@@ -1,11 +1,3 @@
 <template>
-  <main class="app">
-    <h1>Tourism Client</h1>
-  </main>
+  <RouterView />
 </template>
-
-<style scoped>
-.app {
-  padding: 24px;
-}
-</style>
