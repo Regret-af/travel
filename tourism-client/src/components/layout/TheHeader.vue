@@ -12,12 +12,12 @@
         <div class="text-lg font-semibold text-slate-900">Tourism</div>
       </div>
 
-      <nav class="hidden items-center gap-6 text-slate-700 md:flex">
+      <nav class="hidden items-center gap-6 text-base text-slate-700 md:flex">
         <el-dropdown trigger="hover">
           <span class="nav-link inline-flex cursor-pointer items-center gap-1">
             目的地
             <el-icon class="w-4 h-4">
-              <arrow-down />
+              <ArrowDown />
             </el-icon>
           </span>
           <template #dropdown>
@@ -235,5 +235,11 @@ onUnmounted(() => {
     background: rgba(99, 102, 241, 0.1);
     color: #0f172a;
   }
+}
+
+:deep(.el-dropdown),
+:deep(.el-tooltip__trigger) {
+  font-size: inherit;
+  line-height: inherit;
 }
 </style>
