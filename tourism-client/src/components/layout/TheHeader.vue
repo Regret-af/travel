@@ -190,33 +190,33 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .nav-link {
   position: relative;
   font-weight: 500;
   padding: 0.25rem 0;
   transition: color 0.2s ease;
-}
 
-.nav-link::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -6px;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, #22d3ee, #6366f1);
-  transform: translateX(-50%) scaleX(0);
-  transform-origin: center;
-  transition: transform 0.25s ease;
-}
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #22d3ee, #6366f1);
+    transform: translateX(-50%) scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s ease;
+  }
 
-.nav-link:hover {
-  color: #0f172a;
-}
+  &:hover {
+    color: #0f172a;
 
-.nav-link:hover::after {
-  transform: translateX(-50%) scaleX(1);
+    &::after {
+      transform: translateX(-50%) scaleX(1);
+    }
+  }
 }
 
 .glass-drawer {
@@ -230,10 +230,10 @@ onUnmounted(() => {
   padding: 0.4rem 0.6rem;
   border-radius: 0.65rem;
   transition: background 0.2s ease, color 0.2s ease;
-}
 
-.mobile-link:hover {
-  background: rgba(99, 102, 241, 0.1);
-  color: #0f172a;
+  &:hover {
+    background: rgba(99, 102, 241, 0.1);
+    color: #0f172a;
+  }
 }
 </style>

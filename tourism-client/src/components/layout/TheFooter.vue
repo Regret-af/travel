@@ -138,14 +138,14 @@ const handleSubscribe = () => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .link {
   color: #6b7280;
   transition: color 0.2s ease;
-}
 
-.link:hover {
-  color: #6366f1;
+  &:hover {
+    color: #6366f1;
+  }
 }
 
 .social-dot {
