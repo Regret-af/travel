@@ -1,16 +1,12 @@
 <template>
-  <header
-    class="fixed top-0 left-0 z-50 w-full transition-all duration-300"
-    :class="[
-      isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent',
-      'h-[60px] md:h-20'
-    ]"
-  >
+  <header class="fixed top-0 left-0 z-50 w-full transition-all duration-300" :class="[
+    isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm' : 'bg-transparent',
+    'h-[60px] md:h-20'
+  ]">
     <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-4 md:px-8">
       <div class="flex items-center gap-3">
         <div
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 text-lg font-bold text-white shadow-lg"
-        >
+          class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 text-lg font-bold text-white shadow-lg">
           T
         </div>
         <div class="text-lg font-semibold text-slate-900">Tourism</div>
@@ -26,8 +22,8 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item v-for="item in destinationItems" :key="item">
-                {{ item }}
+              <el-dropdown-item v-for="item in destinationItems" :key="item.value" @click="onDestinationClick(item)">
+                {{ item.label }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -37,33 +33,19 @@
       </nav>
 
       <div class="flex items-center gap-3">
-        <div
-          ref="searchWrapperRef"
+        <div ref="searchWrapperRef"
           class="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 transition-all duration-300 backdrop-blur-sm md:flex"
-          :class="searchOpen ? 'shadow-sm' : ''"
-        >
-          <el-icon
-            class="h-5 w-5 cursor-pointer text-slate-600"
-            @click.stop="openSearch"
-          >
+          :class="searchOpen ? 'shadow-sm' : ''">
+          <el-icon class="h-5 w-5 cursor-pointer text-slate-600" @click.stop="openSearch">
             <Search />
           </el-icon>
-          <input
-            ref="searchInputRef"
-            type="text"
-            placeholder="搜索目的地或日记..."
+          <input ref="searchInputRef" type="text" placeholder="搜索目的地或日记..."
             class="w-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all duration-300"
-            :class="searchOpen ? 'w-48 opacity-100' : 'opacity-0 pointer-events-none'"
-            @blur="collapseSearch"
-          />
+            :class="searchOpen ? 'w-48 opacity-100' : 'opacity-0 pointer-events-none'" @blur="collapseSearch" />
         </div>
 
         <template v-if="isLoggedIn">
-          <el-avatar
-            :size="36"
-            :src="userAvatar"
-            class="cursor-pointer shadow-sm"
-          />
+          <el-avatar :size="36" :src="userAvatar" class="cursor-pointer shadow-sm" />
         </template>
         <template v-else>
           <el-button type="primary" round class="hidden md:inline-flex">
@@ -73,8 +55,7 @@
 
         <button
           class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-slate-700 shadow-sm backdrop-blur-sm md:hidden"
-          @click="drawerOpen = true"
-        >
+          @click="drawerOpen = true">
           <el-icon class="h-5 w-5">
             <Menu />
           </el-icon>
@@ -82,12 +63,7 @@
       </div>
     </div>
 
-    <el-drawer
-      v-model="drawerOpen"
-      :with-header="false"
-      size="80%"
-      custom-class="glass-drawer"
-    >
+    <el-drawer v-model="drawerOpen" :with-header="false" size="80%" custom-class="glass-drawer">
       <div class="flex flex-col gap-4 pt-4">
         <div class="flex items-center justify-between px-2">
           <div class="text-lg font-semibold text-slate-900">导航</div>
@@ -141,7 +117,12 @@ import {
 } from 'element-plus';
 import { ArrowDown, Menu, Search } from '@element-plus/icons-vue';
 
-const destinationItems = ['热门', '海滨', '山川', '城市'];
+const destinationItems = [
+  { label: '热门', value: 'hot' },
+  { label: '海滨', value: 'beach' },
+  { label: '山川', value: 'mountain' },
+  { label: '城市', value: 'city' }
+];
 const isScrolled = ref(false);
 const searchOpen = ref(false);
 const drawerOpen = ref(false);
@@ -174,15 +155,26 @@ const handleClickOutside = (event: MouseEvent) => {
 const fetchUser = async () => {
   try {
     // TODO: 替换为真实的登录态判断与请求
-    // const res = await fetch('/api/v1/users/me');
+    // 假设您已经封装了请求工具，这里对齐接口字段
+    // const res = await fetch('/api/v1/users/me', {
+    //   headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    // });
     // if (res.ok) {
-    //   const data = await res.json();
+    //   const { data } = await res.json();
     //   isLoggedIn.value = true;
-    //   userAvatar.value = data?.data?.avatarUrl;
+    //   // 注意这里根据 api.yaml 对应 avatar_url
+    //   userAvatar.value = data.avatar_url; 
     // }
   } catch (error) {
-    console.error(error);
+    console.error("获取用户信息失败", error);
   }
+};
+
+const onDestinationClick = (item: { label: string; value: string }) => {
+  console.log(item.value); // hot / beach / mountain / city
+  // 后续你可以：
+  // router.push(`/destinations/${item.value}`)
+  // 或 emit 事件
 };
 
 onMounted(() => {
@@ -228,9 +220,9 @@ onUnmounted(() => {
 }
 
 .glass-drawer {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .mobile-link {

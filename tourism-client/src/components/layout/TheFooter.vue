@@ -127,8 +127,13 @@ const email = ref('');
 const activeNames = ref<string | string[]>('destinations');
 
 const handleSubscribe = () => {
-  // 模拟提交
-  ElMessage.success('订阅成功！');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email.value || !emailRegex.test(email.value)) {
+    ElMessage.warning('请输入正确的邮箱地址');
+    return;
+  }
+  // 模拟 API 调用
+  ElMessage.success('订阅成功！感谢关注探索旅讯');
   email.value = '';
 };
 </script>
@@ -150,5 +155,10 @@ const handleSubscribe = () => {
   border-radius: 9999px;
   background: linear-gradient(135deg, #22d3ee, #6366f1);
   opacity: 0.9;
+}
+
+:deep(.el-input__wrapper) {
+  box-shadow: none !important;
+  background: transparent;
 }
 </style>
