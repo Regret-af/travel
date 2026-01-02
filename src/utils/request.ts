@@ -1,4 +1,5 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { AxiosError, AxiosResponse } from 'axios';
 import { ElMessage } from 'element-plus';
 
 const request = axios.create({

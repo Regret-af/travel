@@ -11,6 +11,7 @@ export interface AttractionCard {
   name: string;
   location?: string;
   imageUrl?: string;
+  description?: string;
   rating?: number;
   tags?: string[];
   viewCount?: number;

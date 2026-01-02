@@ -116,6 +116,7 @@ import {
   ElIcon
 } from 'element-plus';
 import { ArrowDown, Menu, Search } from '@element-plus/icons-vue';
+import { getMe } from '../../api/user';
 
 const destinationItems = [
   { label: '热门', value: 'hot' },
@@ -153,19 +154,25 @@ const handleClickOutside = (event: MouseEvent) => {
 };
 
 const fetchUser = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    isLoggedIn.value = false;
+    userAvatar.value = undefined;
+    return;
+  }
+
   try {
-    // TODO: 替换为真实的登录态判断与请求
-    // 假设您已经封装了请求工具，这里对齐接口字段
-    // const res = await fetch('/api/v1/users/me', {
-    //   headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    // });
-    // if (res.ok) {
-    //   const { data } = await res.json();
-    //   isLoggedIn.value = true;
-    //   // 注意这里根据 api.yaml 对应 avatar_url
-    //   userAvatar.value = data.avatar_url; 
-    // }
+    const res = await getMe();
+    if (res?.data) {
+      isLoggedIn.value = true;
+      userAvatar.value = res.data.avatarUrl;
+      return;
+    }
+    isLoggedIn.value = false;
+    userAvatar.value = undefined;
   } catch (error) {
+    isLoggedIn.value = false;
+    userAvatar.value = undefined;
     console.error("获取用户信息失败", error);
   }
 };

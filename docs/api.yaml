@@ -2027,6 +2027,7 @@ components:
         name: { type: string }
         location: { type: string }
         imageUrl: { type: string }
+        description: { type: string }
         rating: { type: number, format: double }
         tags: { type: array, items: { type: string } }
         viewCount: { type: integer, format: int32 }

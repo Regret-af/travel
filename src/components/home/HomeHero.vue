@@ -13,7 +13,7 @@
               <div class="line bold">{{ item.location || '发现灵感' }}</div>
             </div>
             <p class="desc">
-              {{ item.summary || '沉浸式旅程，从此刻出发。精选景点、真实日记与智能推荐，为你定制独一无二的旅行灵感。' }}
+              {{ item.description || '沉浸式旅程，从此刻出发。精选景点、真实日记与智能推荐，为你定制独一无二的旅行灵感。' }}
             </p>
 
             <div ref="searchRef" class="search-wrapper">
@@ -64,39 +64,6 @@ import debounce from 'lodash-es/debounce';
 
 import { getFeaturedAttractions, searchAttractions } from '@/api/attractions';
 
-// mock/featuredAttractions.js
-const MockfeaturedAttractions = [
-  {
-    id: 1,
-    name: '巴黎铁塔',
-    location: '法国 · 巴黎',
-    summary: '登上浪漫之都的地标，在塞纳河畔感受艺术与历史的交融。',
-    image_url: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34'
-  },
-  {
-    id: 2,
-    name: '富士山',
-    location: '日本 · 本州',
-    summary: '四季皆美的圣山，是自然、信仰与摄影爱好者的天堂。',
-    image_url: 'https://images.unsplash.com/photo-1549880338-65ddcdfd017b'
-  },
-  {
-    id: 3,
-    name: '圣托里尼',
-    location: '希腊 · 爱琴海',
-    summary: '蓝白之间的浪漫岛屿，日落美景令人终生难忘。',
-    image_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e'
-  },
-  {
-    id: 4,
-    name: '马丘比丘',
-    location: '秘鲁 · 库斯科',
-    summary: '隐藏在云端的古老文明遗迹，揭开印加帝国的神秘面纱。',
-    image_url: 'https://images.unsplash.com/photo-1505678261036-a3fcc5e884ee'
-  }
-]
-
-
 const router = useRouter();
 const searchRef = ref<HTMLElement | null>(null);
 const featuredAttractions = ref<any[]>([]);
@@ -110,10 +77,8 @@ const showDropdown = computed(() => {
 
 const loadFeatured = async () => {
   try {
-    // const res = await getFeaturedAttractions();
-    // // 严格对齐 api.yaml 的 Page 结构: res.data.list
-    // featuredAttractions.value = res?.data?.list || [];
-    featuredAttractions.value = MockfeaturedAttractions;
+    const res = await getFeaturedAttractions();
+    featuredAttractions.value = res?.data?.list || [];
   } catch (error) {
     console.error('加载精选景点失败', error);
   }
@@ -169,6 +134,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+  @use "sass:color";
 $gold-color: #d4af37;
 $white: #f9fafb;
 
@@ -281,7 +247,7 @@ $white: #f9fafb;
             font-weight: bold;
 
             &:hover {
-              background: lighten($gold-color, 10%);
+              background: color.adjust($gold-color, $lightness: 10%);
             }
           }
 
