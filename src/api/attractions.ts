@@ -27,25 +27,6 @@ export interface PageAttractionCard {
   hasNext: boolean;
 }
 
-export interface DiaryCard {
-  id: number;
-  title: string;
-  summary?: string;
-  coverImage?: string;
-  isFeatured?: number;
-  likeCount?: number;
-  viewCount?: number;
-  createdAt?: string;
-}
-
-export interface PageDiaryCard {
-  list: DiaryCard[];
-  page: number;
-  size: number;
-  total: number;
-  hasNext: boolean;
-}
-
 export function getFeaturedAttractions() {
   return request.get<ApiResponse<PageAttractionCard>>('/attractions', {
     params: { page: 1, size: 3, sort: '-rating' }
@@ -56,8 +37,18 @@ export function searchAttractions(params: Record<string, unknown>) {
   return request.get<ApiResponse<PageAttractionCard>>('/attractions', { params });
 }
 
-export function getDiaryFeed() {
-  return request.get<ApiResponse<PageDiaryCard>>('/diaries', {
-    params: { page: 1, size: 3, featured: 1, sort: '-createdAt' }
+export function getTopRatedAttractions(limit: number) {
+  return request.get<ApiResponse<PageAttractionCard>>('/attractions', {
+    params: { page: 1, size: limit, sort: '-rating' }
+  });
+}
+
+export function getAttractionDetail(id: number) {
+  return request.get<ApiResponse<AttractionCard>>(`/attractions/${id}`);
+}
+
+export function searchAttractionsByQuery(query: string) {
+  return request.get<ApiResponse<PageAttractionCard>>('/attractions', {
+    params: { q: query, page: 1, size: 5 }
   });
 }
