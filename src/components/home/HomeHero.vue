@@ -90,8 +90,8 @@ const doSearch = debounce(async () => {
     return;
   }
   try {
-    // const res = await searchAttractions({ q: keyword.value, page: 1, size: 5 });
-    // searchResults.value = res?.data?.list || [];
+    const res = await searchAttractions({ q: keyword.value, page: 1, size: 5 });
+    searchResults.value = res?.data?.list || [];
   } catch (error) {
     console.error('搜索接口异常', error);
   }
