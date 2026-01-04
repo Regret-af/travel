@@ -15,7 +15,7 @@
         <div class="image-wrap">
           <img :src="item.coverImage" :alt="item.title" />
           <div class="like-badge">
-            <el-icon><Cherry /></el-icon>
+            <el-icon><LinearNewMedicHealthHeartCardiogram /></el-icon>
             <span>{{ item.likeCount ?? 0 }}</span>
           </div>
         </div>
@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue';
 import { ElAvatar, ElIcon } from 'element-plus';
-import { Cherry } from '@element-plus/icons-vue';
+import { LinearNewMedicHealthHeartCardiogram } from '@element-extended-icon-pack/vue';
 import { getDiaryFeed } from '@/api/diaries';
 import type { DiaryCard } from '@/api/diaries';
 

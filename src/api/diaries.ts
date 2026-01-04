@@ -16,7 +16,7 @@ export interface User {
 export interface DiaryCard {
   id: number;
   title: string;
-  user?: User[];
+  user?: User;
   summary?: string;
   coverImage?: string;
   isFeatured?: number;

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@element-extended-icon-pack/vue": "^0.1.0",
     "axios": "^1.13.2",
     "element-plus": "^2.13.0",
     "lodash-es": "^4.17.22",
