@@ -27,6 +27,7 @@ declare module 'vue' {
     ElInput: typeof import('element-plus/es')['ElInput']
     ElRate: typeof import('element-plus/es')['ElRate']
     ElTag: typeof import('element-plus/es')['ElTag']
+    GlobalInsight: typeof import('./components/home/GlobalInsight.vue')['default']
     HomeHero: typeof import('./components/home/HomeHero.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

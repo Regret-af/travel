@@ -3,6 +3,7 @@
     <HomeHero />
     <CuratedDestinations />
     <TravelerDiaries />
+    <GlobalInsight />
     <section class="home">
       <h1>Tourism Client</h1>
       <p class="lead">高级旅游官网</p>
@@ -14,6 +15,7 @@
 import HomeHero from '../components/home/HomeHero.vue';
 import CuratedDestinations from '@/components/home/CuratedDestinations.vue';
 import TravelerDiaries from '@/components/home/TravelerDiaries.vue';
+import GlobalInsight from '@/components/home/GlobalInsight.vue';
 </script>
 
 <style scoped>
