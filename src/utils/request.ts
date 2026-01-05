@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { AxiosError, AxiosResponse } from 'axios';
 import { ElMessage } from 'element-plus';
+import 'element-plus/theme-chalk/el-message.css';
 
 const request = axios.create({
   baseURL: '/api/v1'

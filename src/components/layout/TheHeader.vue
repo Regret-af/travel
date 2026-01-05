@@ -106,15 +106,6 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import {
-  ElAvatar,
-  ElButton,
-  ElDropdown,
-  ElDropdownItem,
-  ElDropdownMenu,
-  ElDrawer,
-  ElIcon
-} from 'element-plus';
 import { ArrowDown, Menu, Search } from '@element-plus/icons-vue';
 import { getMe } from '../../api/user';
 

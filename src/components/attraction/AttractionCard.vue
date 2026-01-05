@@ -39,7 +39,6 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { ElRate, ElTag } from 'element-plus';
 import type { AttractionCard } from '@/api/attractions';
 
 const props = defineProps<{

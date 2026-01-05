@@ -58,7 +58,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { ElButton, ElCarousel, ElCarouselItem, ElIcon, ElInput } from 'element-plus';
 import { Search, Location } from '@element-plus/icons-vue';
 import debounce from 'lodash-es/debounce';
 

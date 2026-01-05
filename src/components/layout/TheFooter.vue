@@ -118,7 +118,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { ElButton, ElCollapse, ElCollapseItem, ElInput, ElMessage } from 'element-plus';
+import { ElMessage } from 'element-plus';
 
 const destinations = ['巴黎左岸', '马尔代夫', '瑞士阿尔卑斯', '京都古街', '巴塞罗那'];
 const supports = ['帮助中心', '隐私政策', '服务条款'];

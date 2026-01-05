@@ -37,7 +37,6 @@
 
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue';
-import { ElAvatar, ElIcon } from 'element-plus';
 import { LinearNewMedicHealthHeartCardiogram } from '@element-extended-icon-pack/vue';
 import { getDiaryFeed } from '@/api/diaries';
 import type { DiaryCard } from '@/api/diaries';

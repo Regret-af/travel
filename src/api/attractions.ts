@@ -16,6 +16,8 @@ export interface AttractionCard {
   tags?: string[];
   viewCount?: number;
   priceLevel?: number;
+  latitude?: number;
+  longitude?: number;
   createdAt?: string;
 }
 
