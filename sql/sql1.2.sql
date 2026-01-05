@@ -43,13 +43,17 @@ CREATE TABLE attractions (
   view_count INT DEFAULT 0 COMMENT '浏览热度(可Redis计数回写)',
   price_level TINYINT DEFAULT 1 COMMENT '消费等级: 1-低,2-中,3-高',
   status TINYINT DEFAULT 1 COMMENT '状态: 1-正常,2-待审核,3-屏蔽,0-删除',
+	longitude decimal(11, 8) NULL DEFAULT NULL COMMENT '景点经度坐标',
+  latitude decimal(10, 8) NULL DEFAULT NULL COMMENT '景点纬度坐标',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   KEY idx_status_created (status, created_at) COMMENT '按状态拉取最新',
   KEY idx_price_time (price_level, created_at) COMMENT '按价位+时间筛选',
   KEY idx_view (view_count) COMMENT '按热度排序',
   KEY idx_rating (rating) COMMENT '按评分排序',
-  KEY idx_location (location) COMMENT '按地点筛选(简单索引)'
+  KEY idx_location (location) COMMENT '按地点筛选(简单索引)',
+	CONSTRAINT `chk_latitude` CHECK (`latitude` between -(90) and 90),
+  CONSTRAINT `chk_longitude` CHECK (`longitude` between -(180) and 180)
 ) COMMENT='景点表' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================
