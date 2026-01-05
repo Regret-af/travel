@@ -78,11 +78,11 @@ const addMarkers = (list: AttractionCard[]) => {
       autoPan: false
     });
 
-    marker.on('mouseover', function() {
+    marker.on('mouseover', function(this: L.Marker) {
       this.openPopup();
     });
 
-    marker.on('mouseout', function() {
+    marker.on('mouseout', function(this: L.Marker) {
       this.closePopup();
     });
 
