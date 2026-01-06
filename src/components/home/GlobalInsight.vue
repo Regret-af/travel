@@ -16,6 +16,7 @@ import { getTopRatedAttractions, type AttractionCard } from '@/api/attractions';
 
 const mapRef = shallowRef<HTMLDivElement | null>(null);
 const mapInstance = shallowRef<L.Map | null>(null);
+const closeTimers = new WeakMap<L.Marker, number | undefined>();
 
 const createPulseIcon = () =>
   L.divIcon({
@@ -28,62 +29,102 @@ const createPulseIcon = () =>
     `,
     iconSize: [24, 24],
     iconAnchor: [12, 12],
-    popupAnchor: [0, -12]
+    popupAnchor: [0, -5]
   });
 
 const initMap = () => {
   if (!mapRef.value) return;
-  
+
   mapInstance.value = L.map(mapRef.value, {
     zoomControl: true,
     attributionControl: false,
-    scrollWheelZoom: false, // 禁止滚动缩放防止首页误触
-    dragging: !L.Browser.mobile // 移动端禁用拖拽提升滚动体验
-  }).setView([20, 10], 2);
+    dragging: !L.Browser.mobile
+  }).setView([30, 110], 3);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 18
+  L.tileLayer('http://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+    subdomains: ['1', '2', '3', '4'],
+    maxZoom: 18,
+    minZoom: 3,
+    opacity: 0.85
   }).addTo(mapInstance.value);
 };
 
 const addMarkers = (list: AttractionCard[]) => {
   if (!mapInstance.value) return;
-  
+
   list.forEach((item) => {
     if (item.latitude == null || item.longitude == null) return;
 
-    const marker = L.marker([item.latitude, item.longitude], { 
-      icon: createPulseIcon() 
+    const marker = L.marker([item.latitude, item.longitude], {
+      icon: createPulseIcon()
     });
-    
+
     const popupHtml = `
-      <div class="popup-card">
+      <div class="popup-card" data-id="${item.id}">
         <div class="img-wrapper">
           <img src="${item.imageUrl || ''}" alt="${item.name}" />
         </div>
         <div class="popup-info">
           <div class="name">${item.name}</div>
           <div class="meta">
-            <span class="loc">${item.location || ''}</span>
+            <span class="loc">${item.location || '未知地点'}</span>
             <span class="rating">★ ${item.rating ?? '5.0'}</span>
           </div>
         </div>
       </div>
     `;
 
-    marker.bindPopup(popupHtml, { 
+    marker.bindPopup(popupHtml, {
       className: 'insight-popup',
-      maxWidth: 220,
+      maxWidth: 240,
       closeButton: false,
       autoPan: false
     });
 
-    marker.on('mouseover', function(this: L.Marker) {
+    const clearTimer = (m: L.Marker) => {
+      const timer = closeTimers.get(m);
+      if (timer) {
+        clearTimeout(timer);
+        closeTimers.set(m, undefined);
+      }
+    };
+
+    marker.on('mouseover', function (this: L.Marker) {
+      clearTimer(this);
       this.openPopup();
     });
 
-    marker.on('mouseout', function(this: L.Marker) {
-      this.closePopup();
+    marker.on('mouseout', function (this: L.Marker) {
+      const timer = window.setTimeout(() => this.closePopup(), 300);
+      closeTimers.set(this, timer);
+    });
+
+    marker.on('popupopen', function (this: L.Marker) {
+      const popupEl = this.getPopup()?.getElement();
+      if (!popupEl) return;
+
+      popupEl.addEventListener('mouseenter', () => clearTimer(this));
+      popupEl.addEventListener('mouseleave', () => {
+        const timer = window.setTimeout(() => this.closePopup(), 300);
+        closeTimers.set(this, timer);
+      });
+
+      const imgWrapper = popupEl.querySelector('.img-wrapper') as HTMLElement | null;
+
+      if (imgWrapper) {
+        imgWrapper.addEventListener('click', (e) => {
+          e.stopPropagation();
+
+          const card = imgWrapper.closest('.popup-card') as HTMLElement | null;
+          const id = card?.dataset.id;
+
+          if (id) {
+            window.location.href = `/attractions/${id}`;
+          }
+        });
+
+        imgWrapper.style.cursor = 'pointer';
+      }
     });
 
     marker.addTo(mapInstance.value!);
@@ -92,11 +133,11 @@ const addMarkers = (list: AttractionCard[]) => {
 
 const loadData = async () => {
   try {
-    const res = await getTopRatedAttractions(15);
+    const res = await getTopRatedAttractions(12);
     const list = res?.data?.list || [];
     addMarkers(list);
   } catch (error) {
-    console.error('Map points loading failed', error);
+    console.error('地图数据加载失败', error);
   }
 };
 
@@ -114,24 +155,41 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 $gold: #d4af37;
+$bg-soft: #fcfcfd;
+$text-main: #2c3e50;
 
 .global-insight {
-  background: #0f172a;
-  padding: 40px 24px;
-  border-radius: 24px;
-  margin: 20px 0;
+  background: $bg-soft;
+  padding: 50px 24px;
+  border-radius: 30px;
 
   .map-header {
-    margin-bottom: 24px;
-    .subtitle { color: $gold; font-size: 14px; letter-spacing: 2px; }
-    .title { font-size: 32px; color: #fff; font-weight: 800; font-family: serif; }
+    margin-bottom: 35px;
+    text-align: center;
+
+    .subtitle {
+      color: $gold;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 5px;
+      margin-bottom: 10px;
+    }
+
+    .title {
+      font-size: 34px;
+      color: $text-main;
+      font-weight: 800;
+      font-family: 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    }
   }
 
   .map-container {
-    height: 550px;
-    border-radius: 20px;
-    background: #1a1a1a;
+    height: 600px;
+    border-radius: 24px;
+    background: #f0f2f5;
     z-index: 1;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
   }
 }
 
@@ -148,11 +206,12 @@ $gold: #d4af37;
     justify-content: center;
 
     .dot {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       background: $gold;
+      border: 2px solid #fff;
       border-radius: 50%;
-      box-shadow: 0 0 10px $gold;
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
     }
 
     .ping {
@@ -161,49 +220,78 @@ $gold: #d4af37;
       height: 100%;
       background: rgba(212, 175, 55, 0.4);
       border-radius: 50%;
-      animation: map-ping 1.5s ease-out infinite;
+      animation: map-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
     }
   }
 }
 
 @keyframes map-ping {
-  0% { transform: scale(0.5); opacity: 1; }
-  100% { transform: scale(3); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+  }
 }
 
 :deep(.insight-popup) {
-  pointer-events: none;
-  
+  // pointer-events: none;
+
   .leaflet-popup-content-wrapper {
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    border-radius: 18px;
     padding: 0;
-    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
   }
 
   .leaflet-popup-content {
     margin: 0 !important;
-    width: 220px !important;
+    width: 240px !important;
   }
 
   .popup-card {
     .img-wrapper {
-      height: 110px;
-      img { width: 100%; height: 100%; object-fit: cover; }
+      height: 135px;
+      border-radius: 18px 18px 0 0;
+      overflow: hidden;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
     }
+
     .popup-info {
-      padding: 12px;
-      .name { color: #fff; font-weight: 600; margin-bottom: 4px; }
-      .meta { 
-        display: flex; justify-content: space-between;
-        color: rgba(255,255,255,0.6); font-size: 12px;
-        .rating { color: $gold; }
+      padding: 18px;
+
+      .name {
+        color: #1a1a1a;
+        font-weight: 700;
+        margin-bottom: 6px;
+        font-size: 18px;
+      }
+
+      .meta {
+        display: flex;
+        justify-content: space-between;
+        color: #7f8c8d;
+        font-size: 13px;
+
+        .rating {
+          color: $gold;
+          font-weight: bold;
+        }
       }
     }
   }
 
-  .leaflet-popup-tip { background: rgba(15, 23, 42, 0.9); }
+  .leaflet-popup-tip {
+    background: rgba(255, 255, 255, 0.95);
+  }
 }
 </style>
