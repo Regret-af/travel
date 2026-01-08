@@ -22,6 +22,8 @@ export interface DiaryCard {
   isFeatured?: number;
   likeCount?: number;
   viewCount?: number;
+  collectCount?: number;
+  commentCount?: number;
   createdAt?: string;
 }
 
