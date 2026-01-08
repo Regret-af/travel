@@ -4,10 +4,6 @@
     <CuratedDestinations />
     <TravelerDiaries />
     <GlobalInsight />
-    <section class="home">
-      <h1>Tourism Client</h1>
-      <p class="lead">高级旅游官网</p>
-    </section>
   </div>
 </template>
 
