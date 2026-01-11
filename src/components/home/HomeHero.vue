@@ -3,7 +3,11 @@
     <el-carousel v-if="featuredAttractions.length" height="100vh" trigger="click" arrow="always"
       indicator-position="none" :interval="6000" :autoplay="true">
       <el-carousel-item v-for="item in featuredAttractions" :key="item.id" class="carousel-item">
-        <div class="carousel-bg" :style="{ backgroundImage: `url(${item.image_url || item.imageUrl || ''})` }" />
+        <div class="carousel-bg" :style="{
+          backgroundImage: item.image_url || item.imageUrl
+            ? `url(${item.image_url || item.imageUrl}/webp_low)`
+            : ''
+        }" />
 
         <div class="overlay">
           <div class="content">
@@ -133,7 +137,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-  @use "sass:color";
+@use "sass:color";
 $gold-color: #d4af37;
 $white: #f9fafb;
 
