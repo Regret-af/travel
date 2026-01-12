@@ -48,7 +48,7 @@
           <el-avatar :size="36" :src="userAvatar" class="cursor-pointer shadow-sm" />
         </template>
         <template v-else>
-          <el-button type="primary" round class="hidden md:inline-flex">
+          <el-button type="primary" round class="hidden md:inline-flex" @click="openAuthDrawer">
             登录 / 注册
           </el-button>
         </template>
@@ -95,19 +95,23 @@
             </div>
           </template>
           <template v-else>
-            <el-button type="primary" round class="w-full">登录 / 注册</el-button>
+            <el-button type="primary" round class="w-full" @click="openAuthDrawer">登录 / 注册</el-button>
           </template>
         </div>
       </div>
     </el-drawer>
+
+    <AuthDrawer v-model="authDrawerOpen" />
   </header>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { ArrowDown, Menu, Search } from '@element-plus/icons-vue';
-import { getMe } from '../../api/user';
+import { getMe } from '@/api/user';
+import { useAuthStore } from '@/stores/auth';
+import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 
 const destinationItems = [
   { label: '热门', value: 'hot' },
@@ -118,8 +122,10 @@ const destinationItems = [
 const isScrolled = ref(false);
 const searchOpen = ref(false);
 const drawerOpen = ref(false);
-const isLoggedIn = ref(false);
-const userAvatar = ref<string | undefined>();
+const authDrawerOpen = ref(false);
+const authStore = useAuthStore();
+const isLoggedIn = computed(() => Boolean(authStore.token));
+const userAvatar = computed(() => authStore.user?.avatarUrl);
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const searchWrapperRef = ref<HTMLElement | null>(null);
 
@@ -136,6 +142,11 @@ const collapseSearch = () => {
   searchOpen.value = false;
 };
 
+const openAuthDrawer = () => {
+  authDrawerOpen.value = true;
+  drawerOpen.value = false;
+};
+
 const handleClickOutside = (event: MouseEvent) => {
   if (!searchOpen.value) return;
   const target = event.target as Node;
@@ -145,25 +156,21 @@ const handleClickOutside = (event: MouseEvent) => {
 };
 
 const fetchUser = async () => {
-  const token = localStorage.getItem('token');
+  const token = authStore.token || localStorage.getItem('token');
   if (!token) {
-    isLoggedIn.value = false;
-    userAvatar.value = undefined;
+    authStore.clearAuth();
     return;
   }
 
   try {
     const res = await getMe();
     if (res?.data) {
-      isLoggedIn.value = true;
-      userAvatar.value = res.data.avatarUrl;
+      authStore.setAuth(token, res.data);
       return;
     }
-    isLoggedIn.value = false;
-    userAvatar.value = undefined;
+    authStore.clearAuth();
   } catch (error) {
-    isLoggedIn.value = false;
-    userAvatar.value = undefined;
+    authStore.clearAuth();
     console.error("获取用户信息失败", error);
   }
 };
