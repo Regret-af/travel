@@ -3,11 +3,12 @@
     <el-carousel v-if="featuredAttractions.length" height="100vh" trigger="click" arrow="always"
       indicator-position="none" :interval="6000" :autoplay="true">
       <el-carousel-item v-for="item in featuredAttractions" :key="item.id" class="carousel-item">
-        <div class="carousel-bg" :style="{
+        <!-- <div class="carousel-bg" :style="{
           backgroundImage: item.image_url || item.imageUrl
             ? `url(${item.image_url || item.imageUrl}/webp_low)`
             : ''
-        }" />
+        }" /> -->
+        <div class="carousel-bg" :style="{ backgroundImage: `url(${item.image_url || item.imageUrl || ''})` }" />
 
         <div class="overlay">
           <div class="content">

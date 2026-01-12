@@ -1,7 +1,8 @@
 <template>
   <div class="attraction-card">
     <div class="image-box">
-      <img :src="item.imageUrl ? `${item.imageUrl}/webp_low` : ''" :alt="item.name" />
+      <!-- <img :src="item.imageUrl ? `${item.imageUrl}/webp_low` : ''" :alt="item.name" /> -->
+      <img :src="item.imageUrl" :alt="item.name" />
       <div class="tags" v-if="item.tags?.length">
         <el-tag
           v-for="tag in item.tags"

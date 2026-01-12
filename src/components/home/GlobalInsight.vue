@@ -59,10 +59,11 @@ const addMarkers = (list: AttractionCard[]) => {
       icon: createPulseIcon()
     });
 
+    // <img src="${item.imageUrl ? `${item.imageUrl}/webp_low` : ''}" alt="${item.name}" />
     const popupHtml = `
       <div class="popup-card" data-id="${item.id}">
         <div class="img-wrapper">
-          <img src="${item.imageUrl ? `${item.imageUrl}/webp_low` : ''}" alt="${item.name}" />
+          <img src="${item.imageUrl || ''}" alt="${item.name}" />
         </div>
         <div class="popup-info">
           <div class="name">${item.name}</div>

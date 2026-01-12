@@ -8,7 +8,8 @@
       <article v-for="item in diaries" :key="item.id" class="diary-card" ref="cardsRef">
         <div class="content">
           <div class="author">
-            <el-avatar :size="40" :src="item.user?.avatarUrl ? `${item.user.avatarUrl}/webp_low` : ''" />
+            <!-- <el-avatar :size="40" :src="item.user?.avatarUrl ? `${item.user.avatarUrl}/webp_low` : ''" /> -->
+            <el-avatar :size="40" :src="item.user?.avatarUrl" />
             <div class="meta">
               <p class="name">{{ item.user?.username || 'Traveler' }}</p>
               <span class="location">{{ getLocation(item) }}</span>
