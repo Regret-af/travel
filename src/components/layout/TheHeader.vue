@@ -45,7 +45,44 @@
         </div>
 
         <template v-if="isLoggedIn">
-          <el-avatar :size="36" :src="userAvatar" class="cursor-pointer shadow-sm" />
+          <el-popover
+            v-if="!isMobile"
+            placement="bottom-end"
+            trigger="hover"
+            :offset="15"
+            popper-class="profile-popover"
+            :popper-style="{ width: '360px' }"
+          >
+            <template #reference>
+              <el-avatar :size="49" :src="userAvatar" class="cursor-pointer shadow-sm" />
+            </template>
+            <div class="profile-card">
+              <div class="profile-identity">
+                <el-avatar :size="64" :src="userAvatar" class="profile-avatar" />
+                <div class="profile-name">{{ userName }}</div>
+                <div class="profile-badge">资深环球旅行家</div>
+              </div>
+              <div class="profile-quick">
+                <button
+                  v-for="item in quickAccessItems"
+                  :key="item.label"
+                  class="quick-item"
+                  @click="goTo(item.to)"
+                >
+                  <el-icon class="quick-icon">
+                    <component :is="item.icon" />
+                  </el-icon>
+                  <span class="quick-text">{{ item.label }}</span>
+                  <span class="quick-count">({{ item.count }})</span>
+                </button>
+              </div>
+              <div class="profile-actions">
+                <button class="action-item" @click="goTo('/account')">账号设置</button>
+                <button class="action-item action-logout" @click="handleLogout">退出登录</button>
+              </div>
+            </div>
+          </el-popover>
+          <el-avatar v-else :size="49" :src="userAvatar" class="cursor-pointer shadow-sm" />
         </template>
         <template v-else>
           <el-button type="primary" round class="hidden md:inline-flex" @click="openAuthDrawer">
@@ -93,6 +130,26 @@
                 <div class="text-sm text-slate-500">查看个人主页</div>
               </div>
             </div>
+            <div v-if="isMobile" class="mobile-profile">
+              <div class="profile-quick">
+                <button
+                  v-for="item in quickAccessItems"
+                  :key="item.label"
+                  class="quick-item"
+                  @click="goTo(item.to)"
+                >
+                  <el-icon class="quick-icon">
+                    <component :is="item.icon" />
+                  </el-icon>
+                  <span class="quick-text">{{ item.label }}</span>
+                  <span class="quick-count">({{ item.count }})</span>
+                </button>
+              </div>
+              <div class="profile-actions">
+                <button class="action-item" @click="goTo('/account')">账号设置</button>
+                <button class="action-item action-logout" @click="handleLogout">退出登录</button>
+              </div>
+            </div>
           </template>
           <template v-else>
             <el-button type="primary" round class="w-full" @click="openAuthDrawer">登录 / 注册</el-button>
@@ -106,9 +163,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
-import { ArrowDown, Menu, Search } from '@element-plus/icons-vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
+import { ArrowDown, Menu, Search, StarFilled, Notebook } from '@element-plus/icons-vue';
 import { getMe } from '@/api/user';
 import { useAuthStore } from '@/stores/auth';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
@@ -123,14 +180,25 @@ const isScrolled = ref(false);
 const searchOpen = ref(false);
 const drawerOpen = ref(false);
 const authDrawerOpen = ref(false);
+const isMobile = ref(false);
 const authStore = useAuthStore();
+const router = useRouter();
 const isLoggedIn = computed(() => Boolean(authStore.token));
 const userAvatar = computed(() => authStore.user?.avatarUrl);
+const userName = computed(() => authStore.user?.username || '旅行者');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const searchWrapperRef = ref<HTMLElement | null>(null);
+const quickAccessItems = [
+  { label: '我的灵感', count: 12, icon: StarFilled, to: '/inspirations' },
+  { label: '旅行日记', count: 8, icon: Notebook, to: '/diaries?mine=1' }
+];
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50;
+};
+
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth < 768;
 };
 
 const openSearch = () => {
@@ -144,6 +212,19 @@ const collapseSearch = () => {
 
 const openAuthDrawer = () => {
   authDrawerOpen.value = true;
+  drawerOpen.value = false;
+};
+
+const goTo = (path: string) => {
+  router.push(path);
+  drawerOpen.value = false;
+};
+
+const handleLogout = () => {
+  authStore.logout();
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  router.push('/');
   drawerOpen.value = false;
 };
 
@@ -184,13 +265,27 @@ const onDestinationClick = (item: { label: string; value: string }) => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('resize', updateIsMobile);
   document.addEventListener('click', handleClickOutside);
   handleScroll();
+  updateIsMobile();
   fetchUser();
 });
 
+watch(
+  () => authStore.token,
+  (token) => {
+    if (token) {
+      fetchUser();
+    } else {
+      authStore.clearAuth();
+    }
+  }
+);
+
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener('resize', updateIsMobile);
   document.removeEventListener('click', handleClickOutside);
 });
 </script>
@@ -240,6 +335,106 @@ onUnmounted(() => {
     background: rgba(99, 102, 241, 0.1);
     color: #0f172a;
   }
+}
+
+.profile-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+
+  .profile-avatar {
+    border: 2px solid #d4af37;
+  }
+
+  .profile-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  .profile-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.1);
+    color: #d4af37;
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
+
+.profile-quick {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.quick-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  color: #4b5563;
+  transition: all 0.2s ease;
+
+  .quick-icon {
+    color: #9ca3af;
+  }
+
+  &:hover {
+    background: #fdfbf7;
+    color: #d4af37;
+
+    .quick-icon {
+      color: #d4af37;
+    }
+  }
+}
+
+.profile-actions {
+  border-top: 1px solid rgba(243, 244, 246, 0.5);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .action-item {
+    text-align: left;
+    color: #374151;
+    transition: color 0.2s ease, background 0.2s ease;
+    padding: 6px 8px;
+    border-radius: 10px;
+
+    &:hover {
+      background: #fdfbf7;
+      color: #d4af37;
+    }
+  }
+
+  .action-logout {
+    color: #9ca3af;
+
+    &:hover {
+      color: #f87171;
+      background: transparent;
+    }
+  }
+}
+
+.mobile-profile {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 :deep(.el-dropdown),

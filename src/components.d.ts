@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AttractionCard: typeof import('./components/attraction/AttractionCard.vue')['default']
+    AuthDrawer: typeof import('./components/auth/AuthDrawer.vue')['default']
     CuratedDestinations: typeof import('./components/home/CuratedDestinations.vue')['default']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -25,6 +26,7 @@ declare module 'vue' {
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
+    ElPopover: typeof import('element-plus/es')['ElPopover']
     ElRate: typeof import('element-plus/es')['ElRate']
     ElTag: typeof import('element-plus/es')['ElTag']
     GlobalInsight: typeof import('./components/home/GlobalInsight.vue')['default']

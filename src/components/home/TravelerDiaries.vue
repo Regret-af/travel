@@ -33,7 +33,8 @@
           </div>
         </div>
         <div class="image-wrap">
-          <img :src="item.coverImage ? `${item.coverImage}/webp_low` : ''" :alt="item.title" />
+          <!-- <img :src="item.coverImage ? `${item.coverImage}/webp_low` : ''" :alt="item.title" /> -->
+          <img :src="item.coverImage" :alt="item.title" />
         </div>
       </article>
     </div>
