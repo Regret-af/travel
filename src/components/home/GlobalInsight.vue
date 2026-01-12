@@ -38,7 +38,13 @@ const initMap = () => {
   mapInstance.value = L.map(mapRef.value, {
     zoomControl: true,
     attributionControl: false,
-    dragging: !L.Browser.mobile
+    dragging: true,
+    touchZoom: true,
+    maxBounds: [
+      [90, -180],
+      [-90, 180]
+    ],
+    maxBoundsViscosity: 0.6
   }).setView([30, 110], 3);
 
   L.tileLayer('http://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
@@ -185,6 +191,7 @@ $text-main: #2c3e50;
   }
 
   .map-container {
+    width: 100%;
     height: 600px;
     border-radius: 24px;
     background: #f0f2f5;
@@ -293,6 +300,32 @@ $text-main: #2c3e50;
 
   .leaflet-popup-tip {
     background: rgba(255, 255, 255, 0.95);
+  }
+}
+
+@media (max-width: 1024px) {
+  .global-insight {
+    padding: 40px 20px;
+
+    .map-container {
+      height: 480px;
+      border-radius: 20px;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .global-insight {
+    padding: 32px 16px;
+
+    .map-header .title {
+      font-size: 26px;
+    }
+
+    .map-container {
+      height: 360px;
+      border-radius: 18px;
+    }
   }
 }
 </style>

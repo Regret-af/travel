@@ -74,7 +74,6 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
-import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import 'element-plus/theme-chalk/el-message.css';
 import { login, register } from '@/api/auth';
