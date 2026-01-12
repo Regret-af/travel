@@ -1,5 +1,13 @@
 <template>
-  <el-drawer v-model="drawerVisible" size="35%" :with-header="false" direction="rtl" class="auth-drawer">
+  <el-drawer
+    v-model="drawerVisible"
+    :size="drawerSize"
+    :with-header="false"
+    :direction="drawerDirection"
+    :class="['auth-drawer', { 'mobile-sheet': isMobile }]"
+    lock-scroll
+  >
+    <div v-if="isMobile" class="sheet-handle" />
     <div class="hero">
       <img :src="heroImage" alt="旅行背景" />
       <div class="slogan">让远方成为日常</div>
@@ -19,12 +27,24 @@
 
         <div class="field">
           <label>邮箱</label>
-          <el-input v-model="form.email" class="auth-input" placeholder="name@example.com" />
+          <el-input
+            v-model="form.email"
+            class="auth-input"
+            placeholder="name@example.com"
+            autocomplete="email"
+          />
         </div>
 
         <div class="field">
           <label>密码</label>
-          <el-input v-model="form.password" class="auth-input" placeholder="至少 6 位" show-password type="password" />
+          <el-input
+            v-model="form.password"
+            class="auth-input"
+            placeholder="至少 6 位"
+            show-password
+            type="password"
+            autocomplete="current-password"
+          />
         </div>
 
         <div v-if="isLogin" class="forgot">忘记密码？</div>
@@ -73,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import 'element-plus/theme-chalk/el-message.css';
 import { login, register } from '@/api/auth';
@@ -95,6 +115,18 @@ const drawerVisible = computed({
 const authStore = useAuthStore();
 const isLogin = ref(true);
 const loading = ref(false);
+const isMobile = ref(false);
+const scrollState = {
+  top: 0,
+  locked: false
+};
+
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+const drawerDirection = computed(() => (isMobile.value ? 'btt' : 'rtl'));
+const drawerSize = computed(() => (isMobile.value ? '92%' : '35%'));
 
 const form = reactive({
   username: '',
@@ -133,6 +165,30 @@ const extractAuth = (payload: { accessToken?: string; token?: string; user?: Aut
   return { token, user };
 };
 
+const lockBodyScroll = () => {
+  if (scrollState.locked) return;
+  scrollState.top = window.scrollY || window.pageYOffset || 0;
+  const body = document.body;
+  body.style.position = 'fixed';
+  body.style.top = `-${scrollState.top}px`;
+  body.style.left = '0';
+  body.style.right = '0';
+  body.style.width = '100%';
+  scrollState.locked = true;
+};
+
+const unlockBodyScroll = () => {
+  if (!scrollState.locked) return;
+  const body = document.body;
+  body.style.position = '';
+  body.style.top = '';
+  body.style.left = '';
+  body.style.right = '';
+  body.style.width = '';
+  window.scrollTo(0, scrollState.top);
+  scrollState.locked = false;
+};
+
 const handleSubmit = async () => {
   if (!validateForm() || loading.value) return;
   loading.value = true;
@@ -167,6 +223,28 @@ const handleSubmit = async () => {
     loading.value = false;
   }
 };
+
+onMounted(() => {
+  updateIsMobile();
+  window.addEventListener('resize', updateIsMobile, { passive: true });
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateIsMobile);
+  unlockBodyScroll();
+});
+
+watch(
+  drawerVisible,
+  (visible) => {
+    if (visible) {
+      lockBodyScroll();
+      return;
+    }
+    unlockBodyScroll();
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -176,11 +254,20 @@ $gold: #d4af37;
   :deep(.el-drawer) {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
+    border: none;
   }
 
   :deep(.el-drawer__body) {
     padding: 0;
   }
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 5px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  margin: 12px auto 4px;
 }
 
 .hero {
@@ -292,6 +379,10 @@ $gold: #d4af37;
     background: $gold;
     color: #1a1a1a;
   }
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .mode-switch {
@@ -354,6 +445,41 @@ $gold: #d4af37;
   .auth-drawer {
     :deep(.el-drawer) {
       width: 100% !important;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-drawer.mobile-sheet {
+    :deep(.el-drawer) {
+      width: 100% !important;
+      height: 92svh !important;
+      border-radius: 24px 24px 0 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border: none;
+    }
+
+    :deep(.el-drawer__body) {
+      padding: 0 0 12px;
+    }
+  }
+
+  .hero {
+    height: 170px;
+
+    .slogan {
+      font-size: 18px;
+    }
+  }
+
+  .content {
+    padding: 24px 20px 44px;
+  }
+
+  .auth-input {
+    :deep(.el-input__inner) {
+      font-size: 16px;
     }
   }
 }
