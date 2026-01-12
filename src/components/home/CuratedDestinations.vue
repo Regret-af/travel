@@ -111,9 +111,11 @@ onMounted(() => {
 
     .grid {
       grid-template-columns: 1fr;
-      grid-auto-rows: auto;
+      grid-auto-rows: 260px;
 
       .grid-item {
+        height: 260px;
+
         &.span-2 {
           grid-row: span 1;
         }

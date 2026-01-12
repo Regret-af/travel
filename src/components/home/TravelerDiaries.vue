@@ -264,15 +264,18 @@ $gold: #d4af37;
   .diary-section {
     .diary-card {
       flex-direction: column;
-      gap: 16px;
+      gap: 8px;
 
       .content {
+        flex: 0 0 auto;
         margin-right: 0;
         margin-left: 0;
       }
 
       .image-wrap {
-        min-height: 240px;
+        flex: 0 0 auto;
+        height: 260px;
+        border-radius: 22px;
         order: -1;
       }
     }
@@ -294,6 +297,11 @@ $gold: #d4af37;
 
     .header .title {
       font-size: 24px;
+    }
+
+    .image-wrap {
+      height: 200px;
+      border-radius: 18px;
     }
   }
 }
