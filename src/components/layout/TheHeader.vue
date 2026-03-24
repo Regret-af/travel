@@ -166,7 +166,6 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { ArrowDown, Menu, Search, StarFilled, Notebook } from '@element-plus/icons-vue';
-import { getMe } from '@/api/user';
 import { useAuthStore } from '@/stores/auth';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 
@@ -185,7 +184,7 @@ const authStore = useAuthStore();
 const router = useRouter();
 const isLoggedIn = computed(() => Boolean(authStore.token));
 const userAvatar = computed(() => authStore.user?.avatarUrl);
-const userName = computed(() => authStore.user?.username || '旅行者');
+const userName = computed(() => authStore.user?.nickname || authStore.user?.username || '旅行者');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const searchWrapperRef = ref<HTMLElement | null>(null);
 const quickAccessItems = [
@@ -222,8 +221,6 @@ const goTo = (path: string) => {
 
 const handleLogout = () => {
   authStore.logout();
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
   router.push('/');
   drawerOpen.value = false;
 };
@@ -236,23 +233,13 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
-const fetchUser = async () => {
-  const token = authStore.token || localStorage.getItem('token');
-  if (!token) {
-    authStore.clearAuth();
-    return;
-  }
+const syncAuthUser = async () => {
+  if (!authStore.token) return;
 
   try {
-    const res = await getMe();
-    if (res?.data) {
-      authStore.setAuth(token, res.data);
-      return;
-    }
-    authStore.clearAuth();
+    await authStore.fetchMe();
   } catch (error) {
-    authStore.clearAuth();
-    console.error("获取用户信息失败", error);
+    console.error('获取用户信息失败', error);
   }
 };
 
@@ -269,16 +256,14 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside);
   handleScroll();
   updateIsMobile();
-  fetchUser();
+  syncAuthUser();
 });
 
 watch(
   () => authStore.token,
   (token) => {
-    if (token) {
-      fetchUser();
-    } else {
-      authStore.clearAuth();
+    if (token && !authStore.user) {
+      syncAuthUser();
     }
   }
 );

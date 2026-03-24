@@ -2,13 +2,16 @@ import axios from 'axios';
 import type { AxiosError, AxiosResponse } from 'axios';
 import { ElMessage } from 'element-plus';
 import 'element-plus/theme-chalk/el-message.css';
+import { useAuthStore } from '@/stores/auth';
+import { pinia } from '@/stores';
 
 const request = axios.create({
   baseURL: '/api/v1'
 });
 
 request.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const authStore = useAuthStore(pinia);
+  const token = authStore.token;
   if (token) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
@@ -28,8 +31,8 @@ request.interceptors.response.use(
     const status = response.status;
 
     if (status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      const authStore = useAuthStore(pinia);
+      authStore.clearAuth();
       return Promise.reject(error);
     }
 

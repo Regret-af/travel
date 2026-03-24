@@ -8,10 +8,10 @@
 </template>
 
 <script setup lang="ts">
-import HomeHero from '../components/home/HomeHero.vue';
 import CuratedDestinations from '@/components/home/CuratedDestinations.vue';
-import TravelerDiaries from '@/components/home/TravelerDiaries.vue';
 import GlobalInsight from '@/components/home/GlobalInsight.vue';
+import HomeHero from '@/components/home/HomeHero.vue';
+import TravelerDiaries from '@/components/home/TravelerDiaries.vue';
 </script>
 
 <style scoped>

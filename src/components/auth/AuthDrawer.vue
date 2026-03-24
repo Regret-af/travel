@@ -96,9 +96,8 @@
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import 'element-plus/theme-chalk/el-message.css';
-import { login, register } from '@/api/auth';
+import { register } from '@/api/auth';
 import { useAuthStore } from '@/stores/auth';
-import type { AuthUser } from '@/api/auth';
 
 interface Props {
   modelValue: boolean;
@@ -159,12 +158,6 @@ const validateForm = () => {
   return true;
 };
 
-const extractAuth = (payload: { accessToken?: string; token?: string; user?: AuthUser }) => {
-  const token = payload.accessToken || payload.token || '';
-  const user = payload.user || null;
-  return { token, user };
-};
-
 const lockBodyScroll = () => {
   if (scrollState.locked) return;
   scrollState.top = window.scrollY || window.pageYOffset || 0;
@@ -195,13 +188,10 @@ const handleSubmit = async () => {
 
   try {
     if (isLogin.value) {
-      const res = await login({ account: form.email.trim(), password: form.password.trim() });
-      const { token, user } = extractAuth(res.data || {});
-      if (!token) {
-        ElMessage.error('登录失败，请稍后再试');
-        return;
-      }
-      authStore.setAuth(token, user);
+      await authStore.login({
+        email: form.email.trim(),
+        password: form.password.trim()
+      });
       ElMessage.success('登录成功');
       drawerVisible.value = false;
     } else {

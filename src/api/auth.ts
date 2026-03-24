@@ -7,10 +7,12 @@ interface ApiResponse<T> {
 }
 
 export interface AuthUser {
-  id?: number;
+  id?: string;
   username?: string;
+  nickname?: string;
   email?: string;
   avatarUrl?: string;
+  roles?: string[];
 }
 
 export interface LoginResponse {
@@ -22,7 +24,7 @@ export interface LoginResponse {
 }
 
 export interface LoginRequest {
-  account: string;
+  email: string;
   password: string;
 }
 
