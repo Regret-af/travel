@@ -29,6 +29,26 @@ interface DiaryApiItem {
   publishedAt?: string;
 }
 
+interface DiaryDetailApiItem extends DiaryApiItem {
+  content?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface DiaryCommentApiAuthor {
+  id?: string;
+  nickname?: string;
+  avatarUrl?: string;
+}
+
+interface DiaryCommentApiItem {
+  id: string;
+  diaryId?: string;
+  content: string;
+  author?: DiaryCommentApiAuthor | null;
+  createdAt?: string;
+}
+
 interface PaginatedData<T> {
   pageNum: number;
   pageSize: number;
@@ -66,6 +86,57 @@ export interface PageDiaryCard {
   pages: number;
 }
 
+export interface DiaryDetail extends DiaryCard {
+  content?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DiaryComment {
+  id: string;
+  diaryId?: string;
+  content: string;
+  author?: {
+    id?: string;
+    nickname?: string;
+    avatarUrl?: string;
+  };
+  createdAt?: string;
+}
+
+export interface PageDiaryComment {
+  list: DiaryComment[];
+  pageNum: number;
+  pageSize: number;
+  total: number;
+  pages: number;
+}
+
+export interface DiaryListParams {
+  pageNum?: number;
+  pageSize?: number;
+  sort?: 'latest' | 'hot';
+}
+
+export interface DiaryCommentListParams {
+  pageNum?: number;
+  pageSize?: number;
+}
+
+export interface CreateDiaryCommentPayload {
+  content: string;
+}
+
+export interface DiaryLikeResponse {
+  liked: boolean;
+  likeCount: number;
+}
+
+export interface DiaryFavoriteResponse {
+  favorited: boolean;
+  favoriteCount: number;
+}
+
 const mapDiary = (item: DiaryApiItem): DiaryCard => ({
   id: item.id,
   title: item.title,
@@ -95,13 +166,136 @@ const mapPage = (page?: PaginatedData<DiaryApiItem>): PageDiaryCard => ({
   pages: page?.pages ?? 0
 });
 
+const mapDiaryDetail = (item?: DiaryDetailApiItem | null): DiaryDetail => ({
+  id: item?.id || '',
+  title: item?.title || '',
+  summary: item?.summary,
+  coverUrl: item?.coverUrl,
+  content: item?.content,
+  author: item?.author
+    ? {
+        id: item.author.id,
+        nickname: item.author.nickname,
+        avatarUrl: item.author.avatarUrl
+      }
+    : undefined,
+  viewCount: item?.viewCount,
+  likeCount: item?.likeCount,
+  favoriteCount: item?.favoriteCount,
+  commentCount: item?.commentCount,
+  liked: item?.liked,
+  favorited: item?.favorited,
+  publishedAt: item?.publishedAt,
+  createdAt: item?.createdAt,
+  updatedAt: item?.updatedAt
+});
+
+const mapDiaryComment = (item: DiaryCommentApiItem): DiaryComment => ({
+  id: item.id,
+  diaryId: item.diaryId,
+  content: item.content,
+  author: item.author
+    ? {
+        id: item.author.id,
+        nickname: item.author.nickname,
+        avatarUrl: item.author.avatarUrl
+      }
+    : undefined,
+  createdAt: item.createdAt
+});
+
+const mapCommentPage = (page?: PaginatedData<DiaryCommentApiItem>): PageDiaryComment => ({
+  list: page?.list?.map(mapDiaryComment) || [],
+  pageNum: page?.pageNum ?? 1,
+  pageSize: page?.pageSize ?? 0,
+  total: page?.total ?? 0,
+  pages: page?.pages ?? 0
+});
+
+const normalizeListParams = (params: DiaryListParams = {}) => ({
+  pageNum: Number(params.pageNum ?? 1),
+  pageSize: Number(params.pageSize ?? 10),
+  sort: params.sort === 'hot' ? 'hot' : 'latest'
+});
+
+const normalizeCommentListParams = (params: DiaryCommentListParams = {}) => ({
+  pageNum: Number(params.pageNum ?? 1),
+  pageSize: Number(params.pageSize ?? 10)
+});
+
+const createPageResponse = (res: ApiResponse<PaginatedData<DiaryApiItem>>): ApiResponse<PageDiaryCard> => ({
+  ...res,
+  data: mapPage(res.data)
+});
+
+const createDetailResponse = (res: ApiResponse<DiaryDetailApiItem>): ApiResponse<DiaryDetail> => ({
+  ...res,
+  data: mapDiaryDetail(res.data)
+});
+
+const createCommentPageResponse = (
+  res: ApiResponse<PaginatedData<DiaryCommentApiItem>>
+): ApiResponse<PageDiaryComment> => ({
+  ...res,
+  data: mapCommentPage(res.data)
+});
+
+const createCommentResponse = (res: ApiResponse<DiaryCommentApiItem>): ApiResponse<DiaryComment> => ({
+  ...res,
+  data: mapDiaryComment(res.data)
+});
+
 export async function getDiaryFeed() {
   const res = await request.get<ApiResponse<PaginatedData<DiaryApiItem>>>('/travel-diaries', {
     params: { pageNum: 1, pageSize: 3, sort: 'latest' }
   });
 
-  return {
-    ...res,
-    data: mapPage(res.data)
-  };
+  return createPageResponse(res);
+}
+
+export async function getTravelDiaryList(params: DiaryListParams = {}) {
+  const res = await request.get<ApiResponse<PaginatedData<DiaryApiItem>>>('/travel-diaries', {
+    params: normalizeListParams(params)
+  });
+
+  return createPageResponse(res);
+}
+
+export async function getTravelDiaryDetail(diaryId: string) {
+  const res = await request.get<ApiResponse<DiaryDetailApiItem>>(`/travel-diaries/${diaryId}`);
+
+  return createDetailResponse(res);
+}
+
+export async function getTravelDiaryComments(diaryId: string, params: DiaryCommentListParams = {}) {
+  const res = await request.get<ApiResponse<PaginatedData<DiaryCommentApiItem>>>(
+    `/travel-diaries/${diaryId}/comments`,
+    {
+      params: normalizeCommentListParams(params)
+    }
+  );
+
+  return createCommentPageResponse(res);
+}
+
+export async function createTravelDiaryComment(diaryId: string, payload: CreateDiaryCommentPayload) {
+  const res = await request.post<ApiResponse<DiaryCommentApiItem>>(`/travel-diaries/${diaryId}/comments`, payload);
+
+  return createCommentResponse(res);
+}
+
+export async function likeTravelDiary(diaryId: string) {
+  return request.post<ApiResponse<DiaryLikeResponse>>(`/travel-diaries/${diaryId}/likes`);
+}
+
+export async function unlikeTravelDiary(diaryId: string) {
+  return request.delete<ApiResponse<DiaryLikeResponse>>(`/travel-diaries/${diaryId}/likes`);
+}
+
+export async function favoriteTravelDiary(diaryId: string) {
+  return request.post<ApiResponse<DiaryFavoriteResponse>>(`/travel-diaries/${diaryId}/favorites`);
+}
+
+export async function unfavoriteTravelDiary(diaryId: string) {
+  return request.delete<ApiResponse<DiaryFavoriteResponse>>(`/travel-diaries/${diaryId}/favorites`);
 }
