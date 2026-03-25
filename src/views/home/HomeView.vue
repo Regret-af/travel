@@ -18,6 +18,9 @@ import TravelerDiaries from '@/components/home/TravelerDiaries.vue';
 .home-page {
   display: flex;
   flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .home {

@@ -1,7 +1,7 @@
 <template>
   <div class="app-shell">
     <TheHeader />
-    <main class="page-body">
+    <main class="page-body" :class="{ 'page-body-home': isHomeRoute }">
       <RouterView />
     </main>
     <TheFooter />
@@ -9,9 +9,13 @@
 </template>
 
 <script setup lang="ts">
-import { RouterView } from 'vue-router';
+import { computed } from 'vue';
+import { RouterView, useRoute } from 'vue-router';
 import TheFooter from './components/layout/TheFooter.vue';
 import TheHeader from './components/layout/TheHeader.vue';
+
+const route = useRoute();
+const isHomeRoute = computed(() => route.name === 'home');
 </script>
 
 <style scoped>
@@ -24,5 +28,9 @@ import TheHeader from './components/layout/TheHeader.vue';
 .page-body {
   flex: 1;
   padding: 88px 24px 32px;
+}
+
+.page-body-home {
+  padding-top: 0;
 }
 </style>

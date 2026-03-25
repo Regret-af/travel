@@ -1,18 +1,30 @@
 <template>
   <section class="curated-section" v-loading="loading">
     <div class="header">
-      <p class="subtitle">探索高评分的绝佳去处</p>
+      <p class="subtitle">探索近期热门目的地</p>
       <h2 class="title">精选目的地</h2>
     </div>
-    <div class="grid">
+
+    <div v-if="items.length" class="grid">
       <div
         v-for="(item, index) in items"
         :key="item.id"
         class="grid-item"
         :class="spanClass(index)"
       >
-        <AttractionCard :item="item" />
+        <AttractionCard :item="item" :to="`/attractions/${item.id}`" />
       </div>
+    </div>
+
+    <div v-else-if="loadError && !loading" class="state-card">
+      <h3>推荐景点加载失败</h3>
+      <p>{{ loadError }}</p>
+      <el-button round @click="fetchData">重新加载</el-button>
+    </div>
+
+    <div v-else-if="!loading" class="state-card">
+      <h3>暂无精选推荐</h3>
+      <p>当前接口已返回成功，但暂时没有可展示的首页精选景点。</p>
     </div>
   </section>
 </template>
@@ -24,14 +36,18 @@ import { getTopRatedAttractions, type AttractionCard as AttractionCardType } fro
 
 const items = ref<AttractionCardType[]>([]);
 const loading = ref(false);
+const loadError = ref('');
 
 const fetchData = async () => {
   loading.value = true;
+  loadError.value = '';
   try {
     const res = await getTopRatedAttractions(6);
     items.value = res?.data?.list || [];
   } catch (error) {
     console.error('Failed to load curated destinations', error);
+    items.value = [];
+    loadError.value = '当前无法获取首页精选景点，请稍后重试。';
   } finally {
     loading.value = false;
   }
@@ -42,9 +58,7 @@ const spanClass = (index: number) => {
   return '';
 };
 
-onMounted(() => {
-  fetchData();
-});
+onMounted(fetchData);
 </script>
 
 <style scoped lang="scss">
@@ -87,6 +101,26 @@ onMounted(() => {
       :deep(.attraction-card) {
         height: 100%;
       }
+    }
+  }
+
+  .state-card {
+    padding: 48px 24px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    color: #6b7280;
+
+    h3 {
+      margin: 0 0 10px;
+      color: #111827;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0 0 20px;
+      line-height: 1.7;
     }
   }
 }

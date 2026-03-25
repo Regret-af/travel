@@ -1,59 +1,90 @@
 <template>
-  <section class="diary-section">
+  <section class="diary-section" v-loading="loading">
     <div class="header">
-      <p class="subtitle">旅行者日记</p>
-      <h2 class="title">重叠叙事里的真实旅途</h2>
+      <div>
+        <p class="subtitle">旅行日记精选</p>
+        <h2 class="title">重叠叙事里的真实旅途</h2>
+      </div>
+      <el-button round class="more-btn" @click="router.push('/diaries')">查看更多日记</el-button>
     </div>
-    <div class="list">
-      <article v-for="item in diaries" :key="item.id" class="diary-card" ref="cardsRef">
+
+    <div v-if="diaries.length" class="list">
+      <article
+        v-for="item in diaries"
+        :key="item.id"
+        ref="cardsRef"
+        class="diary-card"
+        @click="router.push(`/diaries/${item.id}`)"
+      >
         <div class="content">
           <div class="author">
-            <!-- <el-avatar :size="40" :src="item.user?.avatarUrl ? `${item.user.avatarUrl}/webp_low` : ''" /> -->
-            <el-avatar :size="40" :src="item.user?.avatarUrl" />
+            <el-avatar :size="40" :src="item.author?.avatarUrl" />
             <div class="meta">
-              <p class="name">{{ item.user?.username || 'Traveler' }}</p>
-              <span class="location">{{ getLocation(item) }}</span>
+              <p class="name">{{ item.author?.nickname || '旅行者' }}</p>
+              <span class="time">{{ item.publishedAt || '发布时间待补充' }}</span>
             </div>
           </div>
+
           <h3 class="diary-title">{{ item.title }}</h3>
           <p class="summary">{{ getSummary(item) }}</p>
+
           <div class="counts">
             <span class="count">
-              <el-icon><FillNewMedicHealthHeartLike /></el-icon>
+              <el-icon><View /></el-icon>
+              {{ item.viewCount ?? 0 }}
+            </span>
+            <span class="count">
+              <el-icon><Star /></el-icon>
               {{ item.likeCount ?? 0 }}
             </span>
             <span class="count">
-              <el-icon><Comment /></el-icon>
+              <el-icon><ChatLineRound /></el-icon>
               {{ item.commentCount ?? 0 }}
             </span>
             <span class="count">
-              <el-icon><StarFilled /></el-icon>
-              {{ item.collectCount ?? 0 }}
+              <el-icon><CollectionTag /></el-icon>
+              {{ item.favoriteCount ?? 0 }}
             </span>
           </div>
         </div>
+
         <div class="image-wrap">
-          <!-- <img :src="item.coverImage ? `${item.coverImage}/webp_low` : ''" :alt="item.title" /> -->
-          <img :src="item.coverImage" :alt="item.title" />
+          <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" />
+          <div v-else class="image-fallback" />
         </div>
       </article>
+    </div>
+
+    <div v-else-if="loadError && !loading" class="state-card">
+      <h3>旅行日记加载失败</h3>
+      <p>{{ loadError }}</p>
+      <el-button round @click="fetchData">重新加载</el-button>
+    </div>
+
+    <div v-else-if="!loading" class="state-card">
+      <h3>暂无精选日记</h3>
+      <p>当前接口已返回成功，但暂时没有可展示的旅行日记内容。</p>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue';
-import { Comment, StarFilled } from '@element-plus/icons-vue';
-import { FillNewMedicHealthHeartLike } from '@element-extended-icon-pack/vue';
-import { getDiaryFeed } from '@/api/diaries';
-import type { DiaryCard } from '@/api/diaries';
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { ChatLineRound, CollectionTag, Star, View } from '@element-plus/icons-vue';
+import { getDiaryFeed, type DiaryCard } from '@/api/diaries';
 
-type DiaryCardWithContent = DiaryCard & { content?: string; location?: string };
-
+const router = useRouter();
 const diaries = ref<DiaryCard[]>([]);
 const cardsRef = ref<HTMLElement[]>([]);
+const loading = ref(false);
+const loadError = ref('');
+let observer: IntersectionObserver | null = null;
 
 const fetchData = async () => {
+  loading.value = true;
+  loadError.value = '';
+
   try {
     const res = await getDiaryFeed();
     diaries.value = res?.data?.list || [];
@@ -61,39 +92,40 @@ const fetchData = async () => {
     observeCards();
   } catch (error) {
     console.error('Failed to load diaries', error);
+    diaries.value = [];
+    loadError.value = '当前无法获取旅行日记精选，请稍后重试。';
+  } finally {
+    loading.value = false;
   }
 };
 
 const observeCards = () => {
-  const observer = new IntersectionObserver(
+  observer?.disconnect();
+  observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
+          observer?.unobserve(entry.target);
         }
       });
     },
     { threshold: 0.2 }
   );
 
-  cardsRef.value.forEach((card) => card && observer.observe(card));
+  cardsRef.value.forEach((card) => card && observer?.observe(card));
 };
 
-const getSummary = (item: DiaryCardWithContent) => {
+const getSummary = (item: DiaryCard) => {
   const summary = item.summary?.trim();
-  if (summary) return summary;
-  const content = item.content?.replace(/\s+/g, ' ').trim();
-  if (!content) return '暂无摘要';
-  return content.length > 80 ? `${content.slice(0, 80)}...` : content;
+  if (!summary) return '这篇旅行日记暂未提供摘要内容。';
+  return summary.length > 88 ? `${summary.slice(0, 88)}...` : summary;
 };
 
-const getLocation = (item: DiaryCardWithContent) => {
-  return item.location || item.user?.bio || '未知地点';
-};
+onMounted(fetchData);
 
-onMounted(() => {
-  fetchData();
+onBeforeUnmount(() => {
+  observer?.disconnect();
 });
 </script>
 
@@ -107,6 +139,10 @@ $gold: #d4af37;
 
   .header {
     margin-bottom: 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
 
     .subtitle {
       color: $gold;
@@ -120,6 +156,10 @@ $gold: #d4af37;
       font-size: 28px;
       font-weight: 700;
       font-family: 'Georgia', 'Times New Roman', serif;
+    }
+
+    .more-btn {
+      flex-shrink: 0;
     }
   }
 
@@ -135,6 +175,7 @@ $gold: #d4af37;
     opacity: 0;
     transform: translateY(40px);
     transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    cursor: pointer;
 
     &.visible {
       opacity: 1;
@@ -156,7 +197,7 @@ $gold: #d4af37;
       margin-right: -90px;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(12px);
-      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
       border-radius: 24px;
       position: relative;
       z-index: 20;
@@ -178,9 +219,10 @@ $gold: #d4af37;
           .name {
             color: #111827;
             font-weight: 700;
+            margin: 0;
           }
 
-          .location {
+          .time {
             display: inline-flex;
             align-items: center;
             font-size: 12px;
@@ -203,6 +245,7 @@ $gold: #d4af37;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        margin: 0;
       }
 
       .summary {
@@ -212,11 +255,13 @@ $gold: #d4af37;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        margin: 0;
       }
 
       .counts {
         display: flex;
-        gap: 24px;
+        flex-wrap: wrap;
+        gap: 16px 24px;
         margin-top: auto;
 
         .count {
@@ -240,23 +285,58 @@ $gold: #d4af37;
       overflow: hidden;
       border-radius: 32px;
       z-index: 10;
+      background: linear-gradient(135deg, #dbeafe 0%, #eef2ff 100%);
 
-      img {
+      img,
+      .image-fallback {
         width: 100%;
         height: 100%;
         object-fit: cover;
         transition: transform 700ms ease;
       }
+
+      .image-fallback {
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(15, 23, 42, 0.18) 100%),
+          linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%);
+      }
     }
 
     &:hover {
-      .image-wrap img {
-        transform: scale(1.1);
+      .image-wrap img,
+      .image-wrap .image-fallback {
+        transform: scale(1.08);
       }
 
       .content {
         transform: translateY(-8px);
       }
+    }
+  }
+
+  .state-card {
+    min-height: 280px;
+    padding: 48px 24px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.85);
+    text-align: center;
+    color: #6b7280;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    h3 {
+      margin: 0 0 10px;
+      color: #111827;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0 0 20px;
+      max-width: 440px;
+      line-height: 1.7;
     }
   }
 }
@@ -296,13 +376,24 @@ $gold: #d4af37;
   .diary-section {
     padding: 32px 16px;
 
-    .header .title {
-      font-size: 24px;
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .title {
+        font-size: 24px;
+      }
     }
 
-    .image-wrap {
-      height: 200px;
-      border-radius: 18px;
+    .diary-card {
+      .content {
+        padding: 22px 18px;
+      }
+
+      .image-wrap {
+        height: 200px;
+        border-radius: 18px;
+      }
     }
   }
 }

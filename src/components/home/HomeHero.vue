@@ -1,103 +1,266 @@
 <template>
   <section class="hero-container">
-    <el-carousel v-if="featuredAttractions.length" height="100vh" trigger="click" arrow="always"
-      indicator-position="none" :interval="6000" :autoplay="true">
-      <el-carousel-item v-for="item in featuredAttractions" :key="item.id" class="carousel-item">
-        <!-- <div class="carousel-bg" :style="{
-          backgroundImage: item.image_url || item.imageUrl
-            ? `url(${item.image_url || item.imageUrl}/webp_low)`
-            : ''
-        }" /> -->
-        <div class="carousel-bg" :style="{ backgroundImage: `url(${item.image_url || item.imageUrl || ''})` }" />
-
-        <div class="overlay">
-          <div class="content">
-            <p class="tagline">探索全球精选</p>
-            <div class="title">
-              <div class="line thin">{{ item.name }}</div>
-              <div class="line bold">{{ item.location || '发现灵感' }}</div>
-            </div>
-            <p class="desc">
-              {{ item.description || '沉浸式旅程，从此刻出发。精选景点、真实日记与智能推荐，为你定制独一无二的旅行灵感。' }}
-            </p>
-
-            <div ref="searchRef" class="search-wrapper">
-              <el-input v-model="keyword" placeholder="搜索目的地、景点或攻略..." class="search-input" @input="handleInput"
-                @focus="handleInput" @keyup.enter="handleSearchSubmit">
-                <template #prefix>
-                  <el-icon class="search-icon">
-                    <Search />
-                  </el-icon>
-                </template>
-              </el-input>
-
-              <el-button type="primary" class="search-btn" @click="handleSearchSubmit">
-                探索
-              </el-button>
-
-              <transition name="fade-slide">
-                <div v-if="showDropdown" class="search-dropdown">
-                  <ul v-if="searchResults.length" class="result-list">
-                    <li v-for="result in searchResults" :key="result.id" class="search-item"
-                      @click="handleSelectResult(result)">
-                      <el-icon>
-                        <Location />
-                      </el-icon>
-                      <span class="name">{{ result.name }}</span>
-                      <span class="location-tag">{{ result.location }}</span>
-                    </li>
-                  </ul>
-                  <div v-else class="empty-state">
-                    未找到相关目的地，换个词试试？
-                  </div>
-                </div>
-              </transition>
-            </div>
+    <div v-if="featuredStatus === 'loading'" class="hero-loading">
+      <div class="overlay">
+        <div class="content loading-content">
+          <p class="tagline">探索全球精选旅程</p>
+          <div class="title">
+            <div class="line thin">首页景点推荐</div>
+            <div class="line bold">加载中</div>
+          </div>
+          <p class="desc">正在获取首页推荐景点，请稍候。</p>
+          <div class="loading-bar">
+            <span />
           </div>
         </div>
-      </el-carousel-item>
-    </el-carousel>
+      </div>
+    </div>
+
+    <template v-else-if="featuredAttractions.length">
+      <div class="hero-slides">
+        <div
+          v-for="(item, index) in featuredAttractions"
+          :key="item.id"
+          class="hero-slide"
+          :class="{ active: index === currentSlideIndex }"
+        >
+          <div
+            class="hero-bg"
+            :style="{ backgroundImage: item.coverUrl || item.imageUrl ? `url(${item.coverUrl || item.imageUrl})` : '' }"
+          />
+        </div>
+      </div>
+
+      <div class="overlay">
+        <div class="content">
+          <p class="tagline">探索全球精选旅程</p>
+          <div class="title">
+            <div class="line thin">{{ activeFeaturedAttraction?.name }}</div>
+            <div class="line bold">{{ activeFeaturedAttraction?.locationText || '发现旅途灵感' }}</div>
+          </div>
+          <p class="desc">
+            {{ activeFeaturedAttraction?.summary || '沉浸式浏览真实景点内容，从灵感到出发一站完成。' }}
+          </p>
+
+          <div ref="searchRef" class="search-wrapper">
+            <el-input
+              v-model="keyword"
+              placeholder="搜索目的地、景点名称..."
+              class="search-input"
+              @input="handleInput"
+              @focus="handleInput"
+              @keyup.enter="handleSearchSubmit"
+            >
+              <template #prefix>
+                <el-icon class="search-icon">
+                  <Search />
+                </el-icon>
+              </template>
+            </el-input>
+
+            <el-button type="primary" class="search-btn" @click="handleSearchSubmit">
+              探索
+            </el-button>
+
+            <transition name="fade-slide">
+              <div v-if="showDropdown" class="search-dropdown">
+                <ul v-if="searchResults.length" class="result-list">
+                  <li
+                    v-for="result in searchResults"
+                    :key="result.id"
+                    class="search-item"
+                    @click="handleSelectResult(result)"
+                  >
+                    <el-icon>
+                      <Location />
+                    </el-icon>
+                    <span class="name">{{ result.name }}</span>
+                    <span class="location-tag">{{ result.locationText || '待补充地点' }}</span>
+                  </li>
+                </ul>
+                <div v-else-if="searchStatus === 'loading'" class="state-panel">
+                  正在搜索景点...
+                </div>
+                <div v-else-if="searchStatus === 'error'" class="state-panel error">
+                  {{ searchErrorMessage }}
+                </div>
+                <div v-else class="state-panel">
+                  未找到相关景点，请尝试更换关键词
+                </div>
+              </div>
+            </transition>
+          </div>
+
+          <div v-if="featuredAttractions.length > 1" class="slide-dots">
+            <button
+              v-for="(item, index) in featuredAttractions"
+              :key="item.id"
+              class="dot"
+              :class="{ active: index === currentSlideIndex }"
+              :aria-label="`切换到第 ${index + 1} 张景点图`"
+              @click="setActiveSlide(index)"
+            />
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <div v-else class="hero-fallback">
+      <div class="overlay">
+        <div class="content">
+          <p class="tagline">探索全球精选旅程</p>
+          <div class="title">
+            <div class="line thin">目的地灵感</div>
+            <div class="line bold">从景点开始</div>
+          </div>
+          <p class="desc">{{ fallbackDescription }}</p>
+
+          <div ref="searchRef" class="search-wrapper">
+            <el-input
+              v-model="keyword"
+              placeholder="搜索目的地、景点名称..."
+              class="search-input"
+              @input="handleInput"
+              @focus="handleInput"
+              @keyup.enter="handleSearchSubmit"
+            >
+              <template #prefix>
+                <el-icon class="search-icon">
+                  <Search />
+                </el-icon>
+              </template>
+            </el-input>
+
+            <el-button type="primary" class="search-btn" @click="handleSearchSubmit">
+              探索
+            </el-button>
+
+            <transition name="fade-slide">
+              <div v-if="showDropdown" class="search-dropdown">
+                <ul v-if="searchResults.length" class="result-list">
+                  <li
+                    v-for="result in searchResults"
+                    :key="result.id"
+                    class="search-item"
+                    @click="handleSelectResult(result)"
+                  >
+                    <el-icon>
+                      <Location />
+                    </el-icon>
+                    <span class="name">{{ result.name }}</span>
+                    <span class="location-tag">{{ result.locationText || '待补充地点' }}</span>
+                  </li>
+                </ul>
+                <div v-else-if="searchStatus === 'loading'" class="state-panel">
+                  正在搜索景点...
+                </div>
+                <div v-else-if="searchStatus === 'error'" class="state-panel error">
+                  {{ searchErrorMessage }}
+                </div>
+                <div v-else class="state-panel">
+                  未找到相关景点，请尝试更换关键词
+                </div>
+              </div>
+            </transition>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search, Location } from '@element-plus/icons-vue';
 import debounce from 'lodash-es/debounce';
-
-import { getFeaturedAttractions, searchAttractions } from '@/api/attractions';
+import {
+  getFeaturedAttractions,
+  searchAttractions,
+  type AttractionCard
+} from '@/api/attractions';
 
 const router = useRouter();
 const searchRef = ref<HTMLElement | null>(null);
-const featuredAttractions = ref<any[]>([]);
+const featuredAttractions = ref<AttractionCard[]>([]);
+const currentSlideIndex = ref(0);
 const keyword = ref('');
-const searchResults = ref<any[]>([]);
+const searchResults = ref<AttractionCard[]>([]);
 const isDropdownVisible = ref(false);
+const featuredStatus = ref<'loading' | 'success' | 'empty' | 'error'>('loading');
+const searchStatus = ref<'idle' | 'loading' | 'success' | 'empty' | 'error'>('idle');
+const searchErrorMessage = ref('');
+let heroTimer: number | null = null;
 
-const showDropdown = computed(() => {
-  return isDropdownVisible.value && keyword.value.trim().length > 0;
-});
+const showDropdown = computed(() => isDropdownVisible.value && keyword.value.trim().length > 0);
+const activeFeaturedAttraction = computed(
+  () => featuredAttractions.value[currentSlideIndex.value] || featuredAttractions.value[0] || null
+);
+const fallbackDescription = computed(() =>
+  featuredStatus.value === 'error'
+    ? '当前无法获取首页推荐景点，你仍可继续搜索并浏览景点列表。'
+    : '当前暂无可展示的首页推荐景点，你仍可继续搜索并浏览景点列表。'
+);
+
+const clearHeroTimer = () => {
+  if (heroTimer !== null) {
+    window.clearInterval(heroTimer);
+    heroTimer = null;
+  }
+};
+
+const startHeroTimer = () => {
+  clearHeroTimer();
+  if (featuredAttractions.value.length <= 1) return;
+
+  heroTimer = window.setInterval(() => {
+    currentSlideIndex.value = (currentSlideIndex.value + 1) % featuredAttractions.value.length;
+  }, 6000);
+};
 
 const loadFeatured = async () => {
+  featuredStatus.value = 'loading';
+  currentSlideIndex.value = 0;
+
   try {
     const res = await getFeaturedAttractions();
-    featuredAttractions.value = res?.data?.list || [];
+    featuredAttractions.value = (res?.data?.list || []).filter((item) => item.coverUrl || item.imageUrl).slice(0, 3);
+    featuredStatus.value = featuredAttractions.value.length ? 'success' : 'empty';
+    startHeroTimer();
   } catch (error) {
-    console.error('加载精选景点失败', error);
+    console.error('Failed to load featured attractions', error);
+    featuredAttractions.value = [];
+    featuredStatus.value = 'error';
+    clearHeroTimer();
   }
 };
 
 const doSearch = debounce(async () => {
-  if (!keyword.value.trim()) {
+  const value = keyword.value.trim();
+  if (!value) {
     searchResults.value = [];
+    searchStatus.value = 'idle';
+    searchErrorMessage.value = '';
     return;
   }
+
+  searchStatus.value = 'loading';
+  searchErrorMessage.value = '';
+
   try {
-    const res = await searchAttractions({ q: keyword.value, page: 1, size: 5 });
+    const res = await searchAttractions({
+      keyword: value,
+      pageNum: 1,
+      pageSize: 5,
+      sort: 'hot'
+    });
     searchResults.value = res?.data?.list || [];
+    searchStatus.value = searchResults.value.length ? 'success' : 'empty';
   } catch (error) {
-    console.error('搜索接口异常', error);
+    console.error('Attraction search failed', error);
+    searchResults.value = [];
+    searchStatus.value = 'error';
+    searchErrorMessage.value = '搜索建议加载失败，请稍后重试。';
   }
 }, 300);
 
@@ -107,15 +270,17 @@ const handleInput = () => {
 };
 
 const handleSearchSubmit = () => {
-  if (!keyword.value.trim()) return;
+  const value = keyword.value.trim();
+  if (!value) return;
+
   isDropdownVisible.value = false;
   router.push({
     path: '/attractions',
-    query: { q: keyword.value.trim() }
+    query: { keyword: value }
   });
 };
 
-const handleSelectResult = (result: any) => {
+const handleSelectResult = (result: AttractionCard) => {
   isDropdownVisible.value = false;
   keyword.value = result.name;
   router.push(`/attractions/${result.id}`);
@@ -127,18 +292,26 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
+const setActiveSlide = (index: number) => {
+  currentSlideIndex.value = index;
+  startHeroTimer();
+};
+
 onMounted(() => {
   loadFeatured();
   document.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
+  clearHeroTimer();
+  doSearch.cancel();
   document.removeEventListener('click', handleClickOutside);
 });
 </script>
 
 <style lang="scss" scoped>
 @use "sass:color";
+
 $gold-color: #d4af37;
 $white: #f9fafb;
 
@@ -146,173 +319,262 @@ $white: #f9fafb;
   position: relative;
   width: 100%;
   height: 100vh;
+  border-radius: 34px;
   background: #1a1a1a;
+  overflow: hidden;
 
-  .carousel-item {
-    .carousel-bg {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+  .hero-loading,
+  .hero-slides,
+  .hero-fallback {
+    position: absolute;
+    inset: 0;
+  }
 
-      &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to right, rgba(0, 0, 0, 0.6) 20%, transparent);
+  .hero-slide,
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-slide {
+    opacity: 0;
+    transition: opacity 0.9s ease;
+
+    &.active {
+      opacity: 1;
+    }
+  }
+
+  .hero-bg {
+    background-size: cover;
+    background-position: center;
+    transform: scale(1);
+    transition: transform 6.2s ease;
+  }
+
+  .hero-slide.active .hero-bg,
+  .hero-fallback:hover {
+    transform: scale(1.06);
+  }
+
+  .hero-fallback {
+    background:
+      radial-gradient(circle at 18% 22%, rgba(34, 211, 238, 0.2), transparent 24%),
+      radial-gradient(circle at 78% 20%, rgba(212, 175, 55, 0.14), transparent 22%),
+      linear-gradient(120deg, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0.62) 48%, rgba(15, 23, 42, 0.3) 100%);
+  }
+
+  .hero-loading {
+    background:
+      radial-gradient(circle at 18% 22%, rgba(34, 211, 238, 0.18), transparent 24%),
+      radial-gradient(circle at 78% 20%, rgba(212, 175, 55, 0.12), transparent 22%),
+      linear-gradient(120deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.74) 52%, rgba(15, 23, 42, 0.42) 100%);
+  }
+
+  .hero-slide::after,
+  .hero-loading::after,
+  .hero-fallback::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.62) 18%, rgba(0, 0, 0, 0.18) 52%, transparent 100%);
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 8%;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .content {
+    max-width: 620px;
+    z-index: 10;
+    pointer-events: auto;
+
+    .tagline {
+      display: inline-block;
+      font-size: 14px;
+      color: $gold-color;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+
+    .title {
+      margin-bottom: 1.5rem;
+
+      .line {
+        color: $white;
+        line-height: 1.2;
+      }
+
+      .thin {
+        font-size: 2.5rem;
+        font-weight: 200;
+      }
+
+      .bold {
+        font-size: 3.5rem;
+        font-weight: 800;
       }
     }
 
-    &:hover .carousel-bg {
-      transform: scale(1.08);
+    .desc {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.82);
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+      max-width: 560px;
     }
 
-    .overlay {
-      position: absolute;
-      inset: 0;
+    .loading-content {
+      .desc {
+        margin-bottom: 20px;
+      }
+    }
+
+    .loading-bar {
+      width: min(320px, 100%);
+      height: 6px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.16);
+
+      span {
+        display: block;
+        width: 38%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.9), rgba(212, 175, 55, 0.92));
+        animation: hero-loading 1.3s ease-in-out infinite;
+      }
+    }
+
+    .search-wrapper {
+      position: relative;
       display: flex;
       align-items: center;
-      padding: 0 10%;
+      gap: 12px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50px;
 
-      .content {
-        max-width: 600px;
-        z-index: 10;
+      .search-input {
+        flex: 1;
 
-        .tagline {
-          display: inline-block;
-          font-size: 14px;
-          color: $gold-color;
-          text-transform: uppercase;
-          letter-spacing: 2px;
-          margin-bottom: 1rem;
-        }
+        :deep(.el-input__wrapper) {
+          background: transparent;
+          box-shadow: none !important;
 
-        .title {
-          margin-bottom: 1.5rem;
+          .el-input__inner {
+            color: white;
 
-          .line {
-            color: $white;
-            line-height: 1.2;
-          }
-
-          .thin {
-            font-size: 2.5rem;
-            font-weight: 200;
-          }
-
-          .bold {
-            font-size: 3.5rem;
-            font-weight: 800;
-          }
-        }
-
-        .desc {
-          font-size: 1.1rem;
-          color: rgba(255, 255, 255, 0.8);
-          margin-bottom: 2.5rem;
-          line-height: 1.6;
-        }
-
-        .search-wrapper {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 8px 16px;
-          background: rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          border-radius: 50px;
-
-          .search-input {
-            flex: 1;
-
-            :deep(.el-input__wrapper) {
-              background: transparent;
-              box-shadow: none !important;
-
-              .el-input__inner {
-                color: white;
-
-                &::placeholder {
-                  color: rgba(255, 255, 255, 0.6);
-                }
-              }
+            &::placeholder {
+              color: rgba(255, 255, 255, 0.6);
             }
           }
+        }
+      }
 
-          .search-btn {
-            border-radius: 40px;
-            padding: 0 25px;
-            height: 44px;
-            background: $gold-color;
-            border: none;
-            font-weight: bold;
+      .search-btn {
+        border-radius: 40px;
+        padding: 0 25px;
+        height: 44px;
+        background: $gold-color;
+        border: none;
+        font-weight: bold;
+
+        &:hover {
+          background: color.adjust($gold-color, $lightness: 10%);
+        }
+      }
+
+      .search-dropdown {
+        position: absolute;
+        top: calc(100% + 15px);
+        left: 0;
+        width: 100%;
+        background: rgba(26, 26, 26, 0.95);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+        z-index: 50;
+
+        .result-list {
+          list-style: none;
+          padding: 10px 0;
+          margin: 0;
+
+          .search-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            .el-icon {
+              color: $gold-color;
+            }
+
+            .name {
+              flex: 1;
+            }
+
+            .location-tag {
+              font-size: 12px;
+              opacity: 0.65;
+            }
 
             &:hover {
-              background: color.adjust($gold-color, $lightness: 10%);
+              background: rgba(212, 175, 55, 0.15);
+              color: white;
             }
           }
+        }
 
-          /* 下拉框 SCSS 嵌套 */
-          .search-dropdown {
-            position: absolute;
-            top: calc(100% + 15px);
-            left: 0;
-            width: 100%;
-            background: rgba(26, 26, 26, 0.95);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            overflow: hidden;
-            z-index: 50;
+        .state-panel {
+          padding: 20px;
+          text-align: center;
+          color: #cbd5e1;
+          font-size: 14px;
 
-            .result-list {
-              list-style: none;
-              padding: 10px 0;
-              margin: 0;
-
-              .search-item {
-                display: flex;
-                align-items: center;
-                padding: 12px 20px;
-                color: #ddd;
-                cursor: pointer;
-                transition: all 0.2s;
-
-                .el-icon {
-                  margin-right: 10px;
-                  color: $gold-color;
-                }
-
-                .location-tag {
-                  margin-left: auto;
-                  font-size: 12px;
-                  opacity: 0.5;
-                }
-
-                &:hover {
-                  background: rgba(212, 175, 55, 0.15);
-                  color: white;
-                }
-              }
-            }
-
-            .empty-state {
-              padding: 20px;
-              text-align: center;
-              color: #888;
-              font-size: 14px;
-            }
+          &.error {
+            color: #fca5a5;
           }
+        }
+      }
+    }
+
+    .slide-dots {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.35);
+        transition: all 0.25s ease;
+
+        &.active {
+          width: 28px;
+          background: $gold-color;
         }
       }
     }
   }
 }
 
-/* 动画 */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
   transition: all 0.3s ease;
@@ -322,5 +584,47 @@ $white: #f9fafb;
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+@keyframes hero-loading {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(280%);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-container {
+    border-radius: 24px;
+
+    .overlay {
+      padding: 0 24px;
+    }
+
+    .content {
+      .title {
+        .thin {
+          font-size: 2rem;
+        }
+
+        .bold {
+          font-size: 2.7rem;
+        }
+      }
+
+      .search-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        border-radius: 28px;
+
+        .search-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
 }
 </style>

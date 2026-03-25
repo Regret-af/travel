@@ -1,93 +1,105 @@
 <template>
-  <div class="attraction-card">
+  <article
+    class="attraction-card"
+    :class="{ clickable: Boolean(to) }"
+    @click="handleClick"
+  >
     <div class="image-box">
-      <!-- <img :src="item.imageUrl ? `${item.imageUrl}/webp_low` : ''" :alt="item.name" /> -->
-      <img :src="item.imageUrl" :alt="item.name" />
-      <div class="tags" v-if="item.tags?.length">
+      <img v-if="imageSrc" :src="imageSrc" :alt="item.name" />
+      <div v-else class="image-fallback" />
+
+      <div class="category-badges" v-if="categoryBadges.length">
         <el-tag
-          v-for="tag in item.tags"
-          :key="tag"
+          v-for="badge in categoryBadges"
+          :key="badge"
           size="small"
           effect="dark"
           type="info"
         >
-          {{ tag }}
+          {{ badge }}
         </el-tag>
       </div>
+
       <div class="info-overlay">
         <div class="title">{{ item.name }}</div>
-        <div class="meta">
-          <span class="location">{{ item.location }}</span>
-          <span class="price">{{ priceSymbol }}</span>
+        <div class="meta" v-if="item.locationText || hasViewCount">
+          <span class="location">{{ item.locationText || '地点待补充' }}</span>
+          <span v-if="hasViewCount" class="views">{{ viewText }}</span>
         </div>
-        <div class="rate-box">
-          <el-rate
-            v-model="rateValue"
-            disabled
-            :colors="[gold, gold, gold]"
-            void-color="#cbd5e1"
-            disabled-void-color="#cbd5e1"
-            allow-half
-            :texts="[]"
-            show-score
-            score-template="{value}"
-          />
-        </div>
+        <p v-if="summaryText" class="summary">{{ summaryText }}</p>
       </div>
     </div>
-  </div>
+  </article>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import type { AttractionCard } from '@/api/attractions';
 
 const props = defineProps<{
   item: AttractionCard;
+  to?: string;
 }>();
 
-const gold = '#D4AF37';
-const rateValue = ref(props.item.rating || 0);
+const router = useRouter();
 
-const priceSymbol = computed(() => {
-  const level = props.item.priceLevel || 1;
-  return '￥'.repeat(Math.min(Math.max(level, 1), 4));
-});
+const imageSrc = computed(() => props.item.coverUrl || props.item.imageUrl || '');
+const summaryText = computed(() => props.item.summary?.trim() || props.item.description?.trim() || '');
+const categoryBadges = computed(() => (props.item.category?.name ? [props.item.category.name] : []));
+const hasViewCount = computed(() => typeof props.item.viewCount === 'number');
+const viewText = computed(() => `${props.item.viewCount ?? 0} 浏览`);
+
+const handleClick = () => {
+  if (!props.to) return;
+  router.push(props.to);
+};
 </script>
 
 <style scoped lang="scss">
-$gold: #D4AF37;
-
 .attraction-card {
   position: relative;
-  border-radius: 16px;
+  height: 100%;
+  border-radius: 24px;
   overflow: hidden;
   background: #ffffff;
-  transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+
+  &.clickable {
+    cursor: pointer;
+  }
 
   .image-box {
     position: relative;
     width: 100%;
     height: 100%;
     overflow: hidden;
+    background: linear-gradient(160deg, #dcecff 0%, #eef2ff 50%, #f7f7f7 100%);
 
-    img {
+    img,
+    .image-fallback {
       width: 100%;
       height: 100%;
       object-fit: cover;
       transform: scale(1);
-      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
-    .tags {
+    .image-fallback {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(15, 23, 42, 0.18) 100%),
+        linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%);
+    }
+
+    .category-badges {
       position: absolute;
-      top: 12px;
-      left: 12px;
+      top: 14px;
+      left: 14px;
       display: flex;
       gap: 8px;
 
       :deep(.el-tag) {
-        background: rgba(0, 0, 0, 0.48);
+        background: rgba(15, 23, 42, 0.48);
         border: none;
         color: #f8fafc;
         backdrop-filter: blur(4px);
@@ -99,54 +111,78 @@ $gold: #D4AF37;
       left: 0;
       right: 0;
       bottom: 0;
-      padding: 16px;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 100%);
+      padding: 18px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(15, 23, 42, 0.78) 100%);
       color: #f8fafc;
-      transform: translateY(100%);
-      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      transform: translateY(calc(100% - 72px));
+      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 
       .title {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 700;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
       }
 
       .meta {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-size: 14px;
-        color: rgba(255, 255, 255, 0.8);
-        margin-bottom: 8px;
+        gap: 12px;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.82);
+        margin-bottom: 10px;
+
+        .location,
+        .views {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
       }
 
-      .rate-box {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-
-        :deep(.el-rate__icon) {
-          margin-right: 2px;
-        }
-
-        :deep(.el-rate__text) {
-          color: $gold;
-          font-weight: 600;
-          margin-left: 6px;
-        }
+      .summary {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.82);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
     }
   }
 
   &:hover {
-    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+    transform: translateY(-6px);
 
-    .image-box img {
-      transform: scale(1.1);
+    .image-box {
+      img,
+      .image-fallback {
+        transform: scale(1.08);
+      }
     }
 
     .info-overlay {
       transform: translateY(0);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .attraction-card {
+    border-radius: 20px;
+
+    .image-box {
+      .info-overlay {
+        transform: translateY(0);
+        padding: 16px;
+
+        .title {
+          font-size: 18px;
+        }
+      }
     }
   }
 }

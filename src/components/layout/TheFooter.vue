@@ -132,8 +132,7 @@ const handleSubscribe = () => {
     ElMessage.warning('请输入正确的邮箱地址');
     return;
   }
-  // 模拟 API 调用
-  ElMessage.success('订阅成功！感谢关注探索旅讯');
+  ElMessage.success('已记录你的订阅意向，我们会在后续开放真实订阅能力。');
   email.value = '';
 };
 </script>

@@ -4,160 +4,27 @@
       <p class="subtitle">灵感交互地图</p>
       <h2 class="title">Global Insight</h2>
     </div>
-    <div ref="mapRef" class="map-container" />
+
+    <div class="map-container">
+      <div class="empty-panel">
+        <span class="badge">安全降级</span>
+        <h3>当前景点接口未提供地图坐标</h3>
+        <p>
+          首页已保留全球洞察模块结构，但地图点位与点位跳转暂不展示。
+          你仍可前往景点列表查看全部景点，并进入详情页。
+        </p>
+        <el-button type="primary" round class="cta-btn" @click="router.push('/attractions')">
+          查看景点列表
+        </el-button>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, shallowRef } from 'vue';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { getTopRatedAttractions, type AttractionCard } from '@/api/attractions';
+import { useRouter } from 'vue-router';
 
-const mapRef = shallowRef<HTMLDivElement | null>(null);
-const mapInstance = shallowRef<L.Map | null>(null);
-const closeTimers = new WeakMap<L.Marker, number | undefined>();
-
-const createPulseIcon = () =>
-  L.divIcon({
-    className: 'custom-pulse-container',
-    html: `
-      <div class="pulse-marker">
-        <div class="ping"></div>
-        <div class="dot"></div>
-      </div>
-    `,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -5]
-  });
-
-const initMap = () => {
-  if (!mapRef.value) return;
-
-  mapInstance.value = L.map(mapRef.value, {
-    zoomControl: true,
-    attributionControl: false,
-    dragging: true,
-    touchZoom: true,
-    maxBounds: [
-      [90, -180],
-      [-90, 180]
-    ],
-    maxBoundsViscosity: 0.6
-  }).setView([30, 110], 3);
-
-  L.tileLayer('http://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
-    subdomains: ['1', '2', '3', '4'],
-    maxZoom: 18,
-    minZoom: 3,
-    opacity: 0.85
-  }).addTo(mapInstance.value);
-};
-
-const addMarkers = (list: AttractionCard[]) => {
-  if (!mapInstance.value) return;
-
-  list.forEach((item) => {
-    if (item.latitude == null || item.longitude == null) return;
-
-    const marker = L.marker([item.latitude, item.longitude], {
-      icon: createPulseIcon()
-    });
-
-    // <img src="${item.imageUrl ? `${item.imageUrl}/webp_low` : ''}" alt="${item.name}" />
-    const popupHtml = `
-      <div class="popup-card" data-id="${item.id}">
-        <div class="img-wrapper">
-          <img src="${item.imageUrl || ''}" alt="${item.name}" />
-        </div>
-        <div class="popup-info">
-          <div class="name">${item.name}</div>
-          <div class="meta">
-            <span class="loc">${item.location || '未知地点'}</span>
-            <span class="rating">★ ${item.rating ?? '5.0'}</span>
-          </div>
-        </div>
-      </div>
-    `;
-
-    marker.bindPopup(popupHtml, {
-      className: 'insight-popup',
-      maxWidth: 240,
-      closeButton: false,
-      autoPan: false
-    });
-
-    const clearTimer = (m: L.Marker) => {
-      const timer = closeTimers.get(m);
-      if (timer) {
-        clearTimeout(timer);
-        closeTimers.set(m, undefined);
-      }
-    };
-
-    marker.on('mouseover', function (this: L.Marker) {
-      clearTimer(this);
-      this.openPopup();
-    });
-
-    marker.on('mouseout', function (this: L.Marker) {
-      const timer = window.setTimeout(() => this.closePopup(), 300);
-      closeTimers.set(this, timer);
-    });
-
-    marker.on('popupopen', function (this: L.Marker) {
-      const popupEl = this.getPopup()?.getElement();
-      if (!popupEl) return;
-
-      popupEl.addEventListener('mouseenter', () => clearTimer(this));
-      popupEl.addEventListener('mouseleave', () => {
-        const timer = window.setTimeout(() => this.closePopup(), 300);
-        closeTimers.set(this, timer);
-      });
-
-      const imgWrapper = popupEl.querySelector('.img-wrapper') as HTMLElement | null;
-
-      if (imgWrapper) {
-        imgWrapper.addEventListener('click', (e) => {
-          e.stopPropagation();
-
-          const card = imgWrapper.closest('.popup-card') as HTMLElement | null;
-          const id = card?.dataset.id;
-
-          if (id) {
-            window.location.href = `/attractions/${id}`;
-          }
-        });
-
-        imgWrapper.style.cursor = 'pointer';
-      }
-    });
-
-    marker.addTo(mapInstance.value!);
-  });
-};
-
-const loadData = async () => {
-  try {
-    const res = await getTopRatedAttractions(12);
-    const list = res?.data?.list || [];
-    addMarkers(list);
-  } catch (error) {
-    console.error('地图数据加载失败', error);
-  }
-};
-
-onMounted(() => {
-  initMap();
-  loadData();
-});
-
-onUnmounted(() => {
-  if (mapInstance.value) {
-    mapInstance.value.remove();
-  }
-});
+const router = useRouter();
 </script>
 
 <style scoped lang="scss">
@@ -192,114 +59,59 @@ $text-main: #2c3e50;
 
   .map-container {
     width: 100%;
-    height: 600px;
+    min-height: 600px;
     border-radius: 24px;
-    background: #f0f2f5;
-    z-index: 1;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.2), transparent 30%),
+      radial-gradient(circle at 80% 25%, rgba(99, 102, 241, 0.18), transparent 32%),
+      linear-gradient(135deg, #eff6ff 0%, #f8fafc 45%, #eef2ff 100%);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.05);
-  }
-}
-
-:deep(.custom-pulse-container) {
-  background: transparent !important;
-  border: none !important;
-
-  .pulse-marker {
-    position: relative;
-    width: 24px;
-    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
 
-    .dot {
-      width: 10px;
-      height: 10px;
-      background: $gold;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+  .empty-panel {
+    max-width: 460px;
+    padding: 34px 30px;
+    border-radius: 28px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.12);
+
+    .badge {
+      display: inline-flex;
+      margin-bottom: 16px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(212, 175, 55, 0.12);
+      color: $gold;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
     }
 
-    .ping {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: rgba(212, 175, 55, 0.4);
-      border-radius: 50%;
-      animation: map-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-    }
-  }
-}
-
-@keyframes map-ping {
-  0% {
-    transform: scale(0.6);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(3.5);
-    opacity: 0;
-  }
-}
-
-:deep(.insight-popup) {
-  // pointer-events: none;
-
-  .leaflet-popup-content-wrapper {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(15px);
-    border-radius: 18px;
-    padding: 0;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-  }
-
-  .leaflet-popup-content {
-    margin: 0 !important;
-    width: 240px !important;
-  }
-
-  .popup-card {
-    .img-wrapper {
-      height: 135px;
-      border-radius: 18px 18px 0 0;
-      overflow: hidden;
-      
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+    h3 {
+      margin: 0 0 12px;
+      color: #111827;
+      font-size: 28px;
+      font-weight: 800;
     }
 
-    .popup-info {
-      padding: 18px;
-
-      .name {
-        color: #1a1a1a;
-        font-weight: 700;
-        margin-bottom: 6px;
-        font-size: 18px;
-      }
-
-      .meta {
-        display: flex;
-        justify-content: space-between;
-        color: #7f8c8d;
-        font-size: 13px;
-
-        .rating {
-          color: $gold;
-          font-weight: bold;
-        }
-      }
+    p {
+      margin: 0;
+      color: #4b5563;
+      line-height: 1.8;
     }
-  }
 
-  .leaflet-popup-tip {
-    background: rgba(255, 255, 255, 0.95);
+    .cta-btn {
+      margin-top: 24px;
+      min-width: 160px;
+    }
   }
 }
 
@@ -308,7 +120,7 @@ $text-main: #2c3e50;
     padding: 40px 20px;
 
     .map-container {
-      height: 480px;
+      min-height: 480px;
       border-radius: 20px;
     }
   }
@@ -323,8 +135,16 @@ $text-main: #2c3e50;
     }
 
     .map-container {
-      height: 360px;
+      min-height: 360px;
       border-radius: 18px;
+    }
+
+    .empty-panel {
+      padding: 28px 20px;
+
+      h3 {
+        font-size: 22px;
+      }
     }
   }
 }

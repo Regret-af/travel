@@ -22,14 +22,14 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item v-for="item in destinationItems" :key="item.value" @click="onDestinationClick(item)">
-                {{ item.label }}
+              <el-dropdown-item v-for="item in destinationItems" :key="item.id" @click="onDestinationClick(item)">
+                {{ item.name }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
         <RouterLink to="/diaries" class="nav-link">旅行日记</RouterLink>
-        <RouterLink to="/about" class="nav-link">关于我们</RouterLink>
+        <RouterLink to="/attractions" class="nav-link">景点探索</RouterLink>
       </nav>
 
       <div class="flex items-center gap-3">
@@ -39,7 +39,7 @@
           <el-icon class="h-5 w-5 cursor-pointer text-slate-600" @click.stop="openSearch">
             <Search />
           </el-icon>
-          <input ref="searchInputRef" type="text" placeholder="搜索目的地或日记..."
+          <input ref="searchInputRef" type="text" placeholder="快速查找景点..."
             class="w-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all duration-300"
             :class="searchOpen ? 'w-48 opacity-100' : 'opacity-0 pointer-events-none'" @blur="collapseSearch" />
         </div>
@@ -60,7 +60,6 @@
               <div class="profile-identity">
                 <el-avatar :size="64" :src="userAvatar" class="profile-avatar" />
                 <div class="profile-name">{{ userName }}</div>
-                <div class="profile-badge">资深环球旅行家</div>
               </div>
               <div class="profile-quick">
                 <button
@@ -73,7 +72,7 @@
                     <component :is="item.icon" />
                   </el-icon>
                   <span class="quick-text">{{ item.label }}</span>
-                  <span class="quick-count">({{ item.count }})</span>
+                  <span v-if="item.countLabel" class="quick-count">{{ item.countLabel }}</span>
                 </button>
               </div>
               <div class="profile-actions">
@@ -109,16 +108,20 @@
           </el-icon>
         </div>
         <div class="flex flex-col gap-3 px-2 text-base text-slate-800">
-          <button class="mobile-link text-left" @click="drawerOpen = false">目的地</button>
-          <button class="mobile-link text-left" @click="drawerOpen = false">热门</button>
-          <button class="mobile-link text-left" @click="drawerOpen = false">海滨</button>
-          <button class="mobile-link text-left" @click="drawerOpen = false">山川</button>
-          <button class="mobile-link text-left" @click="drawerOpen = false">城市</button>
+          <button class="mobile-link text-left" @click="goTo('/attractions')">目的地</button>
+          <button
+            v-for="item in destinationItems.slice(0, 4)"
+            :key="item.id"
+            class="mobile-link text-left"
+            @click="onDestinationClick(item); drawerOpen = false"
+          >
+            {{ item.name }}
+          </button>
           <RouterLink to="/diaries" class="mobile-link" @click="drawerOpen = false">
             旅行日记
           </RouterLink>
-          <RouterLink to="/about" class="mobile-link" @click="drawerOpen = false">
-            关于我们
+          <RouterLink to="/attractions" class="mobile-link" @click="drawerOpen = false">
+            景点探索
           </RouterLink>
         </div>
         <div class="px-2 pt-2">
@@ -142,7 +145,7 @@
                     <component :is="item.icon" />
                   </el-icon>
                   <span class="quick-text">{{ item.label }}</span>
-                  <span class="quick-count">({{ item.count }})</span>
+                  <span v-if="item.countLabel" class="quick-count">{{ item.countLabel }}</span>
                 </button>
               </div>
               <div class="profile-actions">
@@ -167,19 +170,15 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { ArrowDown, Menu, Search, StarFilled, Notebook } from '@element-plus/icons-vue';
 import { useAuthStore } from '@/stores/auth';
+import { getAttractionCategories, type AttractionCategory } from '@/api/attractions';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 
-const destinationItems = [
-  { label: '热门', value: 'hot' },
-  { label: '海滨', value: 'beach' },
-  { label: '山川', value: 'mountain' },
-  { label: '城市', value: 'city' }
-];
 const isScrolled = ref(false);
 const searchOpen = ref(false);
 const drawerOpen = ref(false);
 const authDrawerOpen = ref(false);
 const isMobile = ref(false);
+const destinationItems = ref<AttractionCategory[]>([]);
 const authStore = useAuthStore();
 const router = useRouter();
 const isLoggedIn = computed(() => Boolean(authStore.token));
@@ -188,8 +187,8 @@ const userName = computed(() => authStore.user?.nickname || authStore.user?.user
 const searchInputRef = ref<HTMLInputElement | null>(null);
 const searchWrapperRef = ref<HTMLElement | null>(null);
 const quickAccessItems = [
-  { label: '我的灵感', count: 12, icon: StarFilled, to: '/inspirations' },
-  { label: '旅行日记', count: 8, icon: Notebook, to: '/diaries?mine=1' }
+  { label: '个人主页', countLabel: '入口', icon: StarFilled, to: '/account' },
+  { label: '旅行日记', countLabel: '列表', icon: Notebook, to: '/diaries' }
 ];
 
 const handleScroll = () => {
@@ -243,11 +242,23 @@ const syncAuthUser = async () => {
   }
 };
 
-const onDestinationClick = (item: { label: string; value: string }) => {
-  console.log(item.value); // hot / beach / mountain / city
-  // 后续你可以：
-  // router.push(`/destinations/${item.value}`)
-  // 或 emit 事件
+const loadDestinationItems = async () => {
+  try {
+    const res = await getAttractionCategories();
+    destinationItems.value = res.data || [];
+  } catch (error) {
+    console.error('获取景点分类失败', error);
+    destinationItems.value = [];
+  }
+};
+
+const onDestinationClick = (item: AttractionCategory) => {
+  router.push({
+    path: '/attractions',
+    query: {
+      categoryId: item.id
+    }
+  });
 };
 
 onMounted(() => {
@@ -257,6 +268,7 @@ onMounted(() => {
   handleScroll();
   updateIsMobile();
   syncAuthUser();
+  loadDestinationItems();
 });
 
 watch(
@@ -344,15 +356,6 @@ onUnmounted(() => {
     font-size: 18px;
     font-weight: 700;
     color: #1f2937;
-  }
-
-  .profile-badge {
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: rgba(212, 175, 55, 0.1);
-    color: #d4af37;
-    font-size: 12px;
-    font-weight: 600;
   }
 }
 
