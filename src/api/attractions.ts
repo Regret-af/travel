@@ -19,13 +19,16 @@ interface AttractionApiItem {
   id: string;
   name: string;
   summary?: string;
-  description?: string;
   coverUrl?: string;
   locationText?: string;
   viewCount?: number;
   createdAt?: string;
-  updatedAt?: string;
   category?: AttractionCategoryApi | null;
+}
+
+interface AttractionDetailApi extends AttractionApiItem {
+  description?: string;
+  updatedAt?: string;
 }
 
 interface PaginatedData<T> {
@@ -47,15 +50,11 @@ export interface AttractionCard {
   id: string;
   name: string;
   summary?: string;
-  description?: string;
   coverUrl?: string;
   locationText?: string;
   viewCount?: number;
   createdAt?: string;
-  updatedAt?: string;
   category?: AttractionCategory;
-  imageUrl?: string;
-  location?: string;
 }
 
 export interface PageAttractionCard {
@@ -64,6 +63,11 @@ export interface PageAttractionCard {
   pageSize: number;
   total: number;
   pages: number;
+}
+
+export interface AttractionDetail extends AttractionCard {
+  description?: string;
+  updatedAt?: string;
 }
 
 export interface AttractionListParams {
@@ -92,17 +96,19 @@ const mapAttraction = (item: AttractionApiItem): AttractionCard => {
     id: item.id,
     name: item.name,
     summary: item.summary,
-    description: item.description,
     coverUrl: item.coverUrl,
     locationText: item.locationText,
     viewCount: item.viewCount,
     createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
-    category,
-    imageUrl: item.coverUrl,
-    location: item.locationText
+    category
   };
 };
+
+const mapAttractionDetail = (item: AttractionDetailApi): AttractionDetail => ({
+  ...mapAttraction(item),
+  description: item.description,
+  updatedAt: item.updatedAt
+});
 
 const mapPage = (page?: PaginatedData<AttractionApiItem>): PageAttractionCard => ({
   list: page?.list?.map(mapAttraction) || [],
@@ -127,9 +133,9 @@ const createPageResponse = (
   data: mapPage(res.data)
 });
 
-const createDetailResponse = (res: ApiResponse<AttractionApiItem>): ApiResponse<AttractionCard> => ({
+const createDetailResponse = (res: ApiResponse<AttractionDetailApi>): ApiResponse<AttractionDetail> => ({
   ...res,
-  data: mapAttraction(res.data)
+  data: mapAttractionDetail(res.data)
 });
 
 export async function getAttractionCategories() {
@@ -163,7 +169,7 @@ export async function searchAttractions(params: AttractionListParams = {}) {
   return createPageResponse(res);
 }
 
-export async function getTopRatedAttractions(limit: number) {
+export async function getHotAttractions(limit: number) {
   const res = await request.get<ApiResponse<PaginatedData<AttractionApiItem>>>('/attractions', {
     params: { pageNum: 1, pageSize: limit, sort: 'hot' }
   });
@@ -172,7 +178,7 @@ export async function getTopRatedAttractions(limit: number) {
 }
 
 export async function getAttractionDetail(id: string | number) {
-  const res = await request.get<ApiResponse<AttractionApiItem>>(`/attractions/${id}`);
+  const res = await request.get<ApiResponse<AttractionDetailApi>>(`/attractions/${id}`);
 
   return createDetailResponse(res);
 }

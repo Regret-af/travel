@@ -3,7 +3,7 @@
     <template v-if="detail && !errorMessage">
       <section class="hero-card">
         <div class="cover-wrap">
-          <img v-if="detail.coverUrl || detail.imageUrl" :src="detail.coverUrl || detail.imageUrl" :alt="detail.name" />
+          <img v-if="detail.coverUrl" :src="detail.coverUrl" :alt="detail.name" />
           <div v-else class="cover-fallback" />
 
           <div class="cover-overlay">
@@ -85,13 +85,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getAttractionDetail, type AttractionCard } from '@/api/attractions';
+import { getAttractionDetail, type AttractionDetail } from '@/api/attractions';
 
 const route = useRoute();
 const router = useRouter();
 
 const loading = ref(false);
-const detail = ref<AttractionCard | null>(null);
+const detail = ref<AttractionDetail | null>(null);
 const errorMessage = ref('');
 
 const viewCountText = computed(() =>

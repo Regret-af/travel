@@ -26,7 +26,7 @@
         >
           <div
             class="hero-bg"
-            :style="{ backgroundImage: item.coverUrl || item.imageUrl ? `url(${item.coverUrl || item.imageUrl})` : '' }"
+            :style="{ backgroundImage: item.coverUrl ? `url(${item.coverUrl})` : '' }"
           />
         </div>
       </div>
@@ -224,7 +224,7 @@ const loadFeatured = async () => {
 
   try {
     const res = await getFeaturedAttractions();
-    featuredAttractions.value = (res?.data?.list || []).filter((item) => item.coverUrl || item.imageUrl).slice(0, 3);
+    featuredAttractions.value = (res?.data?.list || []).filter((item) => item.coverUrl).slice(0, 3);
     featuredStatus.value = featuredAttractions.value.length ? 'success' : 'empty';
     startHeroTimer();
   } catch (error) {

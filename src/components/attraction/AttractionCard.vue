@@ -2,31 +2,40 @@
   <article
     class="attraction-card"
     :class="{ clickable: Boolean(to) }"
+    :role="to ? 'link' : undefined"
+    :tabindex="to ? 0 : undefined"
     @click="handleClick"
+    @keyup.enter="handleClick"
+    @keyup.space.prevent="handleClick"
   >
     <div class="image-box">
       <img v-if="imageSrc" :src="imageSrc" :alt="item.name" />
       <div v-else class="image-fallback" />
 
-      <div class="category-badges" v-if="categoryBadges.length">
-        <el-tag
-          v-for="badge in categoryBadges"
-          :key="badge"
-          size="small"
-          effect="dark"
-          type="info"
-        >
-          {{ badge }}
-        </el-tag>
+      <div class="image-top">
+        <span v-if="item.category?.name" class="category-badge">
+          {{ item.category.name }}
+        </span>
+        <span class="ghost-dot" />
+      </div>
+    </div>
+
+    <div class="content-panel">
+      <div class="content-head">
+        <h3 class="title">{{ item.name }}</h3>
+        <span class="arrow-mark">进入</span>
       </div>
 
-      <div class="info-overlay">
-        <div class="title">{{ item.name }}</div>
-        <div class="meta" v-if="item.locationText || hasViewCount">
-          <span class="location">{{ item.locationText || '地点待补充' }}</span>
-          <span v-if="hasViewCount" class="views">{{ viewText }}</span>
-        </div>
-        <p v-if="summaryText" class="summary">{{ summaryText }}</p>
+      <p v-if="summaryText" class="summary">{{ summaryText }}</p>
+
+      <div class="meta-line">
+        <span class="meta-pill">{{ locationText }}</span>
+      </div>
+
+      <div v-if="hasViewCount || createdAtText" class="meta-row">
+        <span v-if="hasViewCount">{{ viewText }}</span>
+        <span v-if="hasViewCount && createdAtText" class="divider" />
+        <span v-if="createdAtText">{{ createdAtText }}</span>
       </div>
     </div>
   </article>
@@ -44,11 +53,12 @@ const props = defineProps<{
 
 const router = useRouter();
 
-const imageSrc = computed(() => props.item.coverUrl || props.item.imageUrl || '');
-const summaryText = computed(() => props.item.summary?.trim() || props.item.description?.trim() || '');
-const categoryBadges = computed(() => (props.item.category?.name ? [props.item.category.name] : []));
+const imageSrc = computed(() => props.item.coverUrl || '');
+const summaryText = computed(() => props.item.summary?.trim() || '');
+const locationText = computed(() => props.item.locationText?.trim() || '地点待补充');
 const hasViewCount = computed(() => typeof props.item.viewCount === 'number');
 const viewText = computed(() => `${props.item.viewCount ?? 0} 浏览`);
+const createdAtText = computed(() => props.item.createdAt?.slice(0, 10) || '');
 
 const handleClick = () => {
   if (!props.to) return;
@@ -62,17 +72,29 @@ const handleClick = () => {
   height: 100%;
   border-radius: 24px;
   overflow: hidden;
-  background: #ffffff;
-  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+    border-color 0.45s ease;
 
   &.clickable {
     cursor: pointer;
   }
 
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 3px rgba(34, 211, 238, 0.18),
+      0 22px 50px rgba(15, 23, 42, 0.12);
+  }
+
   .image-box {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: 68%;
     overflow: hidden;
     background: linear-gradient(160deg, #dcecff 0%, #eef2ff 50%, #f7f7f7 100%);
 
@@ -91,81 +113,165 @@ const handleClick = () => {
         linear-gradient(135deg, #dbeafe 0%, #f8fafc 100%);
     }
 
-    .category-badges {
+    &::after {
+      content: '';
       position: absolute;
-      top: 14px;
-      left: 14px;
-      display: flex;
-      gap: 8px;
-
-      :deep(.el-tag) {
-        background: rgba(15, 23, 42, 0.48);
-        border: none;
-        color: #f8fafc;
-        backdrop-filter: blur(4px);
-      }
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.04) 0%, rgba(15, 23, 42, 0.28) 100%);
     }
 
-    .info-overlay {
+    .image-top {
       position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      padding: 18px;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(15, 23, 42, 0.78) 100%);
-      color: #f8fafc;
-      transform: translateY(calc(100% - 72px));
-      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      inset: 16px 16px auto 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      z-index: 1;
 
-      .title {
-        font-size: 20px;
-        font-weight: 700;
-        margin-bottom: 8px;
-      }
-
-      .meta {
-        display: flex;
+      .category-badge {
+        display: inline-flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.82);
-        margin-bottom: 10px;
-
-        .location,
-        .views {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
+        max-width: calc(100% - 40px);
+        min-height: 32px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.46);
+        color: #f8fafc;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        backdrop-filter: blur(12px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
-      .summary {
-        margin: 0;
-        font-size: 14px;
-        line-height: 1.6;
-        color: rgba(255, 255, 255, 0.82);
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+      .ghost-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.12);
       }
     }
   }
 
+  .content-panel {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    padding: 18px 18px 16px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    transition:
+      transform 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+      background 0.45s ease,
+      box-shadow 0.45s ease;
+  }
+
+  .content-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+
+    .title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.18;
+      font-weight: 700;
+      color: #0f172a;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .arrow-mark {
+      flex-shrink: 0;
+      font-size: 11px;
+      letter-spacing: 0.24em;
+      color: rgba(100, 116, 139, 0.72);
+      transform: translateX(0);
+      transition: transform 0.45s ease, color 0.45s ease;
+    }
+  }
+
+  .summary {
+    margin: 0 0 14px;
+    font-size: 14px;
+    line-height: 1.72;
+    color: #475569;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .meta-line {
+    margin-bottom: 10px;
+
+    .meta-pill {
+      display: inline-flex;
+      max-width: 100%;
+      align-items: center;
+      min-height: 32px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(248, 250, 252, 0.96);
+      color: #334155;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+    }
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: #64748b;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+
+    .divider {
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.9);
+    }
+  }
+
   &:hover {
-    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+    border-color: rgba(212, 175, 55, 0.32);
+    box-shadow: 0 28px 62px rgba(15, 23, 42, 0.14);
     transform: translateY(-6px);
 
     .image-box {
       img,
       .image-fallback {
-        transform: scale(1.08);
+        transform: scale(1.06);
       }
     }
 
-    .info-overlay {
-      transform: translateY(0);
+    .content-panel {
+      transform: translateY(-8px);
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
+    }
+
+    .arrow-mark {
+      color: #d4af37;
+      transform: translateX(4px);
     }
   }
 }
@@ -175,13 +281,30 @@ const handleClick = () => {
     border-radius: 20px;
 
     .image-box {
-      .info-overlay {
-        transform: translateY(0);
-        padding: 16px;
+      height: 64%;
+    }
 
-        .title {
-          font-size: 18px;
-        }
+    .content-panel {
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      padding: 16px 16px 14px;
+      border-radius: 18px;
+    }
+
+    .content-head .title {
+      font-size: 18px;
+    }
+
+    .summary {
+      -webkit-line-clamp: 3;
+    }
+
+    &:hover {
+      transform: none;
+
+      .content-panel {
+        transform: none;
       }
     }
   }

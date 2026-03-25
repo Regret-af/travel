@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import AttractionCard from '@/components/attraction/AttractionCard.vue';
-import { getTopRatedAttractions, type AttractionCard as AttractionCardType } from '@/api/attractions';
+import { getHotAttractions, type AttractionCard as AttractionCardType } from '@/api/attractions';
 
 const items = ref<AttractionCardType[]>([]);
 const loading = ref(false);
@@ -42,7 +42,7 @@ const fetchData = async () => {
   loading.value = true;
   loadError.value = '';
   try {
-    const res = await getTopRatedAttractions(6);
+    const res = await getHotAttractions(6);
     items.value = res?.data?.list || [];
   } catch (error) {
     console.error('Failed to load curated destinations', error);
