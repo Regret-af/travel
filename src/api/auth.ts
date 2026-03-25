@@ -12,7 +12,9 @@ export interface AuthUser {
   nickname?: string;
   email?: string;
   avatarUrl?: string;
+  status?: number;
   roles?: string[];
+  createdAt?: string;
 }
 
 export interface LoginResponse {
