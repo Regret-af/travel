@@ -21,7 +21,7 @@
 
             <div class="hero-meta">
               <span v-if="detail.locationText" class="hero-meta-pill">{{ detail.locationText }}</span>
-              <span v-if="detail.viewCount !== undefined" class="hero-meta-pill ghost">{{ viewCountText }}</span>
+              <span v-if="viewCountText" class="hero-meta-pill ghost">{{ viewCountText }}</span>
             </div>
           </div>
 
@@ -33,7 +33,7 @@
 
       <section ref="introRef" class="intro-shell">
         <div class="intro-card">
-          <p class="section-eyebrow">目的地前言</p>
+          <p class="section-eyebrow">景点概览</p>
           <div class="intro-headline">
             <h2>{{ detail.name }}</h2>
             <p>{{ introSummary }}</p>
@@ -41,19 +41,19 @@
         </div>
 
         <div class="meta-grid">
-          <article class="meta-card">
+          <article v-if="detail.category?.name" class="meta-card">
             <span class="meta-label">景点分类</span>
-            <strong class="meta-value">{{ detail.category?.name || '待补充' }}</strong>
+            <strong class="meta-value">{{ detail.category?.name }}</strong>
             <p class="meta-note">以当前景点分类建立浏览语义，不扩展更多筛选维度。</p>
           </article>
 
-          <article class="meta-card">
+          <article v-if="detail.locationText" class="meta-card">
             <span class="meta-label">所在位置</span>
-            <strong class="meta-value">{{ detail.locationText || '待补充' }}</strong>
+            <strong class="meta-value">{{ detail.locationText }}</strong>
             <p class="meta-note">这里仅展示文本位置说明，不伪装成地图或导航能力。</p>
           </article>
 
-          <article class="meta-card">
+          <article v-if="viewCountText" class="meta-card">
             <span class="meta-label">浏览记录</span>
             <strong class="meta-value">{{ viewCountText }}</strong>
             <p class="meta-note">作为轻量内容档案信息展示，不做夸张营销数字。</p>
@@ -65,7 +65,7 @@
         <div class="story-frame">
           <div class="story-intro">
             <p class="section-eyebrow">景点介绍</p>
-            <h2>以阅读的方式，重新走近这处目的地</h2>
+            <h2>以阅读的方式，重新理解该景点</h2>
             <p class="story-lead">{{ introSummary }}</p>
           </div>
 
@@ -83,18 +83,18 @@
           <div v-else class="story-empty">
             <p class="story-empty-title">景点正文正在补充中</p>
             <p class="story-empty-text">
-              当前接口暂未返回更完整的景点介绍内容，但你仍可以先通过摘要与位置信息建立对这处目的地的初步印象。
+              当前内容仍在补充中，你可以先通过摘要与位置信息了解该景点的基本信息。
             </p>
           </div>
         </div>
       </section>
 
-      <section class="location-shell">
+      <section v-if="detail.locationText && locationNarrative" class="location-shell">
         <div class="location-card">
           <div class="location-graphic" />
           <div class="location-copy">
             <p class="section-eyebrow">位置说明</p>
-            <h2>{{ detail.locationText || '位置待补充' }}</h2>
+            <h2>{{ detail.locationText }}</h2>
             <p>
               {{ locationNarrative }}
             </p>
@@ -106,9 +106,9 @@
         <div class="return-card">
           <div class="return-copy">
             <p class="section-eyebrow">继续探索</p>
-            <h2>把这一站收进记忆，再回到目录继续翻阅</h2>
+            <h2>完成当前阅读后，可返回景点列表继续查阅</h2>
             <p>
-              详情页到这里完成了一次完整阅读。如果你还想比较更多目的地，可以回到景点列表继续按分类、排序和分页浏览。
+              当前景点信息已阅读完毕。如需比较更多景点，可返回景点列表并继续按分类、排序与分页浏览。
             </p>
           </div>
 
@@ -160,6 +160,7 @@
 import { computed, nextTick, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getAttractionDetail, type AttractionDetail } from '@/api/attractions';
+import { formatCountStat } from '@/utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -183,7 +184,7 @@ const heroSummary = computed(() => {
 const introSummary = computed(
   () =>
     detail.value?.summary?.trim() ||
-    '从封面、位置与正文开始，建立对这一处目的地最直接的第一印象。'
+    '从封面、位置与正文开始，建立对该景点最直接的第一印象。'
 );
 const descriptionParagraphs = computed(() => {
   const description = detail.value?.description?.trim() || '';
@@ -195,23 +196,23 @@ const descriptionParagraphs = computed(() => {
     .filter(Boolean);
 });
 const viewCountText = computed(() =>
-  typeof detail.value?.viewCount === 'number' ? `${detail.value.viewCount} 次浏览` : '浏览记录待补充'
+  typeof detail.value?.viewCount === 'number' ? `${formatCountStat(detail.value.viewCount)} 浏览` : ''
 );
 const locationNarrative = computed(() => {
   const location = detail.value?.locationText?.trim();
   if (!location) {
-    return '当前接口暂未提供更完整的位置文本说明，因此这里只保留了一个克制的章节式占位，等待后续内容补充。';
+    return '';
   }
 
-  return `${location} 是这处目的地当前能够被确认的文本位置线索。这里不扩展地图、坐标或路线信息，只保留一份轻量而安静的到达感说明。`;
+  return `${location} 是该景点当前能够被确认的文本位置线索。这里不扩展地图、坐标或路线信息，只保留一份轻量而克制的位置信息说明。`;
 });
 const stateTitle = computed(() =>
   pageStatus.value === 'error' ? '景点详情暂时无法加载' : '未找到对应景点内容'
 );
 const stateDescription = computed(() =>
   pageStatus.value === 'error'
-    ? errorMessage.value || '当前无法从接口获取这处景点的详情数据，请稍后重试。'
-    : '这处景点可能不存在，或当前接口没有返回可展示的详情内容。'
+    ? errorMessage.value || '当前无法加载该景点详情，请稍后重试。'
+    : '当前未找到可展示的景点详情，你可以返回景点列表继续浏览。'
 );
 
 const goBackToList = () => {
@@ -410,8 +411,7 @@ watch(
   color: #f0cf79;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .hero-copy h1 {
@@ -544,8 +544,7 @@ watch(
   color: #c79b1d;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .meta-value {

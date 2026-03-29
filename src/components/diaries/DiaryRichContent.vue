@@ -120,7 +120,7 @@ const renderedContent = computed(() => {
   const raw = props.content?.trim() || '';
 
   if (!raw) {
-    return '<p>正文内容暂未提供。</p>';
+    return '<p>这篇内容还在整理中。</p>';
   }
 
   const hasHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
@@ -155,7 +155,6 @@ const renderedContent = computed(() => {
   :deep(h4) {
     margin-bottom: 0;
     color: #111827;
-    font-family: Georgia, 'Times New Roman', serif;
     line-height: 1.22;
   }
 

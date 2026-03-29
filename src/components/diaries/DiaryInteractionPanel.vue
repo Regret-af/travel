@@ -51,6 +51,7 @@
 <script setup lang="ts">
 import { ChatLineRound, CollectionTag, Star } from '@element-plus/icons-vue';
 import type { DiaryDetail } from '@/api/diaries';
+import { formatCountStat } from '@/utils/formatters';
 
 defineProps<{
   detail: DiaryDetail;
@@ -64,7 +65,7 @@ defineEmits<{
   (event: 'focus-comment'): void;
 }>();
 
-const formatCount = (value?: number) => Number(value ?? 0).toLocaleString('zh-CN');
+const formatCount = (value?: number) => formatCountStat(value);
 </script>
 
 <style scoped lang="scss">
@@ -94,7 +95,6 @@ const formatCount = (value?: number) => Number(value ?? 0).toLocaleString('zh-CN
     color: #111827;
     font-size: 28px;
     line-height: 1;
-    font-family: Georgia, 'Times New Roman', serif;
   }
 }
 
@@ -102,8 +102,7 @@ const formatCount = (value?: number) => Number(value ?? 0).toLocaleString('zh-CN
   display: inline-flex;
   color: #64748b;
   font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .action-row {

@@ -22,20 +22,18 @@
 
     <div class="content-panel">
       <div class="content-head">
-        <h3 class="title">{{ item.name }}</h3>
+        <h3 class="title" :title="item.name">{{ item.name }}</h3>
         <span class="arrow-mark">进入</span>
       </div>
 
-      <p v-if="summaryText" class="summary">{{ summaryText }}</p>
+      <p v-if="summaryText" class="summary" :title="summaryText">{{ summaryText }}</p>
 
-      <div class="meta-line">
+      <div v-if="locationText" class="meta-line">
         <span class="meta-pill">{{ locationText }}</span>
       </div>
 
-      <div v-if="hasViewCount || createdAtText" class="meta-row">
-        <span v-if="hasViewCount">{{ viewText }}</span>
-        <span v-if="hasViewCount && createdAtText" class="divider" />
-        <span v-if="createdAtText">{{ createdAtText }}</span>
+      <div v-if="viewText" class="meta-row">
+        <span v-if="viewText">{{ viewText }}</span>
       </div>
     </div>
   </article>
@@ -45,6 +43,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { AttractionCard } from '@/api/attractions';
+import { formatCountStat } from '@/utils/formatters';
 
 const props = defineProps<{
   item: AttractionCard;
@@ -55,10 +54,10 @@ const router = useRouter();
 
 const imageSrc = computed(() => props.item.coverUrl || '');
 const summaryText = computed(() => props.item.summary?.trim() || '');
-const locationText = computed(() => props.item.locationText?.trim() || '地点待补充');
-const hasViewCount = computed(() => typeof props.item.viewCount === 'number');
-const viewText = computed(() => `${props.item.viewCount ?? 0} 浏览`);
-const createdAtText = computed(() => props.item.createdAt?.slice(0, 10) || '');
+const locationText = computed(() => props.item.locationText?.trim() || '');
+const viewText = computed(() =>
+  typeof props.item.viewCount === 'number' ? `${formatCountStat(props.item.viewCount)} 浏览` : ''
+);
 
 const handleClick = () => {
   if (!props.to) return;
@@ -195,7 +194,7 @@ const handleClick = () => {
     .arrow-mark {
       flex-shrink: 0;
       font-size: 11px;
-      letter-spacing: 0.24em;
+      letter-spacing: 0.08em;
       color: rgba(100, 116, 139, 0.72);
       transform: translateX(0);
       transition: transform 0.45s ease, color 0.45s ease;

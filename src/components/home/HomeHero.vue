@@ -45,7 +45,7 @@
           <div ref="searchRef" class="search-wrapper">
             <el-input
               v-model="keyword"
-              placeholder="搜索目的地、景点名称..."
+              placeholder="搜索景点名称..."
               class="search-input"
               @input="handleInput"
               @focus="handleInput"
@@ -75,7 +75,7 @@
                       <Location />
                     </el-icon>
                     <span class="name">{{ result.name }}</span>
-                    <span class="location-tag">{{ result.locationText || '待补充地点' }}</span>
+                    <span v-if="result.locationText" class="location-tag">{{ result.locationText }}</span>
                   </li>
                 </ul>
                 <div v-else-if="searchStatus === 'loading'" class="state-panel">
@@ -110,7 +110,7 @@
         <div class="content">
           <p class="tagline">探索全球精选旅程</p>
           <div class="title">
-            <div class="line thin">目的地灵感</div>
+            <div class="line thin">景点灵感</div>
             <div class="line bold">从景点开始</div>
           </div>
           <p class="desc">{{ fallbackDescription }}</p>
@@ -118,7 +118,7 @@
           <div ref="searchRef" class="search-wrapper">
             <el-input
               v-model="keyword"
-              placeholder="搜索目的地、景点名称..."
+              placeholder="搜索景点名称..."
               class="search-input"
               @input="handleInput"
               @focus="handleInput"
@@ -148,7 +148,7 @@
                       <Location />
                     </el-icon>
                     <span class="name">{{ result.name }}</span>
-                    <span class="location-tag">{{ result.locationText || '待补充地点' }}</span>
+                    <span v-if="result.locationText" class="location-tag">{{ result.locationText }}</span>
                   </li>
                 </ul>
                 <div v-else-if="searchStatus === 'loading'" class="state-panel">
@@ -399,8 +399,7 @@ $white: #f9fafb;
       display: inline-block;
       font-size: 14px;
       color: $gold-color;
-      text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 0.08em;
       margin-bottom: 1rem;
     }
 

@@ -78,14 +78,12 @@ defineEmits<{
   color: #c79b1d;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .state-title {
   margin: 14px 0 0;
   color: #111827;
-  font-family: Georgia, 'Times New Roman', serif;
   font-size: 38px;
   line-height: 1.12;
 }

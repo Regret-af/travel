@@ -2,7 +2,7 @@
   <div class="diaries-page">
     <section class="diary-hero" :style="heroBackgroundStyle">
       <div class="hero-copy">
-        <p class="hero-eyebrow">Travel Diaries</p>
+        <p class="hero-eyebrow">旅行日记</p>
         <h1>把沿途风景与真实心绪，翻成一册适合慢慢阅读的故事目录</h1>
         <p class="hero-description">
           这里收录公开发布的旅行日记，以更安静的节奏呈现沿途片段、人物感受与旅程余韵。
@@ -91,7 +91,7 @@
         variant="empty"
         eyebrow="内容留白"
         title="这本旅行目录暂时还没有刊登新的故事"
-        description="接口已成功返回，但当前没有可展示的旅行日记。稍后再来，也许下一段旅程正准备被写下。"
+        description="当前暂无可展示的旅行日记。稍后再来，也许下一段旅程正准备被写下。"
         action-label="返回首页"
         secondary-label="去景点列表看看"
         secondary-to="/attractions"
@@ -184,7 +184,7 @@ const pageProgressText = computed(() => {
   }
 
   if (listStatus.value === 'error') {
-    return `原计划展开第 ${displayPageNum.value} 页内容，但当前请求未能成功返回。`;
+    return `当前无法加载第 ${displayPageNum.value} 页内容，请稍后重试。`;
   }
 
   if (listStatus.value === 'empty') {
@@ -402,8 +402,7 @@ watch(
   color: #c79b1d;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .hero-copy {
@@ -411,7 +410,6 @@ watch(
     margin: 0;
     max-width: 760px;
     color: #111827;
-    font-family: Georgia, 'Times New Roman', serif;
     font-size: 50px;
     line-height: 1.04;
     font-weight: 700;
@@ -449,8 +447,7 @@ watch(
   display: inline-flex;
   color: #64748b;
   font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .sort-shell,
@@ -557,7 +554,6 @@ watch(
     color: #111827;
     font-size: 30px;
     line-height: 1.04;
-    font-family: Georgia, 'Times New Roman', serif;
     font-weight: 700;
   }
 

@@ -21,29 +21,29 @@
             <el-avatar :size="40" :src="item.author?.avatarUrl" />
             <div class="meta">
               <p class="name">{{ item.author?.nickname || '旅行者' }}</p>
-              <span class="time">{{ item.publishedAt || '发布时间待补充' }}</span>
+              <span v-if="getPublishedAt(item)" class="time">{{ getPublishedAt(item) }}</span>
             </div>
           </div>
 
-          <h3 class="diary-title">{{ item.title }}</h3>
-          <p class="summary">{{ getSummary(item) }}</p>
+          <h3 class="diary-title" :title="item.title">{{ item.title }}</h3>
+          <p class="summary" :title="getSummary(item)">{{ getSummary(item) }}</p>
 
           <div class="counts">
             <span class="count">
               <el-icon><View /></el-icon>
-              {{ item.viewCount ?? 0 }}
+              {{ formatCountStat(item.viewCount) }}
             </span>
             <span class="count">
               <el-icon><Star /></el-icon>
-              {{ item.likeCount ?? 0 }}
+              {{ formatCountStat(item.likeCount) }}
             </span>
             <span class="count">
               <el-icon><ChatLineRound /></el-icon>
-              {{ item.commentCount ?? 0 }}
+              {{ formatCountStat(item.commentCount) }}
             </span>
             <span class="count">
               <el-icon><CollectionTag /></el-icon>
-              {{ item.favoriteCount ?? 0 }}
+              {{ formatCountStat(item.favoriteCount) }}
             </span>
           </div>
         </div>
@@ -63,7 +63,7 @@
 
     <div v-else-if="!loading" class="state-card">
       <h3>暂无精选日记</h3>
-      <p>当前接口已返回成功，但暂时没有可展示的旅行日记内容。</p>
+      <p>当前暂无可展示的旅行日记内容，你可以稍后再来查看。</p>
     </div>
   </section>
 </template>
@@ -73,6 +73,7 @@ import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ChatLineRound, CollectionTag, Star, View } from '@element-plus/icons-vue';
 import { getDiaryFeed, type DiaryCard } from '@/api/diaries';
+import { formatCountStat, formatDate } from '@/utils/formatters';
 
 const router = useRouter();
 const diaries = ref<DiaryCard[]>([]);
@@ -119,8 +120,10 @@ const observeCards = () => {
 const getSummary = (item: DiaryCard) => {
   const summary = item.summary?.trim();
   if (!summary) return '这篇旅行日记暂未提供摘要内容。';
-  return summary.length > 88 ? `${summary.slice(0, 88)}...` : summary;
+  return summary;
 };
+
+const getPublishedAt = (item: DiaryCard) => formatDate(item.publishedAt);
 
 onMounted(fetchData);
 
@@ -155,7 +158,6 @@ $gold: #d4af37;
       color: #1a1a1a;
       font-size: 28px;
       font-weight: 700;
-      font-family: 'Georgia', 'Times New Roman', serif;
     }
 
     .more-btn {
@@ -239,7 +241,6 @@ $gold: #d4af37;
         font-size: 30px;
         font-weight: 800;
         color: #111827;
-        font-family: 'Georgia', 'Times New Roman', serif;
         line-height: 1.2;
         display: -webkit-box;
         -webkit-line-clamp: 2;

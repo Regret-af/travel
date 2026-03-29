@@ -11,29 +11,29 @@
         <el-avatar :size="48" :src="item.author?.avatarUrl" />
         <div class="author-copy">
           <p class="author-name">{{ item.author?.nickname || '旅行者' }}</p>
-          <span class="publish-time">{{ publishedLabel }}</span>
+          <span v-if="publishedLabel" class="publish-time">{{ publishedLabel }}</span>
         </div>
       </div>
 
-      <h2 class="diary-title">{{ item.title }}</h2>
-      <p class="diary-summary">{{ summaryText }}</p>
+      <h2 class="diary-title" :title="item.title">{{ item.title }}</h2>
+      <p class="diary-summary" :title="summaryText">{{ summaryText }}</p>
 
       <div class="metric-row" aria-label="日记内容指标">
         <span class="metric-item">
           <el-icon><View /></el-icon>
-          {{ item.viewCount ?? 0 }}
+          {{ formatCountStat(item.viewCount) }}
         </span>
         <span class="metric-item">
           <el-icon><Star /></el-icon>
-          {{ item.likeCount ?? 0 }}
+          {{ formatCountStat(item.likeCount) }}
         </span>
         <span class="metric-item">
           <el-icon><CollectionTag /></el-icon>
-          {{ item.favoriteCount ?? 0 }}
+          {{ formatCountStat(item.favoriteCount) }}
         </span>
         <span class="metric-item">
           <el-icon><ChatLineRound /></el-icon>
-          {{ item.commentCount ?? 0 }}
+          {{ formatCountStat(item.commentCount) }}
         </span>
       </div>
 
@@ -47,6 +47,7 @@ import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import { ChatLineRound, CollectionTag, Star, View } from '@element-plus/icons-vue';
 import type { DiaryCard } from '@/api/diaries';
+import { formatCountStat, formatDate } from '@/utils/formatters';
 
 const props = defineProps<{
   item: DiaryCard;
@@ -54,13 +55,7 @@ const props = defineProps<{
 }>();
 
 const isReverse = computed(() => props.index % 2 === 1);
-const publishedLabel = computed(() => {
-  const value = props.item.publishedAt?.trim();
-
-  if (!value) return '发布日期待更新';
-
-  return value.length >= 10 ? value.slice(0, 10).replace(/-/g, '.') : value;
-});
+const publishedLabel = computed(() => formatDate(props.item.publishedAt));
 const summaryText = computed(() => {
   const value = props.item.summary?.trim();
 
@@ -188,7 +183,6 @@ const summaryText = computed(() => {
 .diary-title {
   margin: 22px 0 0;
   color: #111827;
-  font-family: Georgia, 'Times New Roman', serif;
   font-size: 38px;
   line-height: 1.08;
   font-weight: 700;
@@ -241,8 +235,7 @@ const summaryText = computed(() => {
   color: #9a7313;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 @media (max-width: 1024px) {

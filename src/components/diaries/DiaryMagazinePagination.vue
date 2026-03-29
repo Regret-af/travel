@@ -118,8 +118,7 @@ const pageEntries = computed<PageEntry[]>(() => {
   color: #c79b1d;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .pagination-copy {

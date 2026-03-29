@@ -57,7 +57,7 @@
           <el-avatar :size="44" :src="comment.author?.avatarUrl" />
           <div class="comment-meta">
             <p class="comment-name">{{ comment.author?.nickname || '旅行者' }}</p>
-            <span class="comment-time">{{ formatTime(comment.createdAt) }}</span>
+            <span v-if="formatTime(comment.createdAt)" class="comment-time">{{ formatTime(comment.createdAt) }}</span>
           </div>
         </div>
 
@@ -69,6 +69,7 @@
 
 <script setup lang="ts">
 import type { DiaryComment } from '@/api/diaries';
+import { formatDateTime } from '@/utils/formatters';
 
 defineProps<{
   comments: DiaryComment[];
@@ -88,8 +89,7 @@ defineEmits<{
 }>();
 
 const formatTime = (value?: string) => {
-  if (!value) return '时间待更新';
-  return value.length >= 16 ? value.slice(0, 16).replace(/-/g, '.') : value;
+  return formatDateTime(value);
 };
 </script>
 
@@ -122,8 +122,7 @@ const formatTime = (value?: string) => {
   color: #c79b1d;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .comment-count {

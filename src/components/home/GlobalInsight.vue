@@ -2,16 +2,16 @@
   <section class="global-insight">
     <div class="map-header">
       <p class="subtitle">灵感交互地图</p>
-      <h2 class="title">Global Insight</h2>
+      <h2 class="title">全球洞察</h2>
     </div>
 
     <div class="map-container">
       <div class="empty-panel">
-        <span class="badge">安全降级</span>
-        <h3>当前景点接口未提供地图坐标</h3>
+        <span class="badge">暂未开放</span>
+        <h3>地图探索功能暂未开放</h3>
         <p>
-          首页已保留全球洞察模块结构，但地图点位与点位跳转暂不展示。
-          你仍可前往景点列表查看全部景点，并进入详情页。
+          当前仅展示全球洞察模块的内容区域，地图点位与跳转功能暂未提供。
+          你仍可前往景点列表查看全部景点，并进入详情页继续浏览。
         </p>
         <el-button type="primary" round class="cta-btn" @click="router.push('/attractions')">
           查看景点列表
@@ -45,7 +45,7 @@ $text-main: #2c3e50;
       color: $gold;
       font-size: 14px;
       font-weight: 600;
-      letter-spacing: 5px;
+      letter-spacing: 0.08em;
       margin-bottom: 10px;
     }
 
@@ -53,7 +53,6 @@ $text-main: #2c3e50;
       font-size: 34px;
       color: $text-main;
       font-weight: 800;
-      font-family: 'PingFang SC', 'Hiragino Sans GB', sans-serif;
     }
   }
 

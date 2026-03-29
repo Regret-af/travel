@@ -30,9 +30,9 @@
       variant="empty"
       eyebrow="内容留白"
       title="这篇旅行故事暂时还没有准备好"
-      description="当前详情接口已返回，但正文内容或核心信息缺失，暂时无法形成完整的阅读页。"
+      description="当前内容尚未准备完整，暂时无法形成完整的阅读页。"
       action-label="返回日记列表"
-      secondary-label="回到首页"
+      secondary-label="返回首页"
       secondary-to="/"
       @action="goBackToList"
     />
@@ -48,7 +48,7 @@
           <img v-if="detail.coverUrl" :src="detail.coverUrl" :alt="detail.title" />
           <div v-else class="hero-fallback" />
           <div class="hero-overlay" />
-          <div class="hero-note">Travel Story</div>
+          <div class="hero-note">旅行故事</div>
         </div>
       </section>
 
@@ -67,7 +67,7 @@
           </div>
         </div>
 
-        <div class="publish-card">
+        <div v-if="formattedPublishedAt" class="publish-card">
           <span class="publish-label">发布时间</span>
           <strong>{{ formattedPublishedAt }}</strong>
         </div>
@@ -138,6 +138,7 @@ import {
   type PageDiaryComment
 } from '@/api/diaries';
 import { useAuthStore } from '@/stores/auth';
+import { formatDateTime } from '@/utils/formatters';
 
 type DetailStatus = 'loading' | 'success' | 'empty' | 'error';
 type CommentsStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -187,10 +188,7 @@ const diaryId = computed(() => {
   return typeof raw === 'string' ? raw.trim() : '';
 });
 const isLoggedIn = computed(() => Boolean(authStore.token));
-const formattedPublishedAt = computed(() => {
-  const value = detail.value.publishedAt?.trim();
-  return value ? value.replace(/-/g, '.').slice(0, 16) : '发布日期待更新';
-});
+const formattedPublishedAt = computed(() => formatDateTime(detail.value.publishedAt));
 
 const goBackToList = () => {
   router.push('/diaries');
@@ -563,8 +561,7 @@ watch(
   color: #f8fafc;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .title-shell,
@@ -584,7 +581,6 @@ watch(
     margin: 0;
     max-width: 900px;
     color: #111827;
-    font-family: Georgia, 'Times New Roman', serif;
     font-size: 54px;
     line-height: 1.02;
     font-weight: 700;
@@ -597,8 +593,7 @@ watch(
   color: #c79b1d;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .summary-copy {

@@ -1,8 +1,8 @@
 <template>
   <section class="curated-section" v-loading="loading">
     <div class="header">
-      <p class="subtitle">探索近期热门目的地</p>
-      <h2 class="title">精选目的地</h2>
+      <p class="subtitle">探索近期热门景点</p>
+      <h2 class="title">精选景点</h2>
     </div>
 
     <div v-if="items.length" class="grid">
@@ -24,7 +24,7 @@
 
     <div v-else-if="!loading" class="state-card">
       <h3>暂无精选推荐</h3>
-      <p>当前接口已返回成功，但暂时没有可展示的首页精选景点。</p>
+      <p>当前暂无可展示的首页精选景点，你可以稍后再来查看。</p>
     </div>
   </section>
 </template>

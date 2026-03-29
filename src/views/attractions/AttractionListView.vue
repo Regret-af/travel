@@ -2,10 +2,10 @@
   <div class="attractions-page">
     <section class="directory-hero" :style="heroBackgroundStyle">
       <div class="hero-copy">
-        <p class="hero-eyebrow">景点目录</p>
-        <h1>为下一段旅程挑一处值得慢慢翻阅的目的地</h1>
+        <p class="hero-eyebrow">景点列表</p>
+        <h1>为行程规划筛选值得了解的景点</h1>
         <p class="hero-description">
-          以真实景点内容建立一份可浏览、可筛选、可翻页的旅行目录。你可以从关键词进入，也可以顺着分类和排序继续寻找灵感。
+          基于真实景点内容构建可浏览、可筛选、可分页的景点列表，可通过关键词、分类与排序快速定位目标内容。
         </p>
       </div>
 
@@ -68,7 +68,7 @@
         <div class="section-copy">
           <p class="section-eyebrow">分类筛选</p>
           <h2>按单一分类切换浏览方向</h2>
-          <p>这里只保留轻量的单选胶囊，不做后台式多维筛选栏。</p>
+          <p>当前仅提供轻量的单选分类筛选，不扩展为多维组合筛选。</p>
         </div>
 
         <div class="category-strip">
@@ -119,11 +119,11 @@
 
     <section ref="resultsAnchorRef" class="catalog-toolbar">
       <div class="toolbar-copy">
-        <p class="toolbar-eyebrow">目录状态</p>
+        <p class="toolbar-eyebrow">列表状态</p>
         <h2>{{ resultHeadline }}</h2>
         <div class="toolbar-meta">
           <span>第 {{ currentPage }} 页 / 共 {{ totalPages || 1 }} 页</span>
-          <span v-if="isFetching" class="loading-indicator">正在更新目录…</span>
+          <span v-if="isFetching" class="loading-indicator">正在更新列表…</span>
         </div>
 
         <div v-if="activeDescriptors.length" class="active-descriptors">
@@ -207,7 +207,7 @@
     <section v-if="listStatus === 'success' && totalPages > 1" class="pagination-shell">
       <div class="pagination-copy">
         <p class="section-eyebrow">分页浏览</p>
-        <h2>继续翻阅这一册景点目录</h2>
+        <h2>继续浏览景点列表</h2>
         <p>分页会保留当前关键词、分类和排序，并在切换后回到目录内容顶部附近。</p>
       </div>
 
@@ -324,7 +324,7 @@ const resultHeadline = computed(() => {
     return `${currentCategoryName.value} 共收录 ${formattedTotal.value} 个景点`;
   }
 
-  return `当前目录共收录 ${formattedTotal.value} 个景点`;
+  return `当前列表共收录 ${formattedTotal.value} 个景点`;
 });
 const heroBackgroundStyle = computed(() => {
   const coverUrl = items.value[0]?.coverUrl;
@@ -336,12 +336,12 @@ const heroBackgroundStyle = computed(() => {
   };
 });
 const emptyStateTitle = computed(() =>
-  hasActiveConditions.value ? '未找到匹配的目的地' : '景点目录暂时还没有内容'
+  hasActiveConditions.value ? '未找到匹配的景点' : '景点列表暂时还没有内容'
 );
 const emptyStateDescription = computed(() =>
   hasActiveConditions.value
     ? '可以尝试缩短关键词、切换分类，或恢复到默认排序后重新浏览。'
-    : '接口已成功返回，但当前页暂时没有可展示的景点数据。'
+    : '当前页暂无可展示的景点，你可以稍后再来查看。'
 );
 
 const updateIsMobile = () => {
@@ -413,7 +413,7 @@ const fetchList = async () => {
     total.value = 0;
     totalPages.value = 0;
     listStatus.value = 'error';
-    listError.value = '当前无法获取景点目录，请稍后重试。';
+    listError.value = '当前无法获取景点列表，请稍后重试。';
   } finally {
     if (requestId === fetchSequence) {
       isFetching.value = false;
@@ -609,8 +609,7 @@ onUnmounted(() => {
   color: #c79b1d;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .hero-copy {
@@ -662,8 +661,7 @@ onUnmounted(() => {
   display: inline-flex;
   color: #64748b;
   font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .filters-shell {

@@ -2,7 +2,7 @@
   <div class="account-page">
     <AuthDrawer v-model="authDrawerOpen" />
 
-    <section v-if="pageState === 'loading'" class="state-panel loading-panel" aria-label="用户中心加载中">
+    <section v-if="pageState === 'loading'" class="state-panel loading-panel" aria-label="个人中心加载中">
       <div class="loading-hero" />
       <div class="loading-grid">
         <div class="loading-card" />
@@ -15,20 +15,20 @@
     </section>
 
     <section v-else-if="pageState === 'auth'" class="state-panel auth-panel">
-      <p class="state-eyebrow">Traveler Space</p>
-      <h1>登录后，才会看见属于你的旅行者个人空间</h1>
+      <p class="state-eyebrow">旅行者空间</p>
+      <h1>登录后，才会看见属于你的个人中心</h1>
       <p class="state-copy">
-        这里会承接你的账户资料、最近消息提醒，以及通往日记与收藏入口的轻量空间。
+        这里将展示你的账户资料、通知中心，以及与日记和收藏相关的内容。
       </p>
       <div class="state-actions">
-        <button class="primary-action" type="button" @click="openAuthDrawer">打开登录抽屉</button>
+        <button class="primary-action" type="button" @click="openAuthDrawer">立即登录</button>
         <button class="secondary-action" type="button" @click="goHome">返回首页</button>
       </div>
     </section>
 
     <section v-else-if="pageState === 'error'" class="state-panel error-panel">
-      <p class="state-eyebrow">Connection Interrupted</p>
-      <h1>用户中心暂时没有顺利展开</h1>
+      <p class="state-eyebrow">连接中断</p>
+      <h1>个人中心暂时没有顺利展开</h1>
       <p class="state-copy">{{ pageError }}</p>
       <div class="state-actions">
         <button class="primary-action" type="button" @click="initializePage">重新加载</button>
@@ -39,21 +39,21 @@
     <template v-else>
       <section class="account-hero">
         <div class="hero-copy">
-          <p class="hero-eyebrow">Traveler Profile</p>
+          <p class="hero-eyebrow">个人中心</p>
           <h1>{{ displayName }}</h1>
           <p class="hero-description">
-            这是一处偏安静的旅行者个人空间，只保留身份信息、轻通知和几个通往内容世界的入口。
+            这里是你的个人中心，集中展示身份信息、通知中心，以及与你相关的内容。
           </p>
 
           <div class="hero-meta">
-            <span class="meta-pill meta-pill-highlight">{{ statusText }}</span>
-            <span class="meta-pill">{{ joinedText }}</span>
+            <span v-if="statusText" class="meta-pill meta-pill-highlight">{{ statusText }}</span>
+            <span v-if="joinedText" class="meta-pill">{{ joinedText }}</span>
             <span class="meta-pill">{{ unreadSummary }}</span>
           </div>
 
           <div class="hero-actions">
             <button class="hero-action hero-action-primary" type="button" @click="scrollToNotifications">
-              查看轻通知
+              查看通知中心
             </button>
             <button class="hero-action" type="button" @click="handleLogout">退出登录</button>
           </div>
@@ -61,14 +61,9 @@
 
         <div class="hero-identity">
           <div class="avatar-shell">
-            <el-avatar :size="112" :src="profile?.avatarUrl">
+            <el-avatar :size="125" :src="profile?.avatarUrl">
               {{ avatarFallback }}
             </el-avatar>
-          </div>
-          <div class="identity-card">
-            <span class="identity-label">当前账户</span>
-            <strong>{{ profile?.email || '未提供邮箱' }}</strong>
-            <p>@{{ profile?.username || 'traveler' }}</p>
           </div>
         </div>
       </section>
@@ -77,8 +72,8 @@
         <article class="panel-card info-panel">
           <div class="panel-header">
             <div>
-              <p class="panel-eyebrow">Account Basics</p>
-              <h2>账户基础信息区</h2>
+              <p class="panel-eyebrow">账户基础</p>
+              <h2>个人中心资料</h2>
             </div>
           </div>
 
@@ -88,22 +83,15 @@
               <strong class="info-value">{{ item.value }}</strong>
             </div>
           </div>
-
-          <div class="role-row">
-            <span class="role-label">角色标签</span>
-            <div class="role-list">
-              <span v-for="role in roleTags" :key="role" class="role-pill">{{ role }}</span>
-            </div>
-          </div>
         </article>
 
         <article ref="notificationsRef" class="panel-card notifications-panel">
           <div class="panel-header">
             <div>
-              <p class="panel-eyebrow">Soft Notices</p>
-              <h2>轻通知区 / 消息入口</h2>
+              <p class="panel-eyebrow">通知中心</p>
+              <h2>通知中心</h2>
             </div>
-            <span class="notice-badge">{{ unreadCount }} 条未读</span>
+            <span class="notice-badge">{{ unreadCount }} 条未读通知</span>
           </div>
 
           <div v-if="notificationsState === 'loading'" class="notice-skeleton">
@@ -111,14 +99,14 @@
           </div>
 
           <div v-else-if="notificationsState === 'error'" class="notice-feedback notice-feedback-error">
-            <p>最近提醒暂时没有加载成功。</p>
-            <button type="button" class="inline-link" @click="loadNotifications">重试通知请求</button>
+            <p>通知中心暂时没有加载成功。</p>
+            <button type="button" class="inline-link" @click="loadNotifications">重试加载通知</button>
           </div>
 
           <div v-else-if="notifications.length === 0" class="notice-feedback notice-feedback-empty">
             <p class="notice-empty-title">空状态</p>
-            <h3>现在还没有新的旅途消息</h3>
-            <p>你的评论、点赞、收藏和系统提醒，后续都会以轻量方式停留在这里。</p>
+            <h3>通知中心里还没有新通知</h3>
+            <p>你的评论、点赞、收藏和系统通知，都会集中收纳在这里。</p>
           </div>
 
           <div v-else class="notice-list">
@@ -138,10 +126,10 @@
                   <span class="notice-type">{{ getNotificationTypeLabel(item.type) }}</span>
                   <time>{{ formatDateTime(item.createdAt, 'MM.DD HH:mm') }}</time>
                 </div>
-                <h3>{{ item.title || '新的旅行提醒' }}</h3>
-                <p>{{ item.content || '点击查看这条消息的详情。' }}</p>
+                <h3>{{ item.title || '新通知' }}</h3>
+                <p>{{ item.content || '点击查看这条通知的详情。' }}</p>
                 <span class="notice-sender">
-                  {{ item.sender?.nickname || '旅途消息' }}
+                  {{ item.sender?.nickname || '通知中心' }}
                   <span v-if="!item.isRead" class="unread-dot" />
                 </span>
               </div>
@@ -152,19 +140,19 @@
 
       <section class="entry-grid">
         <article class="entry-card entry-card-diary">
-          <p class="entry-eyebrow">My Diaries</p>
-          <h2>我的日记入口</h2>
+          <p class="entry-eyebrow">我的日记</p>
+          <h2>我的日记</h2>
           <p>
-            当前只保留通往日记世界的轻入口，不展开个人管理列表。你可以继续回到公共日记页，沿着故事继续阅读或记录灵感。
+            你可以在这里继续浏览旅行日记，阅读他人的故事，或记录自己的灵感。
           </p>
           <button class="entry-action" type="button" @click="goToDiaries">前往旅行日记</button>
         </article>
 
         <article class="entry-card entry-card-favorite">
-          <p class="entry-eyebrow">My Favorites</p>
-          <h2>我的收藏入口</h2>
+          <p class="entry-eyebrow">我的收藏</p>
+          <h2>我的收藏</h2>
           <p>
-            收藏管理能力还没有在当前接口阶段开放，这里只保留一处温和入口，方便你继续回到内容广场寻找想再次停留的片段。
+            你可以从这里继续浏览内容，查找值得再次查看的旅行记录。
           </p>
           <button class="entry-action" type="button" @click="goToDiaryDiscovery">继续探索日记</button>
         </article>
@@ -172,15 +160,15 @@
 
       <section class="action-grid">
         <article class="action-card">
-          <p class="entry-eyebrow">Settings</p>
-          <h2>设置入口</h2>
-          <p>当前阶段不展开复杂设置中心，只保留入口提示，后续若接口补齐再继续延展。</p>
-          <button class="entry-action entry-action-muted" type="button" @click="openSettingsEntry">查看说明</button>
+          <p class="entry-eyebrow">设置</p>
+          <h2>设置</h2>
+          <p>你可以在这里查看当前可用的账户设置相关信息。</p>
+          <button class="entry-action entry-action-muted" type="button" @click="openSettingsEntry">查看设置</button>
         </article>
 
         <article class="action-card action-card-logout">
-          <p class="entry-eyebrow">Sign Out</p>
-          <h2>退出登录入口</h2>
+          <p class="entry-eyebrow">退出登录</p>
+          <h2>退出登录</h2>
           <p>如果你想结束这次访问，可以直接清晰地从这里退出当前账号。</p>
           <button class="logout-action" type="button" @click="handleLogout">退出登录</button>
         </article>
@@ -219,39 +207,36 @@ const unreadCount = ref(0);
 const notificationPendingIds = ref<string[]>([]);
 
 const profile = computed(() => authStore.user);
-const displayName = computed(() => profile.value?.nickname || profile.value?.username || '旅行者');
+const displayName = computed(() => profile.value?.nickname?.trim() || '旅行者');
 const avatarFallback = computed(() => displayName.value.slice(0, 1).toUpperCase());
 const unreadSummary = computed(() =>
-  unreadCount.value > 0 ? `未读提醒 ${unreadCount.value} 条` : '暂时没有未读提醒'
+  unreadCount.value > 0 ? `未读通知 ${unreadCount.value} 条` : '暂时没有未读通知'
 );
-const joinedText = computed(() => `加入时间 ${formatDateTime(profile.value?.createdAt, 'YYYY.MM.DD')}`);
-const statusText = computed(() => getStatusLabel(profile.value?.status));
-const roleTags = computed(() => {
-  const roles = profile.value?.roles?.filter(Boolean) || [];
-
-  return roles.length ? roles.slice(0, 2).map(formatRoleLabel) : ['旅行者'];
+const joinedText = computed(() => {
+  const createdAt = profile.value?.createdAt?.trim();
+  return createdAt ? `加入时间 ${formatDateTime(createdAt, 'YYYY.MM.DD')}` : '';
 });
-const infoItems = computed(() => [
-  { label: '昵称', value: displayName.value },
-  { label: '邮箱', value: profile.value?.email || '未提供' },
-  { label: '用户名', value: profile.value?.username ? `@${profile.value.username}` : '未提供' },
-  { label: '加入时间', value: formatDateTime(profile.value?.createdAt, 'YYYY.MM.DD') }
-]);
+const statusText = computed(() => getStatusLabel(profile.value?.status));
+const infoItems = computed(() => {
+  const items = [
+    { label: '昵称', value: displayName.value },
+    profile.value?.createdAt?.trim()
+      ? { label: '加入时间', value: formatDateTime(profile.value.createdAt, 'YYYY.MM.DD') }
+      : null
+  ];
 
-function formatRoleLabel(role: string) {
-  return role.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-}
+  return items.filter(Boolean) as Array<{ label: string; value: string }>;
+});
 
 function getStatusLabel(status?: number) {
   if (status === 1) return '账户状态正常';
   if (status === 0) return '账户待启用';
-  if (typeof status === 'number') return `账户状态 ${status}`;
-  return '旅程档案已开启';
+  return '';
 }
 
 function formatDateTime(value?: string, mode: 'YYYY.MM.DD' | 'MM.DD HH:mm' = 'YYYY.MM.DD') {
   if (!value) {
-    return mode === 'MM.DD HH:mm' ? '刚刚' : '时间待补充';
+    return '时间未知';
   }
 
   const normalized = value.replace(/-/g, '/');
@@ -273,11 +258,11 @@ function formatDateTime(value?: string, mode: 'YYYY.MM.DD' | 'MM.DD HH:mm' = 'YY
 }
 
 function getNotificationTypeLabel(type?: string) {
-  if (type === 'COMMENT') return '评论提醒';
-  if (type === 'LIKE') return '点赞提醒';
-  if (type === 'FAVORITE') return '收藏提醒';
-  if (type === 'SYSTEM') return '系统提醒';
-  return '旅行提醒';
+  if (type === 'COMMENT') return '评论通知';
+  if (type === 'LIKE') return '点赞通知';
+  if (type === 'FAVORITE') return '收藏通知';
+  if (type === 'SYSTEM') return '系统通知';
+  return '旅行通知';
 }
 
 function getSenderFallback(name?: string) {
@@ -306,7 +291,7 @@ function goToDiaryDiscovery() {
 }
 
 function openSettingsEntry() {
-  ElMessage.info('当前阶段仅保留设置入口展示，复杂设置能力将在后续接口补齐后开放。');
+  ElMessage.info('设置功能暂未开放，请稍后再试。');
 }
 
 function scrollToNotifications() {
@@ -383,7 +368,7 @@ async function initializePage() {
     }
 
     pageState.value = 'error';
-    pageError.value = '用户资料暂时没有成功返回，建议稍后重试，或重新打开登录抽屉确认当前会话。';
+    pageError.value = '当前无法获取个人资料，请稍后重试，或重新登录后再试。';
   }
 }
 
@@ -528,14 +513,12 @@ onMounted(() => {
   color: #c79b1d;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .hero-copy {
   h1 {
     margin: 0;
-    font-family: Georgia, 'Times New Roman', serif;
     font-size: 56px;
     line-height: 1.02;
     letter-spacing: -0.04em;
@@ -567,7 +550,6 @@ onMounted(() => {
 }
 
 .meta-pill,
-.role-pill,
 .notice-badge {
   display: inline-flex;
   align-items: center;
@@ -691,7 +673,6 @@ onMounted(() => {
 
 .identity-label,
 .info-label,
-.role-label,
 .notice-type,
 .notice-sender,
 .notice-line time {
@@ -763,19 +744,6 @@ onMounted(() => {
   line-height: 1.5;
 }
 
-.role-row {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.role-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
 .notice-list {
   display: flex;
   flex-direction: column;
@@ -831,8 +799,7 @@ onMounted(() => {
 .notice-type {
   color: #9a7313;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .notice-copy h3 {
@@ -888,8 +855,7 @@ onMounted(() => {
 
 .notice-empty-title {
   color: #9a7313 !important;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.06em;
   font-weight: 700;
 }
 
@@ -972,7 +938,6 @@ onMounted(() => {
     margin: 0;
     max-width: 720px;
     color: #111827;
-    font-family: Georgia, 'Times New Roman', serif;
     font-size: 52px;
     line-height: 1.04;
     letter-spacing: -0.04em;
