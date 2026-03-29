@@ -145,7 +145,7 @@
           <p>
             你可以在这里继续浏览旅行日记，阅读他人的故事，或记录自己的灵感。
           </p>
-          <button class="entry-action" type="button" @click="goToDiaries">前往旅行日记</button>
+          <button class="entry-action" type="button" @click="goToDiaries">查看我的日记</button>
         </article>
 
         <article class="entry-card entry-card-favorite">
@@ -154,7 +154,7 @@
           <p>
             你可以从这里继续浏览内容，查找值得再次查看的旅行记录。
           </p>
-          <button class="entry-action" type="button" @click="goToDiaryDiscovery">继续探索日记</button>
+          <button class="entry-action" type="button" @click="goToDiaryDiscovery">查看我的收藏</button>
         </article>
       </section>
 
@@ -163,14 +163,14 @@
           <p class="entry-eyebrow">设置</p>
           <h2>设置</h2>
           <p>你可以在这里查看当前可用的账户设置相关信息。</p>
-          <button class="entry-action entry-action-muted" type="button" @click="openSettingsEntry">查看设置</button>
+          <button class="entry-action entry-action-muted" type="button" @click="openSettingsEntry">编辑资料</button>
         </article>
 
         <article class="action-card action-card-logout">
           <p class="entry-eyebrow">退出登录</p>
           <h2>退出登录</h2>
           <p>如果你想结束这次访问，可以直接清晰地从这里退出当前账号。</p>
-          <button class="logout-action" type="button" @click="handleLogout">退出登录</button>
+          <button class="logout-action" type="button" @click="goToPasswordEdit">修改密码</button>
         </article>
       </section>
     </template>
@@ -180,8 +180,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { ElMessage } from 'element-plus';
-import 'element-plus/theme-chalk/el-message.css';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import {
   getNotificationUnreadCount,
@@ -279,20 +277,19 @@ function goHome() {
 }
 
 function goToDiaries() {
-  router.push('/diaries');
+  router.push('/account/diaries');
 }
 
 function goToDiaryDiscovery() {
-  router.push({
-    path: '/diaries',
-    query: {
-      sort: 'hot'
-    }
-  });
+  router.push('/account/favorites');
 }
 
 function openSettingsEntry() {
-  ElMessage.info('设置功能暂未开放，请稍后再试。');
+  router.push('/account/profile');
+}
+
+function goToPasswordEdit() {
+  router.push('/account/password');
 }
 
 function scrollToNotifications() {

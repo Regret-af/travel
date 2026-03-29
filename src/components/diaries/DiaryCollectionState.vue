@@ -20,7 +20,7 @@
 import { RouterLink } from 'vue-router';
 
 defineProps<{
-  variant: 'empty' | 'error';
+  variant: 'empty' | 'error' | 'auth';
   eyebrow: string;
   title: string;
   description: string;
@@ -57,6 +57,12 @@ defineEmits<{
     linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
 }
 
+.state-panel-auth {
+  background:
+    radial-gradient(circle at top, rgba(34, 211, 238, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+}
+
 .state-emblem {
   width: 88px;
   height: 88px;
@@ -71,6 +77,12 @@ defineEmits<{
   background:
     radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0) 34%),
     linear-gradient(135deg, rgba(248, 113, 113, 0.22) 0%, rgba(251, 191, 36, 0.2) 100%);
+}
+
+.state-panel-auth .state-emblem {
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0) 34%),
+    linear-gradient(135deg, rgba(34, 211, 238, 0.24) 0%, rgba(99, 102, 241, 0.18) 100%);
 }
 
 .state-eyebrow {
