@@ -313,7 +313,7 @@ const doSearch = debounce(async () => {
   searchErrorMessage.value = '';
 
   try {
-    const res = await searchAttractionsByQuery(value);
+    const res = await searchAttractionsByQuery(value, { skipErrorToast: true });
 
     if (requestId !== searchFetchSequence) return;
 
@@ -427,7 +427,7 @@ const syncAuthUser = async () => {
 
 const loadDestinationItems = async () => {
   try {
-    const res = await getAttractionCategories();
+    const res = await getAttractionCategories({ skipErrorToast: true });
     destinationItems.value = res.data || [];
   } catch (error) {
     console.error('获取景点分类失败', error);

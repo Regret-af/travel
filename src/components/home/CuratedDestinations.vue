@@ -42,7 +42,7 @@ const fetchData = async () => {
   loading.value = true;
   loadError.value = '';
   try {
-    const res = await getHotAttractions(6);
+    const res = await getHotAttractions(6, { skipErrorToast: true });
     items.value = res?.data?.list || [];
   } catch (error) {
     console.error('Failed to load curated destinations', error);

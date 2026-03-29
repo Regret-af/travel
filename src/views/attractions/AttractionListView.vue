@@ -425,7 +425,7 @@ const fetchCategories = async () => {
   categoriesStatus.value = 'loading';
 
   try {
-    const res = await getAttractionCategories();
+    const res = await getAttractionCategories({ skipErrorToast: true });
     categories.value = [...(res.data || [])].sort((a, b) => {
       const currentOrder = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
       const nextOrder = b.sortOrder ?? Number.MAX_SAFE_INTEGER;

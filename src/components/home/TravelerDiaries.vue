@@ -87,7 +87,7 @@ const fetchData = async () => {
   loadError.value = '';
 
   try {
-    const res = await getDiaryFeed();
+    const res = await getDiaryFeed({ skipErrorToast: true });
     diaries.value = res?.data?.list || [];
     await nextTick();
     observeCards();

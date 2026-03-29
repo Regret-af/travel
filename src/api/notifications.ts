@@ -1,22 +1,8 @@
 import request from '../utils/request';
-
-interface ApiResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-  requestId?: string;
-  timestamp?: string;
-}
-
-interface PaginatedData<T> {
-  pageNum: number;
-  pageSize: number;
-  total: number;
-  pages: number;
-  list: T[];
-}
+import type { ApiResponse, PaginatedData } from '@/types/api';
 
 interface NotificationSenderApi {
+  id?: string;
   nickname?: string;
   avatarUrl?: string;
 }
@@ -38,6 +24,7 @@ export interface NotificationItem {
   title?: string;
   content?: string;
   sender?: {
+    id?: string;
     nickname?: string;
     avatarUrl?: string;
   };
@@ -78,6 +65,7 @@ const mapNotification = (item: NotificationApiItem): NotificationItem => ({
   content: item.content,
   sender: item.sender
     ? {
+        id: item.sender.id,
         nickname: item.sender.nickname,
         avatarUrl: item.sender.avatarUrl
       }

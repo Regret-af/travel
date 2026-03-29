@@ -1,12 +1,6 @@
 import request from '../utils/request';
-
-interface ApiResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-  requestId?: string;
-  timestamp?: string;
-}
+import type { AxiosRequestConfig } from 'axios';
+import type { ApiResponse, PaginatedData } from '@/types/api';
 
 interface AttractionCategoryApi {
   id: string;
@@ -29,14 +23,6 @@ interface AttractionApiItem {
 interface AttractionDetailApi extends AttractionApiItem {
   description?: string;
   updatedAt?: string;
-}
-
-interface PaginatedData<T> {
-  pageNum: number;
-  pageSize: number;
-  total: number;
-  pages: number;
-  list: T[];
 }
 
 export interface AttractionCategory {
@@ -77,6 +63,8 @@ export interface AttractionListParams {
   categoryId?: string;
   sort?: string;
 }
+
+type RequestBehaviorOptions = Pick<AxiosRequestConfig, 'skipErrorToast'>;
 
 const mapCategory = (category?: AttractionCategoryApi | null): AttractionCategory | undefined => {
   if (!category) return undefined;
@@ -138,8 +126,10 @@ const createDetailResponse = (res: ApiResponse<AttractionDetailApi>): ApiRespons
   data: mapAttractionDetail(res.data)
 });
 
-export async function getAttractionCategories() {
-  const res = await request.get<ApiResponse<AttractionCategoryApi[]>>('/attraction-categories');
+export async function getAttractionCategories(options: RequestBehaviorOptions = {}) {
+  const res = await request.get<ApiResponse<AttractionCategoryApi[]>>('/attraction-categories', {
+    skipErrorToast: options.skipErrorToast
+  });
 
   return {
     ...res,
@@ -152,26 +142,29 @@ export async function getAttractionCategories() {
   };
 }
 
-export async function getFeaturedAttractions() {
+export async function getFeaturedAttractions(options: RequestBehaviorOptions = {}) {
   const res = await request.get<ApiResponse<PaginatedData<AttractionApiItem>>>('/attractions', {
-    params: { pageNum: 1, pageSize: 3, sort: 'hot' }
+    params: { pageNum: 1, pageSize: 3, sort: 'hot' },
+    skipErrorToast: options.skipErrorToast
   });
 
   return createPageResponse(res);
 }
 
-export async function searchAttractions(params: AttractionListParams = {}) {
+export async function searchAttractions(params: AttractionListParams = {}, options: RequestBehaviorOptions = {}) {
   const normalized = normalizeListParams(params);
   const res = await request.get<ApiResponse<PaginatedData<AttractionApiItem>>>('/attractions', {
-    params: normalized
+    params: normalized,
+    skipErrorToast: options.skipErrorToast
   });
 
   return createPageResponse(res);
 }
 
-export async function getHotAttractions(limit: number) {
+export async function getHotAttractions(limit: number, options: RequestBehaviorOptions = {}) {
   const res = await request.get<ApiResponse<PaginatedData<AttractionApiItem>>>('/attractions', {
-    params: { pageNum: 1, pageSize: limit, sort: 'hot' }
+    params: { pageNum: 1, pageSize: limit, sort: 'hot' },
+    skipErrorToast: options.skipErrorToast
   });
 
   return createPageResponse(res);
@@ -183,11 +176,11 @@ export async function getAttractionDetail(id: string | number) {
   return createDetailResponse(res);
 }
 
-export async function searchAttractionsByQuery(query: string) {
+export async function searchAttractionsByQuery(query: string, options: RequestBehaviorOptions = {}) {
   return searchAttractions({
     keyword: query,
     pageNum: 1,
     pageSize: 5,
     sort: 'hot'
-  });
+  }, options);
 }

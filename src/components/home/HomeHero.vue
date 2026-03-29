@@ -223,7 +223,7 @@ const loadFeatured = async () => {
   currentSlideIndex.value = 0;
 
   try {
-    const res = await getFeaturedAttractions();
+    const res = await getFeaturedAttractions({ skipErrorToast: true });
     featuredAttractions.value = (res?.data?.list || []).filter((item) => item.coverUrl).slice(0, 3);
     featuredStatus.value = featuredAttractions.value.length ? 'success' : 'empty';
     startHeroTimer();
@@ -253,7 +253,7 @@ const doSearch = debounce(async () => {
       pageNum: 1,
       pageSize: 5,
       sort: 'hot'
-    });
+    }, { skipErrorToast: true });
     searchResults.value = res?.data?.list || [];
     searchStatus.value = searchResults.value.length ? 'success' : 'empty';
   } catch (error) {

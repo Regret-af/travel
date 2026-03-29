@@ -1,12 +1,6 @@
 import request from '../utils/request';
-
-interface ApiResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-  requestId?: string;
-  timestamp?: string;
-}
+import type { AxiosRequestConfig } from 'axios';
+import type { ApiResponse, PaginatedData } from '@/types/api';
 
 interface DiaryAuthorApi {
   id: string;
@@ -47,14 +41,6 @@ interface DiaryCommentApiItem {
   content: string;
   author?: DiaryCommentApiAuthor | null;
   createdAt?: string;
-}
-
-interface PaginatedData<T> {
-  pageNum: number;
-  pageSize: number;
-  total: number;
-  pages: number;
-  list: T[];
 }
 
 export interface DiaryAuthor {
@@ -136,6 +122,8 @@ export interface DiaryFavoriteResponse {
   favorited: boolean;
   favoriteCount: number;
 }
+
+type RequestBehaviorOptions = Pick<AxiosRequestConfig, 'skipErrorToast'>;
 
 const mapDiary = (item: DiaryApiItem): DiaryCard => ({
   id: item.id,
@@ -245,9 +233,10 @@ const createCommentResponse = (res: ApiResponse<DiaryCommentApiItem>): ApiRespon
   data: mapDiaryComment(res.data)
 });
 
-export async function getDiaryFeed() {
+export async function getDiaryFeed(options: RequestBehaviorOptions = {}) {
   const res = await request.get<ApiResponse<PaginatedData<DiaryApiItem>>>('/travel-diaries', {
-    params: { pageNum: 1, pageSize: 3, sort: 'latest' }
+    params: { pageNum: 1, pageSize: 3, sort: 'latest' },
+    skipErrorToast: options.skipErrorToast
   });
 
   return createPageResponse(res);
@@ -261,8 +250,10 @@ export async function getTravelDiaryList(params: DiaryListParams = {}) {
   return createPageResponse(res);
 }
 
-export async function getTravelDiaryDetail(diaryId: string) {
-  const res = await request.get<ApiResponse<DiaryDetailApiItem>>(`/travel-diaries/${diaryId}`);
+export async function getTravelDiaryDetail(diaryId: string, options: RequestBehaviorOptions = {}) {
+  const res = await request.get<ApiResponse<DiaryDetailApiItem>>(`/travel-diaries/${diaryId}`, {
+    skipErrorToast: options.skipErrorToast
+  });
 
   return createDetailResponse(res);
 }

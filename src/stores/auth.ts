@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import type { AuthUser } from '@/api/auth';
 import type { LoginRequest, LoginResponse } from '@/api/auth';
+import { isApiRequestError } from '@/types/api';
 
 const TOKEN_KEY = 'token';
 const USER_KEY = 'user';
@@ -8,9 +9,11 @@ const USER_KEY = 'user';
 const loadUser = () => {
   const raw = localStorage.getItem(USER_KEY);
   if (!raw) return null;
+
   try {
     return JSON.parse(raw) as AuthUser;
   } catch {
+    localStorage.removeItem(USER_KEY);
     return null;
   }
 };
@@ -24,7 +27,13 @@ export const useAuthStore = defineStore('auth', {
     setAuth(token: string, user: AuthUser | null) {
       this.token = token;
       this.user = user;
-      localStorage.setItem(TOKEN_KEY, token);
+
+      if (token) {
+        localStorage.setItem(TOKEN_KEY, token);
+      } else {
+        localStorage.removeItem(TOKEN_KEY);
+      }
+
       if (user) {
         localStorage.setItem(USER_KEY, JSON.stringify(user));
       } else {
@@ -63,7 +72,14 @@ export const useAuthStore = defineStore('auth', {
         this.setAuth(this.token, user);
         return user;
       } catch (error) {
-        this.clearAuth();
+        if (!this.token) {
+          return null;
+        }
+
+        if (isApiRequestError(error) && error.status === 401) {
+          return null;
+        }
+
         throw error;
       }
     },

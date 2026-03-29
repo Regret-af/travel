@@ -1,12 +1,5 @@
 import request from '../utils/request';
-
-interface ApiResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-  requestId?: string;
-  timestamp?: string;
-}
+import type { ApiResponse } from '@/types/api';
 
 export interface UserMe {
   id: string;

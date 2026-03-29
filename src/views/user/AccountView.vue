@@ -190,6 +190,7 @@ import {
   type NotificationItem
 } from '@/api/notifications';
 import { useAuthStore } from '@/stores/auth';
+import { getApiErrorMessage } from '@/types/api';
 
 type PageState = 'loading' | 'auth' | 'ready' | 'error';
 type NotificationsState = 'idle' | 'loading' | 'success' | 'error';
@@ -368,7 +369,7 @@ async function initializePage() {
     }
 
     pageState.value = 'error';
-    pageError.value = '当前无法获取个人资料，请稍后重试，或重新登录后再试。';
+    pageError.value = getApiErrorMessage(error, '当前无法获取个人资料，请稍后重试，或重新登录后再试。');
   }
 }
 
@@ -406,7 +407,6 @@ async function handleNotificationClick(item: NotificationItem) {
       return;
     }
 
-    ElMessage.error('这条消息暂时没有标记成功，请稍后再试。');
   } finally {
     notificationPendingIds.value = notificationPendingIds.value.filter((id) => id !== item.id);
   }

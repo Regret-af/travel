@@ -138,6 +138,7 @@ import {
   type PageDiaryComment
 } from '@/api/diaries';
 import { useAuthStore } from '@/stores/auth';
+import { getApiErrorMessage } from '@/types/api';
 import { formatDateTime } from '@/utils/formatters';
 
 type DetailStatus = 'loading' | 'success' | 'empty' | 'error';
@@ -221,6 +222,14 @@ const applyDetailResponse = (data: DiaryDetail) => {
   };
 };
 
+const resetInteractionStateForAnonymous = () => {
+  detail.value = {
+    ...detail.value,
+    liked: false,
+    favorited: false
+  };
+};
+
 const fetchComments = async () => {
   if (!diaryId.value) return;
 
@@ -250,7 +259,7 @@ const fetchComments = async () => {
       pages: 0
     };
     commentsStatus.value = 'error';
-    commentsError.value = '评论加载失败，你可以稍后重新尝试。';
+    commentsError.value = getApiErrorMessage(error, '评论加载失败，你可以稍后重新尝试。');
   }
 };
 
@@ -306,7 +315,7 @@ const fetchDetail = async () => {
 
     console.error('Failed to load diary detail', error);
     detailStatus.value = 'error';
-    detailError.value = '当前旅程内容加载受阻，请稍后重新打开。';
+    detailError.value = getApiErrorMessage(error, '当前旅程内容加载受阻，请稍后重新打开。');
   }
 };
 
@@ -321,7 +330,10 @@ const handleToggleLike = async () => {
     detail.value.likeCount = res.data.likeCount;
   } catch (error) {
     console.error('Failed to toggle like', error);
-    ElMessage.error('喜欢状态更新失败，请稍后重试');
+
+    if (!authStore.token) {
+      openAuthDrawer();
+    }
   } finally {
     likePending.value = false;
   }
@@ -340,7 +352,10 @@ const handleToggleFavorite = async () => {
     detail.value.favoriteCount = res.data.favoriteCount;
   } catch (error) {
     console.error('Failed to toggle favorite', error);
-    ElMessage.error('收藏状态更新失败，请稍后重试');
+
+    if (!authStore.token) {
+      openAuthDrawer();
+    }
   } finally {
     favoritePending.value = false;
   }
@@ -373,7 +388,10 @@ const handleSubmitComment = async () => {
     scrollToComments();
   } catch (error) {
     console.error('Failed to create comment', error);
-    ElMessage.error('评论发布失败，请稍后重试');
+
+    if (!authStore.token) {
+      openAuthDrawer();
+    }
   } finally {
     commentSubmitting.value = false;
   }
@@ -403,6 +421,26 @@ watch(
         })
         .catch((error) => {
           console.error('Failed to refresh diary detail after login', error);
+        });
+
+      return;
+    }
+
+    if (!token && previousToken && detailStatus.value === 'success' && diaryId.value) {
+      const currentDiaryId = diaryId.value;
+
+      resetInteractionStateForAnonymous();
+
+      getTravelDiaryDetail(currentDiaryId, { skipErrorToast: true })
+        .then((res) => {
+          if (diaryId.value !== currentDiaryId || detailStatus.value !== 'success' || authStore.token) {
+            return;
+          }
+
+          applyDetailResponse(res.data);
+        })
+        .catch((error) => {
+          console.error('Failed to refresh diary detail after auth cleared', error);
         });
     }
   }
