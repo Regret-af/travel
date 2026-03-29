@@ -95,19 +95,29 @@
         </article>
 
         <div class="side-column">
-          <ImageUploadCard
-            v-model="form.avatarUrl"
-            biz-type="avatar"
-            shape="square"
-            eyebrow="头像上传"
-            title="换一张新的头像"
-            description="头像会出现在个人中心、日记作者信息和通知列表中。"
-            button-text="上传头像"
-            placeholder-title="选择头像图片"
-            placeholder-description="建议使用清晰、主体明确的图片"
-            tip="上传成功后会自动写入 avatarUrl"
-            @uploaded="handleAvatarUploaded"
-          />
+          <el-form
+            ref="uploadFormRef"
+            :model="form"
+            :rules="rules"
+            hide-required-asterisk
+            class="upload-form"
+          >
+            <el-form-item prop="avatarUrl" class="avatar-upload-item">
+              <ImageUploadCard
+                v-model="form.avatarUrl"
+                biz-type="avatar"
+                shape="square"
+                eyebrow="头像上传"
+                title="换一张新的头像"
+                description="头像会出现在个人中心、日记作者信息和通知列表中。"
+                button-text="上传头像"
+                placeholder-title="选择头像图片"
+                placeholder-description="建议使用清晰、主体明确的图片"
+                tip="上传成功后会自动写入 avatarUrl"
+                @uploaded="handleAvatarUploaded"
+              />
+            </el-form-item>
+          </el-form>
 
           <article class="preview-card">
             <p class="section-eyebrow">资料预览</p>
@@ -150,6 +160,7 @@ const pageError = ref('当前无法进入资料编辑页，请稍后重试。');
 const submitError = ref('');
 const submitting = ref(false);
 const formRef = ref<FormInstance>();
+const uploadFormRef = ref<FormInstance>();
 const profile = reactive({
   email: '',
   username: ''
@@ -171,6 +182,19 @@ const rules: FormRules<typeof form> = {
         callback();
       },
       trigger: 'blur'
+    }
+  ],
+  avatarUrl: [
+    {
+      validator: (_, value: string, callback) => {
+        if (!value?.trim()) {
+          callback(new Error('请先上传头像'));
+          return;
+        }
+
+        callback();
+      },
+      trigger: ['change', 'blur']
     }
   ]
 };
@@ -226,20 +250,23 @@ const initializePage = async () => {
 
 const handleAvatarUploaded = () => {
   submitError.value = '';
+  formRef.value?.clearValidate('avatarUrl');
+  uploadFormRef.value?.validateField('avatarUrl').catch(() => undefined);
 };
 
 const handleSubmit = async () => {
-  if (!formRef.value || submitting.value) return;
+  if (!formRef.value || !uploadFormRef.value || submitting.value) return;
 
   submitError.value = '';
 
-  const valid = await formRef.value
-    .validate()
-    .then(() => true)
-    .catch(() => false);
+  const [profileValid, avatarValid] = await Promise.all([
+    formRef.value.validate().then(() => true).catch(() => false),
+    uploadFormRef.value.validate().then(() => true).catch(() => false)
+  ]);
+  const valid = profileValid && avatarValid;
 
   if (!valid) {
-    ElMessage.warning('请先完成昵称填写后再保存。');
+    ElMessage.warning('请先完成必填项后再保存。');
     return;
   }
 
@@ -392,6 +419,22 @@ watch(
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 0 0 1px rgba(226, 232, 240, 0.95) inset !important;
+}
+
+.upload-form {
+  display: contents;
+}
+
+.avatar-upload-item {
+  margin: 0;
+}
+
+.avatar-upload-item :deep(.el-form-item__content) {
+  display: block;
+}
+
+.avatar-upload-item :deep(.el-form-item__error) {
+  padding-top: 10px;
 }
 
 .readonly-grid {

@@ -174,6 +174,12 @@ const listError = ref('当前无法获取我的日记列表，请稍后重试。
 const pageError = ref('当前无法验证登录信息，请稍后重新进入。');
 const pageSize = 6;
 const defaultSort: SortValue = 'latest';
+const statusLabelMap: Record<number, string> = {
+  0: '已下线',
+  1: '公开中',
+  2: '草稿',
+  3: '审核中'
+};
 const sortOptions: Array<{ value: SortValue; label: string; note: string }> = [
   { value: 'latest', label: '最新发布', note: '按发布时间浏览最近写下的内容' },
   { value: 'hot', label: '热度优先', note: '按阅读热度查看更常被翻阅的故事' }
@@ -356,7 +362,7 @@ const handlePageChange = (page: number) => {
 
 const formatStatusLabel = (status?: UserDiaryCard['status']) => {
   if (typeof status !== 'number') return '';
-  return `状态 ${status}`;
+  return statusLabelMap[status] || '状态待定';
 };
 
 watch(
