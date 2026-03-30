@@ -5,7 +5,7 @@
         <p class="hero-eyebrow">景点列表</p>
         <h1>为行程规划筛选值得了解的景点</h1>
         <p class="hero-description">
-          基于真实景点内容构建可浏览、可筛选、可分页的景点列表，可通过关键词、分类与排序快速定位目标内容。
+          这里汇集了适合行程规划时慢慢翻看的景点内容，你可以按关键词、分类和浏览方式找到想了解的地方。
         </p>
       </div>
 
@@ -30,7 +30,7 @@
         <div class="section-copy">
           <p class="section-eyebrow">搜索区</p>
           <h2>从一个关键词开始缩小范围</h2>
-          <p>仅基于景点名称和摘要搜索，不扩展不存在的复杂检索维度。</p>
+          <p>输入景点名、目的地印象或一段灵感，先从你最想找的线索开始。</p>
         </div>
 
         <div class="search-main">
@@ -68,7 +68,7 @@
         <div class="section-copy">
           <p class="section-eyebrow">分类筛选</p>
           <h2>按单一分类切换浏览方向</h2>
-          <p>当前仅提供轻量的单选分类筛选，不扩展为多维组合筛选。</p>
+          <p>先挑一个你更想看的方向，让这一轮浏览更集中一些。</p>
         </div>
 
         <div class="category-strip">
@@ -249,8 +249,8 @@ const route = useRoute();
 const pageSize = 9;
 const defaultSort = 'latest';
 const sortOptions = [
-  { value: 'latest', label: '最新发布', note: '按创建时间' },
-  { value: 'hot', label: '热门探索', note: '按后端热度' }
+  { value: 'latest', label: '最新发布', note: '先看最近更新的景点' },
+  { value: 'hot', label: '热门探索', note: '先看更受关注的景点' }
 ] as const;
 
 const items = ref<AttractionCardType[]>([]);

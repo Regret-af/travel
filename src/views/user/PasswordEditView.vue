@@ -37,7 +37,7 @@
           <p class="hero-eyebrow">修改密码</p>
           <h1>更新这把钥匙，让账户安全保持在你掌控之中。</h1>
           <p class="hero-description">
-            提交时只会发送 `currentPassword` 和 `newPassword`。确认密码仅用于前端校验，不会提交给后端。
+            先输入当前密码，再设定一组新的登录密码。页面会帮你确认两次输入是否一致，让这次修改更稳妥。
           </p>
         </div>
       </section>
@@ -94,13 +94,13 @@
         </article>
 
         <article class="tips-card">
-          <p class="section-eyebrow">规则提示</p>
-          <h3>当前页的校验边界</h3>
+          <p class="section-eyebrow">安全规则</p>
+          <h3>改密码前，先看一眼这几条提醒</h3>
           <ul class="tips-list">
-            <li>必须填写当前密码。</li>
-            <li>新密码长度需要在 8 到 32 位之间。</li>
-            <li>新密码必须同时包含字母和数字。</li>
-            <li>确认新密码仅做前端一致性校验，不提交给后端。</li>
+            <li>需要先确认当前使用中的密码，才能完成这次更新。</li>
+            <li>新密码建议保持 8 到 32 位，并同时包含字母和数字。</li>
+            <li>请再次输入一遍新密码，避免因为手误影响下次登录。</li>
+            <li>修改完成后，建议使用新密码重新确认你的登录习惯和保存方式。</li>
           </ul>
         </article>
       </section>

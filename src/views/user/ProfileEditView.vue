@@ -44,10 +44,6 @@
           </p>
         </div>
 
-        <div class="hero-meta">
-          <span class="meta-pill">{{ profile.email || '邮箱未提供' }}</span>
-          <span class="meta-pill">{{ profile.username || '用户名未提供' }}</span>
-        </div>
       </section>
 
       <section class="content-grid">
@@ -127,7 +123,7 @@
               </el-avatar>
               <div>
                 <h3>{{ previewNickname }}</h3>
-                <p>{{ profile.username || '未提供用户名' }}</p>
+                <p>头像与昵称会用于你的公开展示形象。</p>
               </div>
             </div>
           </article>
@@ -366,24 +362,6 @@ watch(
   color: #475569;
   font-size: 15px;
   line-height: 1.86;
-}
-
-.hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.meta-pill {
-  display: inline-flex;
-  min-height: 38px;
-  align-items: center;
-  padding: 0 16px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(226, 232, 240, 0.84);
-  color: #475569;
-  font-size: 13px;
 }
 
 .content-grid,

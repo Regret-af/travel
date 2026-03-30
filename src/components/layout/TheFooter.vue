@@ -12,11 +12,6 @@
               <p class="text-sm">探索未知，记录精彩</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 text-sm">
-            <span class="social-dot" />
-            <span class="social-dot" />
-            <span class="social-dot" />
-          </div>
         </div>
 
         <div>
@@ -29,7 +24,7 @@
         </div>
 
         <div>
-          <h3 class="mb-3 text-base font-semibold text-gray-900">帮助支持</h3>
+          <h3 class="mb-3 text-base font-semibold text-gray-900">站内入口</h3>
           <ul class="space-y-2">
             <li v-for="item in supports" :key="item.label">
               <RouterLink :to="item.to" class="link">{{ item.label }}</RouterLink>
@@ -48,11 +43,6 @@
             <p class="text-sm">探索未知，记录精彩</p>
           </div>
         </div>
-        <div class="flex items-center gap-3 text-sm">
-          <span class="social-dot" />
-          <span class="social-dot" />
-          <span class="social-dot" />
-        </div>
 
         <el-collapse v-model="activeNames" accordion>
           <el-collapse-item name="destinations">
@@ -67,7 +57,7 @@
           </el-collapse-item>
           <el-collapse-item name="supports">
             <template #title>
-              <span class="text-base font-semibold text-gray-900">帮助支持</span>
+              <span class="text-base font-semibold text-gray-900">站内入口</span>
             </template>
             <ul class="mt-2 space-y-2 pl-1">
               <li v-for="item in supports" :key="item.label">
@@ -110,14 +100,5 @@ const activeNames = ref<string | string[]>('destinations');
   &:hover {
     color: #6366f1;
   }
-}
-
-.social-dot {
-  display: inline-block;
-  height: 32px;
-  width: 32px;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #22d3ee, #6366f1);
-  opacity: 0.9;
 }
 </style>

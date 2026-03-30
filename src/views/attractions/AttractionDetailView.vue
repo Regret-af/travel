@@ -56,7 +56,6 @@
           <article v-if="viewCountText" class="meta-card">
             <span class="meta-label">浏览记录</span>
             <strong class="meta-value">{{ viewCountText }}</strong>
-            <p class="meta-note">作为轻量内容档案信息展示，不做夸张营销数字。</p>
           </article>
         </div>
       </section>

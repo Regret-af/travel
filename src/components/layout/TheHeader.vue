@@ -173,20 +173,27 @@
           </div>
         </div>
         <div class="flex flex-col gap-3 px-2 text-base text-slate-800">
-          <button class="mobile-link text-left" @click="goTo('/attractions')">景点</button>
-          <button
-            v-for="item in destinationItems.slice(0, 4)"
-            :key="item.id"
-            class="mobile-link text-left"
-            @click="onDestinationClick(item); drawerOpen = false"
-          >
-            {{ item.name }}
+          <button class="mobile-link mobile-link-toggle text-left" @click="toggleMobileDestinations">
+            <span>景点</span>
+            <el-icon class="mobile-link-arrow" :class="{ expanded: mobileDestinationExpanded }">
+              <ArrowDown />
+            </el-icon>
+          </button>
+          <div v-if="mobileDestinationExpanded" class="mobile-submenu">
+            <button
+              v-for="item in destinationItems.slice(0, 4)"
+              :key="item.id"
+              class="mobile-sub-link text-left"
+              @click="onDestinationClick(item)"
+            >
+              {{ item.name }}
+            </button>
+          </div>
+          <button class="mobile-link text-left" @click="goTo('/attractions')">
+            景点
           </button>
           <RouterLink to="/diaries" class="mobile-link" @click="drawerOpen = false">
             旅行日记
-          </RouterLink>
-          <RouterLink to="/attractions" class="mobile-link" @click="drawerOpen = false">
-            景点
           </RouterLink>
         </div>
         <div class="px-2 pt-2">
@@ -248,6 +255,7 @@ const isScrolled = ref(false);
 const searchOpen = ref(false);
 const drawerOpen = ref(false);
 const drawerSearchVisible = ref(false);
+const mobileDestinationExpanded = ref(false);
 const authDrawerOpen = ref(false);
 const isMobile = ref(false);
 const destinationItems = ref<AttractionCategory[]>([]);
@@ -386,6 +394,10 @@ const openMobileSearch = () => {
   nextTick(() => mobileSearchInputRef.value?.focus());
 };
 
+const toggleMobileDestinations = () => {
+  mobileDestinationExpanded.value = !mobileDestinationExpanded.value;
+};
+
 const openAuthDrawer = () => {
   authDrawerOpen.value = true;
   drawerOpen.value = false;
@@ -439,6 +451,8 @@ const loadDestinationItems = async () => {
 };
 
 const onDestinationClick = (item: AttractionCategory) => {
+  mobileDestinationExpanded.value = false;
+  drawerOpen.value = false;
   router.push({
     path: '/attractions',
     query: {
@@ -469,6 +483,7 @@ watch(
 watch(drawerOpen, (visible) => {
   if (!visible) {
     drawerSearchVisible.value = false;
+    mobileDestinationExpanded.value = false;
   }
 });
 
@@ -607,12 +622,51 @@ onUnmounted(() => {
 
 .mobile-link {
   display: block;
+  width: 100%;
   padding: 0.4rem 0.6rem;
   border-radius: 0.65rem;
+  border: none;
+  background: transparent;
   transition: background 0.2s ease, color 0.2s ease;
 
   &:hover {
     background: rgba(99, 102, 241, 0.1);
+    color: #0f172a;
+  }
+}
+
+.mobile-link-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-link-arrow {
+  transition: transform 0.2s ease;
+}
+
+.mobile-link-arrow.expanded {
+  transform: rotate(180deg);
+}
+
+.mobile-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0 0 0 0.9rem;
+}
+
+.mobile-sub-link {
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  border: none;
+  border-radius: 0.65rem;
+  background: rgba(248, 250, 252, 0.88);
+  color: #475569;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: rgba(226, 232, 240, 0.92);
     color: #0f172a;
   }
 }

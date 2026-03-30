@@ -46,7 +46,6 @@
           </p>
 
           <div class="hero-meta">
-            <span v-if="statusText" class="meta-pill meta-pill-highlight">{{ statusText }}</span>
             <span v-if="joinedText" class="meta-pill">{{ joinedText }}</span>
             <span class="meta-pill">{{ unreadSummary }}</span>
           </div>
@@ -143,7 +142,7 @@
           <p class="entry-eyebrow">我的日记</p>
           <h2>我的日记</h2>
           <p>
-            你可以在这里继续浏览旅行日记，阅读他人的故事，或记录自己的灵感。
+            你可以在这里翻看自己已经发布过的旅行日记，按目录方式继续回顾这一路写下的故事。
           </p>
           <button class="entry-action" type="button" @click="goToDiaries">查看我的日记</button>
         </article>
@@ -215,7 +214,6 @@ const joinedText = computed(() => {
   const createdAt = profile.value?.createdAt?.trim();
   return createdAt ? `加入时间 ${formatDateTime(createdAt, 'YYYY.MM.DD')}` : '';
 });
-const statusText = computed(() => getStatusLabel(profile.value?.status));
 const infoItems = computed(() => {
   const items = [
     { label: '昵称', value: displayName.value },
@@ -226,12 +224,6 @@ const infoItems = computed(() => {
 
   return items.filter(Boolean) as Array<{ label: string; value: string }>;
 });
-
-function getStatusLabel(status?: number) {
-  if (status === 1) return '账户状态正常';
-  if (status === 0) return '账户待启用';
-  return '';
-}
 
 function formatDateTime(value?: string, mode: 'YYYY.MM.DD' | 'MM.DD HH:mm' = 'YYYY.MM.DD') {
   if (!value) {
@@ -557,12 +549,6 @@ onMounted(() => {
   border: 1px solid rgba(226, 232, 240, 0.9);
   color: #475569;
   font-size: 13px;
-}
-
-.meta-pill-highlight {
-  background: rgba(212, 175, 55, 0.12);
-  border-color: rgba(212, 175, 55, 0.26);
-  color: #9a7313;
 }
 
 .hero-actions,

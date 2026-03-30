@@ -117,7 +117,7 @@
             button-text="上传封面"
             placeholder-title="选择一张封面图"
             placeholder-description="推荐上传横向图片，以获得更好的封面观感"
-            tip="上传成功后会自动写入 coverUrl"
+            tip="上传成功后会自动用于这篇日记的封面展示"
             @uploaded="handleCoverUploaded"
           />
 
@@ -136,11 +136,11 @@
 
           <article class="tips-card">
             <p class="section-eyebrow">发布前确认</p>
-            <h3>这一页只提交 4 个字段</h3>
+            <h3>在按下发布前，再看一眼这篇故事</h3>
             <ul class="tips-list">
-              <li>标题 `title` 和正文 `content` 必填。</li>
-              <li>摘要 `summary` 与封面 `coverUrl` 可选。</li>
-              <li>封面上传走 `/api/v1/files/upload`，发布走 `/api/v1/travel-diaries`。</li>
+              <li>标题和正文需要完整填写，故事才能顺利发布。</li>
+              <li>摘要和封面都可以留空，但补上它们会让读者更快进入这段旅途。</li>
+              <li>封面会先上传并立即预览，确认无误后再正式发布整篇日记。</li>
             </ul>
           </article>
         </div>
