@@ -45,7 +45,7 @@
           <div ref="searchRef" class="search-wrapper">
             <el-input
               v-model="keyword"
-              placeholder="搜索景点名称..."
+              placeholder="搜索景点名称或关键词"
               class="search-input"
               @input="handleInput"
               @focus="handleInput"
@@ -59,7 +59,7 @@
             </el-input>
 
             <el-button type="primary" class="search-btn" @click="handleSearchSubmit">
-              探索
+              搜索
             </el-button>
 
             <transition name="fade-slide">
@@ -118,7 +118,7 @@
           <div ref="searchRef" class="search-wrapper">
             <el-input
               v-model="keyword"
-              placeholder="搜索景点名称..."
+              placeholder="搜索景点名称或关键词"
               class="search-input"
               @input="handleInput"
               @focus="handleInput"
@@ -132,7 +132,7 @@
             </el-input>
 
             <el-button type="primary" class="search-btn" @click="handleSearchSubmit">
-              探索
+              搜索
             </el-button>
 
             <transition name="fade-slide">

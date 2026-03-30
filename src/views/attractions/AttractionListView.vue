@@ -38,7 +38,7 @@
             v-model="searchKeyword"
             class="search-input"
             clearable
-            placeholder="搜索景点名称或灵感关键词"
+            placeholder="搜索景点名称或关键词"
             @keyup.enter="handleSearch"
           >
             <template #prefix>
@@ -50,7 +50,7 @@
 
           <div class="search-actions">
             <el-button type="primary" round class="search-button" native-type="submit">
-              开始搜索
+              搜索
             </el-button>
             <button
               v-if="hasActiveConditions"

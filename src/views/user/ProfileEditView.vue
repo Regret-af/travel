@@ -15,7 +15,7 @@
       variant="auth"
       eyebrow="账户资料"
       title="登录后，才能编辑属于你的公开资料"
-      description="这里仅支持修改昵称和头像，邮箱与用户名只读展示，不扩展更多资料项。"
+      description="这里仅支持修改昵称和头像，不扩展更多资料项。"
       action-label="立即登录"
       secondary-label="返回个人中心"
       secondary-to="/account"
@@ -40,57 +40,61 @@
           <p class="hero-eyebrow">资料编辑</p>
           <h1>让别人看到你的第一眼，更像现在的你。</h1>
           <p class="hero-description">
-            这里仅编辑昵称和头像。邮箱与用户名继续作为只读信息展示，不额外扩展个人档案字段。
+            这里仅编辑昵称和头像，不额外扩展更多个人资料字段。
           </p>
         </div>
 
       </section>
 
       <section class="content-grid">
-        <article class="form-card">
-          <div class="section-head">
-            <div>
-              <p class="section-eyebrow">公开资料</p>
-              <h2>更新这张属于你的名片</h2>
-            </div>
-          </div>
-
-          <el-form ref="formRef" :model="form" :rules="rules" label-position="top" class="profile-form">
-            <el-form-item label="昵称" prop="nickname">
-              <el-input
-                v-model="form.nickname"
-                maxlength="40"
-                show-word-limit
-                placeholder="输入想展示在页面上的昵称"
-              />
-            </el-form-item>
-
-            <div class="readonly-grid">
-              <div class="readonly-card">
-                <span class="readonly-label">邮箱</span>
-                <strong>{{ profile.email || '未提供' }}</strong>
+        <div class="main-column">
+          <article class="preview-card">
+            <p class="section-eyebrow">资料预览</p>
+            <div class="identity-row">
+              <el-avatar :size="76" :src="form.avatarUrl">
+                {{ avatarFallback }}
+              </el-avatar>
+              <div>
+                <h3>{{ previewNickname }}</h3>
+                <p>头像与昵称会用于你的公开展示形象。</p>
               </div>
-              <div class="readonly-card">
-                <span class="readonly-label">用户名</span>
-                <strong>{{ profile.username || '未提供' }}</strong>
+            </div>
+          </article>
+
+          <article class="form-card">
+            <div class="section-head">
+              <div>
+                <p class="section-eyebrow">公开资料</p>
+                <h2>更新这张属于你的名片</h2>
               </div>
             </div>
 
-            <div class="form-footer">
-              <p v-if="submitError" class="submit-error">{{ submitError }}</p>
-              <div class="form-actions">
-                <button class="submit-button" type="button" :disabled="submitting" @click="handleSubmit">
-                  {{ submitting ? '保存中...' : '保存资料' }}
-                </button>
-                <button class="secondary-button" type="button" :disabled="submitting" @click="goToAccount">
-                  返回个人中心
-                </button>
-              </div>
-            </div>
-          </el-form>
-        </article>
+            <el-form ref="formRef" :model="form" :rules="rules" label-position="top" class="profile-form">
+              <el-form-item label="昵称" prop="nickname">
+                <el-input
+                  v-model="form.nickname"
+                  maxlength="40"
+                  show-word-limit
+                  placeholder="输入想展示在页面上的昵称"
+                />
+              </el-form-item>
 
-        <div class="side-column">
+              <div class="form-footer">
+                <p v-if="submitError" class="submit-error">{{ submitError }}</p>
+                <div class="form-actions">
+                  <button class="submit-button" type="button" :disabled="submitting" @click="handleSubmit">
+                    {{ submitting ? '保存中...' : '保存资料' }}
+                  </button>
+                  <button class="secondary-button" type="button" :disabled="submitting" @click="goToAccount">
+                    返回个人中心
+                  </button>
+                </div>
+              </div>
+            </el-form>
+          </article>
+        </div>
+
+        <div class="side-column side-column-upload">
           <el-form
             ref="uploadFormRef"
             :model="form"
@@ -109,24 +113,11 @@
                 button-text="上传头像"
                 placeholder-title="选择头像图片"
                 placeholder-description="建议使用清晰、主体明确的图片"
-                tip="上传成功后会自动写入 avatarUrl"
+                tip="上传成功后会自动更新头像"
                 @uploaded="handleAvatarUploaded"
               />
             </el-form-item>
           </el-form>
-
-          <article class="preview-card">
-            <p class="section-eyebrow">资料预览</p>
-            <div class="identity-row">
-              <el-avatar :size="76" :src="form.avatarUrl">
-                {{ avatarFallback }}
-              </el-avatar>
-              <div>
-                <h3>{{ previewNickname }}</h3>
-                <p>头像与昵称会用于你的公开展示形象。</p>
-              </div>
-            </div>
-          </article>
         </div>
       </section>
     </template>
@@ -157,10 +148,6 @@ const submitError = ref('');
 const submitting = ref(false);
 const formRef = ref<FormInstance>();
 const uploadFormRef = ref<FormInstance>();
-const profile = reactive({
-  email: '',
-  username: ''
-});
 const form = reactive({
   nickname: '',
   avatarUrl: ''
@@ -207,8 +194,6 @@ const goToAccount = () => {
 };
 
 const syncProfile = () => {
-  profile.email = authStore.user?.email || '';
-  profile.username = authStore.user?.username || '';
   form.nickname = authStore.user?.nickname || '';
   form.avatarUrl = authStore.user?.avatarUrl || '';
 };
@@ -367,7 +352,7 @@ watch(
 .content-grid,
 .loading-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
   gap: 24px;
 }
 
@@ -415,32 +400,6 @@ watch(
   padding-top: 10px;
 }
 
-.readonly-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.readonly-card {
-  padding: 18px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.84);
-  border: 1px solid rgba(226, 232, 240, 0.84);
-
-  strong {
-    display: block;
-    margin-top: 10px;
-    color: #111827;
-    font-size: var(--font-size-2xl);
-    line-height: 1.5;
-  }
-}
-
-.readonly-label {
-  color: #64748b;
-  font-size: var(--font-size-xs);
-}
-
 .form-footer {
   margin-top: 24px;
 }
@@ -477,6 +436,12 @@ watch(
   margin: 0 0 14px;
   color: #b91c1c;
   font-size: var(--font-size-md);
+}
+
+.main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .side-column {
@@ -567,7 +532,6 @@ watch(
     font-size: var(--font-size-10xl);
   }
 
-  .readonly-grid,
   .form-actions {
     grid-template-columns: 1fr;
     flex-direction: column;

@@ -47,8 +47,6 @@
           />
         </div>
 
-        <div v-if="isLogin" class="forgot">忘记密码？</div>
-
         <el-button class="primary-btn" :loading="loading" :disabled="loading" @click="handleSubmit">
           {{ isLogin ? '登录' : '注册' }}
         </el-button>
@@ -347,12 +345,6 @@ $gold: #d4af37;
     padding: 10px 0 8px;
     color: #111827;
   }
-}
-
-.forgot {
-  text-align: right;
-  font-size: var(--font-size-xs);
-  color: #9ca3af;
 }
 
 .primary-btn {

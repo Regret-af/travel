@@ -15,7 +15,7 @@
       variant="auth"
       eyebrow="创作空间"
       title="登录后，才能开始写下这段新的旅途"
-      description="发布页只接入公开发布能力，你可以上传一张封面，写下标题、摘要与正文，然后直接发布。"
+      description="登录后就能为这段旅途写下标题、封面与正文，让它以完整的样子被慢慢看见。"
       action-label="立即登录"
       secondary-label="返回个人中心"
       secondary-to="/account"
@@ -40,13 +40,13 @@
           <p class="hero-eyebrow">发布旅行日记</p>
           <h1>把路上的风景、情绪与细节，写成一篇适合被慢慢翻阅的公开故事。</h1>
           <p class="hero-description">
-            这里不做后台录入，只保留一页轻量的创作体验。你只需要封面、标题、摘要和正文，就可以完成本次发布。
+            从一张封面、一句标题开始，把沿途真正想留下的风景、情绪与片段慢慢写成一篇完整的旅行日记。
           </p>
         </div>
 
         <div class="hero-note">
-          <span class="hero-note-label">本页说明</span>
-          <p>当前版本只支持直接发布，不包含草稿箱、定时发布、标签与复杂恢复流程。</p>
+          <span class="hero-note-label">创作提醒</span>
+          <p>先想好这一篇最想留下什么：一张能定住气氛的封面、一句准确的标题，再加上一段愿意被慢慢读完的正文。</p>
           <RouterLink to="/account/diaries" class="hero-link">先看看我的日记目录</RouterLink>
         </div>
       </section>

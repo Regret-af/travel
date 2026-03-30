@@ -15,7 +15,7 @@
       variant="auth"
       eyebrow="旅行者空间"
       title="登录后，才会展开属于你的日记目录"
-      description="这里会集中展示你已经发布过的旅行日记，并按最新发布或热度顺序进行分页浏览。"
+      description="这里会集中收纳你写下的旅行日记，方便你继续回看每一篇旅途记录。"
       action-label="立即登录"
       secondary-label="返回个人中心"
       secondary-to="/account"
@@ -40,7 +40,7 @@
           <p class="hero-eyebrow">我的日记</p>
           <h1>把已经写下的旅途，整理成自己的私人目录。</h1>
           <p class="hero-description">
-            这里只展示你已经发布过的旅行日记，不扩展后台管理功能，只保留轻量的状态标识和目录式翻阅体验。
+            这里会收纳你写下的旅行日记，让那些沿途的风景、心情与片段继续安静地留在你的目录里。
           </p>
 
           <div class="hero-actions">
@@ -57,17 +57,15 @@
           <article class="hero-stat">
             <span class="hero-stat-label">当前收录</span>
             <strong>{{ pageData.total.toLocaleString('zh-CN') }}</strong>
-            <p>分页展示你已经发布的旅行日记。</p>
+            <p>把沿途写下的故事收进这里，方便随时回来翻看。</p>
           </article>
           <article class="hero-stat">
             <span class="hero-stat-label">目录排序</span>
             <strong>{{ currentSortLabel }}</strong>
-            <p>仅支持最新发布与热度两种浏览方式。</p>
           </article>
           <article class="hero-stat">
             <span class="hero-stat-label">当前页码</span>
             <strong>第 {{ pageData.pageNum || normalizedRoute.page }} 页</strong>
-            <p>维持杂志化的分页翻阅节奏，不做无限滚动。</p>
           </article>
         </div>
       </section>
@@ -88,7 +86,7 @@
             @click="handleSortChange(option.value)"
           >
             <span class="sort-label">{{ option.label }}</span>
-            <span class="sort-note">{{ option.note }}</span>
+            <span v-if="option.note" class="sort-note">{{ option.note }}</span>
           </button>
         </div>
       </section>
@@ -106,7 +104,7 @@
             :to="`/diaries/${item.id}`"
             :badge="formatStatusLabel(item.status)"
             badge-tone="slate"
-            note="继续翻阅这篇你已经公开写下的旅行故事"
+            note="继续翻阅这篇已经收进你目录里的旅行记录"
           />
         </div>
 
@@ -181,8 +179,8 @@ const statusLabelMap: Record<number, string> = {
   3: '审核中'
 };
 const sortOptions: Array<{ value: SortValue; label: string; note: string }> = [
-  { value: 'latest', label: '最新发布', note: '按发布时间浏览最近写下的内容' },
-  { value: 'hot', label: '热度优先', note: '按阅读热度查看更常被翻阅的故事' }
+  { value: 'latest', label: '最新发布', note: '' },
+  { value: 'hot', label: '热度优先', note: '' }
 ];
 const pageData = ref<PageUserDiaryCard>({
   list: [],
@@ -562,10 +560,14 @@ watch(
 .sort-chip {
   min-width: 168px;
   padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   border-radius: 24px;
   border: 1px solid rgba(203, 213, 225, 0.9);
   background: rgba(255, 255, 255, 0.88);
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   transition:
     transform 0.25s ease,

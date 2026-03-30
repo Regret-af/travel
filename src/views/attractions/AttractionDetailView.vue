@@ -44,13 +44,13 @@
           <article v-if="detail.category?.name" class="meta-card">
             <span class="meta-label">景点分类</span>
             <strong class="meta-value">{{ detail.category?.name }}</strong>
-            <p class="meta-note">以当前景点分类建立浏览语义，不扩展更多筛选维度。</p>
+            <p class="meta-note">帮助你更快理解这处景点在旅途中更接近哪一种体验。</p>
           </article>
 
           <article v-if="detail.locationText" class="meta-card">
             <span class="meta-label">所在位置</span>
             <strong class="meta-value">{{ detail.locationText }}</strong>
-            <p class="meta-note">这里仅展示文本位置说明，不伪装成地图或导航能力。</p>
+            <p class="meta-note">先看看它位于哪里，也为接下来的阅读建立一份清晰的位置感。</p>
           </article>
 
           <article v-if="viewCountText" class="meta-card">
@@ -203,7 +203,7 @@ const locationNarrative = computed(() => {
     return '';
   }
 
-  return `${location} 是该景点当前能够被确认的文本位置线索。这里不扩展地图、坐标或路线信息，只保留一份轻量而克制的位置信息说明。`;
+  return `${location} 是这处景点所在的位置描述，也让你在阅读之前先对它有一份地理上的想象。`;
 });
 const stateTitle = computed(() =>
   pageStatus.value === 'error' ? '景点详情暂时无法加载' : '未找到对应景点内容'

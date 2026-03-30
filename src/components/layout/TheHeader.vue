@@ -4,13 +4,13 @@
     'h-[60px] md:h-20'
   ]">
     <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-4 md:px-8">
-      <div class="flex items-center gap-3">
+      <RouterLink to="/" class="flex items-center gap-3" aria-label="返回首页">
         <div
           class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 text-lg font-bold text-white shadow-lg">
           T
         </div>
         <div class="text-lg font-semibold text-slate-900">旅迹</div>
-      </div>
+      </RouterLink>
 
       <nav class="hidden items-center gap-6 text-base text-slate-700 md:flex">
         <el-dropdown trigger="hover">
@@ -39,7 +39,7 @@
           <el-icon class="h-5 w-5 cursor-pointer text-slate-600" @click.stop="handleSearchIconClick">
             <Search />
           </el-icon>
-          <input ref="searchInputRef" type="text" placeholder="快速查找景点..."
+          <input ref="searchInputRef" type="text" placeholder="搜索景点名称或关键词"
             class="w-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all duration-300"
             :class="searchOpen ? 'w-48 opacity-100' : 'opacity-0 pointer-events-none'"
             v-model="keyword"
@@ -98,7 +98,6 @@
                     <component :is="item.icon" />
                   </el-icon>
                   <span class="quick-text">{{ item.label }}</span>
-                  <span v-if="item.countLabel" class="quick-count">{{ item.countLabel }}</span>
                 </button>
               </div>
               <div class="profile-actions">
@@ -107,7 +106,7 @@
               </div>
             </div>
           </el-popover>
-          <el-avatar v-else :size="49" :src="userAvatar" class="cursor-pointer shadow-sm" />
+          <el-avatar v-else :size="49" :src="userAvatar" class="cursor-pointer shadow-sm" @click="goTo('/account')" />
         </template>
         <template v-else>
           <el-button type="primary" round class="hidden md:inline-flex" @click="openAuthDrawer">
@@ -142,7 +141,7 @@
               ref="mobileSearchInputRef"
               v-model="keyword"
               type="text"
-              placeholder="搜索景点名称..."
+              placeholder="搜索景点名称或关键词"
               class="mobile-search-input"
               @focus="handleSearchFocus"
               @input="handleSearchInput"
@@ -217,7 +216,6 @@
                     <component :is="item.icon" />
                   </el-icon>
                   <span class="quick-text">{{ item.label }}</span>
-                  <span v-if="item.countLabel" class="quick-count">{{ item.countLabel }}</span>
                 </button>
               </div>
               <div class="profile-actions">
@@ -274,11 +272,11 @@ const mobileSearchWrapperRef = ref<HTMLElement | null>(null);
 const searchWrapperRef = ref<HTMLElement | null>(null);
 let searchFetchSequence = 0;
 const quickAccessItems = [
-  { label: '个人中心', countLabel: '入口', icon: StarFilled, to: '/account' },
-  { label: '发布日记', countLabel: '创作', icon: EditPen, to: '/account/diaries/new' },
-  { label: '我的日记', countLabel: '目录', icon: Notebook, to: '/account/diaries' },
-  { label: '我的收藏', countLabel: '列表', icon: CollectionTag, to: '/account/favorites' },
-  { label: '修改密码', countLabel: '安全', icon: Lock, to: '/account/password' }
+  { label: '个人中心', icon: StarFilled, to: '/account' },
+  { label: '发布日记', icon: EditPen, to: '/account/diaries/new' },
+  { label: '我的日记', icon: Notebook, to: '/account/diaries' },
+  { label: '我的收藏', icon: CollectionTag, to: '/account/favorites' },
+  { label: '修改密码', icon: Lock, to: '/account/password' }
 ];
 const showDropdown = computed(
   () =>

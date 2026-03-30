@@ -217,6 +217,8 @@ const formatTime = (value?: string) => {
   font-size: var(--font-size-base);
   line-height: 1.9;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .comment-state {

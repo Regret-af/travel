@@ -12,7 +12,7 @@
       variant="auth"
       eyebrow="账户安全"
       title="登录后，才能修改当前账户密码"
-      description="这里只处理当前密码、新密码和确认新密码，不扩展忘记密码、短信验证或双因素流程。"
+      description="登录后即可更新当前账户密码，让这份旅途记录继续被你稳稳地保管。"
       action-label="立即登录"
       secondary-label="返回个人中心"
       secondary-to="/account"
