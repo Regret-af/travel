@@ -166,11 +166,11 @@
           <button class="entry-action entry-action-muted" type="button" @click="openSettingsEntry">编辑资料</button>
         </article>
 
-        <article class="action-card action-card-logout">
-          <p class="entry-eyebrow">退出登录</p>
-          <h2>退出登录</h2>
-          <p>如果你想结束这次访问，可以直接清晰地从这里退出当前账号。</p>
-          <button class="logout-action" type="button" @click="goToPasswordEdit">修改密码</button>
+        <article class="action-card action-card-security">
+          <p class="entry-eyebrow">账户安全</p>
+          <h2>修改密码</h2>
+          <p>如果你想更新当前账号密码，可以从这里进入修改密码页，完成这次安全调整。</p>
+          <button class="entry-action" type="button" @click="goToPasswordEdit">前往修改密码</button>
         </article>
       </section>
     </template>
@@ -576,8 +576,7 @@ onMounted(() => {
 .hero-action,
 .primary-action,
 .secondary-action,
-.entry-action,
-.logout-action {
+.entry-action {
   min-height: 48px;
   padding: 0 20px;
   border-radius: 999px;
@@ -602,8 +601,7 @@ onMounted(() => {
 
 .hero-action-primary,
 .primary-action,
-.entry-action,
-.logout-action {
+.entry-action {
   border-color: rgba(212, 175, 55, 0.24);
   background: #111827;
   color: #f8fafc;
@@ -911,13 +909,9 @@ onMounted(() => {
   background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
 }
 
-.action-card-logout {
-  border-color: rgba(248, 113, 113, 0.18);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(254, 242, 242, 0.72) 100%);
-}
-
-.logout-action {
-  background: #111827;
+.action-card-security {
+  border-color: rgba(212, 175, 55, 0.2);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 248, 235, 0.82) 100%);
 }
 
 .state-panel {
@@ -1061,8 +1055,7 @@ onMounted(() => {
   .hero-action,
   .primary-action,
   .secondary-action,
-  .entry-action,
-  .logout-action {
+  .entry-action {
     width: 100%;
     justify-content: center;
   }
