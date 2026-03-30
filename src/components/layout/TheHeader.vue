@@ -498,7 +498,7 @@ onUnmounted(() => {
 <style scoped lang="scss">
 .nav-link {
   position: relative;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   padding: 0.25rem 0;
   transition: color 0.2s ease;
 
@@ -575,7 +575,7 @@ onUnmounted(() => {
   border: none;
   background: transparent;
   color: #0f172a;
-  font-size: 0.95rem;
+  font-size: var(--font-size-md);
   outline: none;
 }
 
@@ -600,19 +600,19 @@ onUnmounted(() => {
 
 .result-name {
   color: #0f172a;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
 }
 
 .result-location {
   color: #64748b;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
 }
 
 .search-state {
   padding: 1rem;
   color: #64748b;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   text-align: center;
 }
 
@@ -690,8 +690,8 @@ onUnmounted(() => {
   }
 
   .profile-name {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
     color: #1f2937;
   }
 }

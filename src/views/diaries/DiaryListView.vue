@@ -400,8 +400,8 @@ watch(
 .section-eyebrow {
   margin: 0 0 12px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
@@ -410,9 +410,9 @@ watch(
     margin: 0;
     max-width: 760px;
     color: #111827;
-    font-size: 50px;
+    font-size: var(--font-size-17xl);
     line-height: 1.04;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: -0.035em;
   }
 }
@@ -422,7 +422,7 @@ watch(
   margin: 18px 0 0;
   max-width: 620px;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.86;
 }
 
@@ -437,7 +437,7 @@ watch(
   p {
     margin: 12px 0 0;
     color: #475569;
-    font-size: 15px;
+    font-size: var(--font-size-base);
     line-height: 1.8;
   }
 }
@@ -446,7 +446,7 @@ watch(
 .result-label {
   display: inline-flex;
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.04em;
 }
 
@@ -470,9 +470,9 @@ watch(
   h2 {
     margin: 0;
     color: #111827;
-    font-size: 30px;
+    font-size: var(--font-size-8xl);
     line-height: 1.14;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
   }
 }
 
@@ -512,14 +512,14 @@ watch(
 
 .sort-label {
   color: #111827;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
 }
 
 .sort-note {
   margin-top: 6px;
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   line-height: 1.5;
 }
 
@@ -552,15 +552,15 @@ watch(
     display: block;
     margin-top: 10px;
     color: #111827;
-    font-size: 30px;
+    font-size: var(--font-size-8xl);
     line-height: 1.04;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
   }
 
   p {
     margin: 12px 0 0;
     color: #64748b;
-    font-size: 14px;
+    font-size: var(--font-size-md);
     line-height: 1.75;
   }
 }
@@ -730,13 +730,13 @@ watch(
   }
 
   .hero-copy h1 {
-    font-size: 34px;
+    font-size: var(--font-size-10xl);
   }
 
   .hero-description,
   .results-description,
   .hero-note p {
-    font-size: 14px;
+    font-size: var(--font-size-md);
     line-height: 1.8;
   }
 
@@ -748,7 +748,7 @@ watch(
 
   .sort-copy h2,
   .results-copy h2 {
-    font-size: 26px;
+    font-size: var(--font-size-6xl);
   }
 
   .sort-actions {
@@ -764,7 +764,7 @@ watch(
     border-radius: 20px;
 
     strong {
-      font-size: 24px;
+      font-size: var(--font-size-5xl);
     }
   }
 

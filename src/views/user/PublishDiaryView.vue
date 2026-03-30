@@ -368,17 +368,17 @@ watch(
 .section-eyebrow {
   margin: 0 0 12px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
 .hero-copy h1 {
   margin: 0;
   color: #111827;
-  font-size: 48px;
+  font-size: var(--font-size-16xl);
   line-height: 1.05;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
   letter-spacing: -0.035em;
 }
 
@@ -386,7 +386,7 @@ watch(
   margin: 18px 0 0;
   max-width: 640px;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.86;
 }
 
@@ -401,14 +401,14 @@ watch(
   p {
     margin: 10px 0 0;
     color: #475569;
-    font-size: 14px;
+    font-size: var(--font-size-md);
     line-height: 1.75;
   }
 }
 
 .hero-note-label {
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.04em;
 }
 
@@ -416,8 +416,8 @@ watch(
   display: inline-flex;
   margin-top: 16px;
   color: #9a7313;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   text-decoration: none;
 }
 
@@ -447,9 +447,9 @@ watch(
   h2 {
     margin: 0;
     color: #111827;
-    font-size: 30px;
+    font-size: var(--font-size-8xl);
     line-height: 1.14;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
   }
 }
 
@@ -462,8 +462,8 @@ watch(
   background: rgba(212, 175, 55, 0.12);
   border: 1px solid rgba(212, 175, 55, 0.24);
   color: #9a7313;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
 }
 
 .diary-form :deep(.el-form-item) {
@@ -472,8 +472,8 @@ watch(
 
 .diary-form :deep(.el-form-item__label) {
   color: #334155;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
 }
 
 .diary-form :deep(.el-input__wrapper),
@@ -510,8 +510,8 @@ watch(
   min-height: 48px;
   padding: 0 20px;
   border-radius: 999px;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition:
     transform 0.25s ease,
@@ -550,7 +550,7 @@ watch(
 .submit-error {
   margin: 0 0 14px;
   color: #b91c1c;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   line-height: 1.7;
 }
 
@@ -593,16 +593,16 @@ watch(
 .tips-card h3 {
   margin: 18px 0 0;
   color: #111827;
-  font-size: 24px;
+  font-size: var(--font-size-5xl);
   line-height: 1.18;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
 }
 
 .preview-copy p,
 .tips-list {
   margin: 12px 0 0;
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   line-height: 1.8;
 }
 
@@ -676,7 +676,7 @@ watch(
 
   .hero-copy h1,
   .section-head h2 {
-    font-size: 34px;
+    font-size: var(--font-size-10xl);
   }
 
   .form-actions {

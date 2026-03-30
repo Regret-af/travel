@@ -43,16 +43,16 @@ $text-main: #2c3e50;
 
     .subtitle {
       color: $gold;
-      font-size: 14px;
-      font-weight: 600;
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
       letter-spacing: 0.08em;
       margin-bottom: 10px;
     }
 
     .title {
-      font-size: 34px;
+      font-size: var(--font-size-10xl);
       color: $text-main;
-      font-weight: 800;
+      font-weight: var(--font-weight-display);
     }
   }
 
@@ -89,16 +89,16 @@ $text-main: #2c3e50;
       border-radius: 999px;
       background: rgba(212, 175, 55, 0.12);
       color: $gold;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
       letter-spacing: 0.08em;
     }
 
     h3 {
       margin: 0 0 12px;
       color: #111827;
-      font-size: 28px;
-      font-weight: 800;
+      font-size: var(--font-size-7xl);
+      font-weight: var(--font-weight-display);
     }
 
     p {
@@ -130,7 +130,7 @@ $text-main: #2c3e50;
     padding: 32px 16px;
 
     .map-header .title {
-      font-size: 26px;
+      font-size: var(--font-size-6xl);
     }
 
     .map-container {
@@ -142,7 +142,7 @@ $text-main: #2c3e50;
       padding: 28px 20px;
 
       h3 {
-        font-size: 22px;
+        font-size: var(--font-size-4xl);
       }
     }
   }

@@ -188,14 +188,14 @@ const handleFileChange = async (event: Event) => {
 
   strong {
     color: #111827;
-    font-size: 20px;
+    font-size: var(--font-size-3xl);
     line-height: 1.2;
   }
 
   p {
     margin: 0;
     color: #64748b;
-    font-size: 14px;
+    font-size: var(--font-size-md);
     line-height: 1.7;
   }
 }
@@ -211,24 +211,24 @@ const handleFileChange = async (event: Event) => {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.86);
   color: #111827;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
 }
 
 .upload-copy h3 {
   margin: 10px 0 0;
   color: #111827;
-  font-size: 26px;
+  font-size: var(--font-size-6xl);
   line-height: 1.16;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
 }
 
 .upload-eyebrow {
   margin: 0;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
@@ -236,7 +236,7 @@ const handleFileChange = async (event: Event) => {
 .upload-tip,
 .upload-error {
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   line-height: 1.75;
 }
 
@@ -259,8 +259,8 @@ const handleFileChange = async (event: Event) => {
   border: 1px solid rgba(212, 175, 55, 0.24);
   background: #111827;
   color: #f8fafc;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition:
     transform 0.25s ease,
@@ -299,7 +299,7 @@ const handleFileChange = async (event: Event) => {
   }
 
   .upload-copy h3 {
-    font-size: 22px;
+    font-size: var(--font-size-4xl);
   }
 }
 </style>

@@ -116,8 +116,8 @@ const pageEntries = computed<PageEntry[]>(() => {
 .pagination-eyebrow {
   margin: 0 0 10px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
@@ -125,16 +125,16 @@ const pageEntries = computed<PageEntry[]>(() => {
   h2 {
     margin: 0;
     color: #111827;
-    font-size: 32px;
+    font-size: var(--font-size-9xl);
     line-height: 1.12;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
   }
 
   p:last-child {
     margin: 14px 0 0;
     max-width: 520px;
     color: #475569;
-    font-size: 15px;
+    font-size: var(--font-size-base);
     line-height: 1.8;
   }
 }
@@ -168,8 +168,8 @@ const pageEntries = computed<PageEntry[]>(() => {
   border: 1px solid rgba(203, 213, 225, 0.92);
   background: rgba(255, 255, 255, 0.92);
   color: #475569;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition:
     transform 0.25s ease,
@@ -226,11 +226,11 @@ const pageEntries = computed<PageEntry[]>(() => {
   }
 
   .pagination-copy h2 {
-    font-size: 28px;
+    font-size: var(--font-size-7xl);
   }
 
   .pagination-copy p:last-child {
-    font-size: 14px;
+    font-size: var(--font-size-md);
   }
 
   .pagination-panel {

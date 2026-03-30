@@ -137,8 +137,8 @@ const handleClick = () => {
         border-radius: 999px;
         background: rgba(15, 23, 42, 0.46);
         color: #f8fafc;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-semibold);
         letter-spacing: 0.04em;
         backdrop-filter: blur(12px);
         white-space: nowrap;
@@ -181,9 +181,9 @@ const handleClick = () => {
 
     .title {
       margin: 0;
-      font-size: 22px;
+      font-size: var(--font-size-4xl);
       line-height: 1.18;
-      font-weight: 700;
+      font-weight: var(--font-weight-bold);
       color: #0f172a;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -193,7 +193,7 @@ const handleClick = () => {
 
     .arrow-mark {
       flex-shrink: 0;
-      font-size: 11px;
+      font-size: var(--font-size-2xs);
       letter-spacing: 0.08em;
       color: rgba(100, 116, 139, 0.72);
       transform: translateX(0);
@@ -203,7 +203,7 @@ const handleClick = () => {
 
   .summary {
     margin: 0 0 14px;
-    font-size: 14px;
+    font-size: var(--font-size-md);
     line-height: 1.72;
     color: #475569;
     display: -webkit-box;
@@ -224,8 +224,8 @@ const handleClick = () => {
       border-radius: 999px;
       background: rgba(248, 250, 252, 0.96);
       color: #334155;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -239,7 +239,7 @@ const handleClick = () => {
     gap: 10px;
     flex-wrap: wrap;
     color: #64748b;
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     letter-spacing: 0.03em;
 
     .divider {
@@ -292,7 +292,7 @@ const handleClick = () => {
     }
 
     .content-head .title {
-      font-size: 18px;
+      font-size: var(--font-size-2xl);
     }
 
     .summary {

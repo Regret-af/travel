@@ -330,17 +330,17 @@ watch(
 .hero-eyebrow {
   margin: 0 0 12px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
 .hero-copy h1 {
   margin: 0;
   color: #111827;
-  font-size: 50px;
+  font-size: var(--font-size-17xl);
   line-height: 1.04;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
   letter-spacing: -0.04em;
 }
 
@@ -348,7 +348,7 @@ watch(
   margin: 18px 0 0;
   max-width: 640px;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.86;
 }
 
@@ -369,22 +369,22 @@ watch(
     display: block;
     margin-top: 10px;
     color: #111827;
-    font-size: 28px;
+    font-size: var(--font-size-7xl);
     line-height: 1.06;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
   }
 
   p {
     margin: 10px 0 0;
     color: #64748b;
-    font-size: 14px;
+    font-size: var(--font-size-md);
     line-height: 1.75;
   }
 }
 
 .hero-stat-label {
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.04em;
 }
 
@@ -443,7 +443,7 @@ watch(
   }
 
   .hero-copy h1 {
-    font-size: 34px;
+    font-size: var(--font-size-10xl);
   }
 }
 </style>

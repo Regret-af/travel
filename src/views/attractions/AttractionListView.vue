@@ -607,8 +607,8 @@ onUnmounted(() => {
 .state-eyebrow {
   margin: 0 0 10px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
@@ -616,9 +616,9 @@ onUnmounted(() => {
   h1 {
     margin: 0;
     max-width: 700px;
-    font-size: 48px;
+    font-size: var(--font-size-16xl);
     line-height: 1.08;
-    font-weight: 800;
+    font-weight: var(--font-weight-display);
     letter-spacing: -0.03em;
   }
 }
@@ -630,7 +630,7 @@ onUnmounted(() => {
   margin: 16px 0 0;
   max-width: 620px;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.86;
 }
 
@@ -651,7 +651,7 @@ onUnmounted(() => {
   strong {
     display: block;
     margin-top: 10px;
-    font-size: 26px;
+    font-size: var(--font-size-6xl);
     line-height: 1;
     color: #0f172a;
   }
@@ -660,7 +660,7 @@ onUnmounted(() => {
 .hero-stat-label {
   display: inline-flex;
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.04em;
 }
 
@@ -688,9 +688,9 @@ onUnmounted(() => {
 .section-copy {
   h2 {
     margin: 0;
-    font-size: 28px;
+    font-size: var(--font-size-7xl);
     line-height: 1.18;
-    font-weight: 750;
+    font-weight: var(--font-weight-title);
     color: #111827;
   }
 }
@@ -744,7 +744,7 @@ onUnmounted(() => {
 .reset-link {
   padding: 0;
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   background: transparent;
   transition: color 0.25s ease;
 
@@ -777,8 +777,8 @@ onUnmounted(() => {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.86);
   color: #475569;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
 
   &:hover,
   &.active {
@@ -802,7 +802,7 @@ onUnmounted(() => {
 .category-hint {
   margin: 16px 0 0;
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   line-height: 1.7;
 }
 
@@ -815,8 +815,8 @@ onUnmounted(() => {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
   color: #0f172a;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   border: 1px solid rgba(203, 213, 225, 0.9);
   transition:
     transform 0.25s ease,
@@ -843,9 +843,9 @@ onUnmounted(() => {
 
   h2 {
     margin: 0;
-    font-size: 30px;
+    font-size: var(--font-size-8xl);
     line-height: 1.2;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
     color: #111827;
   }
 }
@@ -857,7 +857,7 @@ onUnmounted(() => {
   gap: 16px;
   flex-wrap: wrap;
   color: #64748b;
-  font-size: 14px;
+  font-size: var(--font-size-md);
 }
 
 .loading-indicator {
@@ -879,8 +879,8 @@ onUnmounted(() => {
   border-radius: 999px;
   background: rgba(241, 245, 249, 0.92);
   color: #334155;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
 }
 
 .sort-group {
@@ -912,14 +912,14 @@ onUnmounted(() => {
 
 .sort-label {
   color: #111827;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
 }
 
 .sort-note {
   margin-top: 6px;
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .results-shell {
@@ -1031,7 +1031,7 @@ onUnmounted(() => {
 
   h3 {
     margin: 0;
-    font-size: 34px;
+    font-size: var(--font-size-10xl);
     line-height: 1.14;
     color: #111827;
   }
@@ -1074,9 +1074,9 @@ onUnmounted(() => {
 .pagination-copy {
   h2 {
     margin: 0;
-    font-size: 30px;
+    font-size: var(--font-size-8xl);
     line-height: 1.15;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
   }
 }
 
@@ -1094,7 +1094,7 @@ onUnmounted(() => {
   gap: 12px;
   margin-bottom: 16px;
   color: #64748b;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 :deep(.el-pagination) {
@@ -1215,14 +1215,14 @@ onUnmounted(() => {
   .toolbar-copy h2,
   .pagination-copy h2,
   .section-copy h2 {
-    font-size: 28px;
+    font-size: var(--font-size-7xl);
   }
 
   .hero-description,
   .section-copy p:last-child,
   .pagination-copy p:last-child,
   .state-description {
-    font-size: 14px;
+    font-size: var(--font-size-md);
   }
 
   .hero-stats {
@@ -1305,7 +1305,7 @@ onUnmounted(() => {
     padding: 34px 18px;
 
     h3 {
-      font-size: 28px;
+      font-size: var(--font-size-7xl);
     }
   }
 

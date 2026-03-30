@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  font-family:
+  --font-family-sans:
     "PingFang SC",
     "Hiragino Sans GB",
     "Microsoft YaHei",
@@ -13,24 +13,167 @@
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  --font-size-2xs: 11px;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-base: 15px;
+  --font-size-lg: 16px;
+  --font-size-xl: 17px;
+  --font-size-2xl: 18px;
+  --font-size-3xl: 20px;
+  --font-size-4xl: 22px;
+  --font-size-5xl: 24px;
+  --font-size-6xl: 26px;
+  --font-size-7xl: 28px;
+  --font-size-8xl: 30px;
+  --font-size-9xl: 32px;
+  --font-size-10xl: 34px;
+  --font-size-11xl: 36px;
+  --font-size-12xl: 38px;
+  --font-size-13xl: 40px;
+  --font-size-14xl: 42px;
+  --font-size-15xl: 44px;
+  --font-size-16xl: 48px;
+  --font-size-17xl: 50px;
+  --font-size-18xl: 52px;
+  --font-size-19xl: 54px;
+  --font-size-20xl: 56px;
+  --font-size-hero: 68px;
+  --font-size-caption: var(--font-size-xs);
+  --font-size-body-sm: var(--font-size-md);
+  --font-size-body: var(--font-size-base);
+  --font-size-body-lg: var(--font-size-xl);
+  --font-size-title-sm: var(--font-size-5xl);
+  --font-size-title-md: var(--font-size-8xl);
+  --font-size-title-lg: var(--font-size-12xl);
+  --font-size-display-sm: var(--font-size-16xl);
+  --font-size-display-md: var(--font-size-20xl);
+  --font-weight-thin: 200;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-title: 760;
+  --font-weight-display: 800;
+  --line-height-tight: 1.15;
+  --line-height-body: 1.75;
+  --line-height-relaxed: 1.9;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-body);
   line-height: 1.5;
-  font-weight: 400;
+  font-weight: var(--font-weight-regular);
   color: #1f2937;
   background-color: #ffffff;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --el-font-family: var(--font-family-sans);
+  --el-font-size-extra-large: var(--font-size-3xl);
+  --el-font-size-large: var(--font-size-2xl);
+  --el-font-size-medium: var(--font-size-lg);
+  --el-font-size-base: var(--font-size-body-sm);
+  --el-font-size-small: var(--font-size-sm);
+  --el-font-size-extra-small: var(--font-size-caption);
+  --el-font-weight-primary: var(--font-weight-semibold);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  font-size: var(--font-size-body);
+}
+
 body {
   margin: 0;
   min-height: 100vh;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+}
+
+body,
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-family-sans);
+}
+
+button,
+input,
+textarea,
+select {
+  font-size: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-title);
+}
+
+strong,
+b {
+  font-weight: var(--font-weight-bold);
+}
+
+small {
+  font-size: var(--font-size-caption);
 }
 
 #app {
   min-height: 100vh;
+}
+
+.el-button,
+.el-input,
+.el-textarea,
+.el-select,
+.el-drawer,
+.el-dialog,
+.el-form,
+.el-form-item,
+.el-pagination,
+.el-dropdown-menu,
+.el-message,
+.el-popover,
+.el-collapse,
+.el-card {
+  font-family: var(--font-family-sans);
+}
+
+.el-button {
+  font-weight: var(--font-weight-semibold);
+}
+
+.el-form-item__label,
+.el-radio__label,
+.el-checkbox__label,
+.el-descriptions__label,
+.el-pagination__total,
+.el-pagination__jump {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.el-input__wrapper,
+.el-textarea__inner,
+.el-select__wrapper,
+.el-input__inner {
+  font-size: var(--font-size-body-sm);
+}
+
+.el-dialog__title,
+.el-drawer__title,
+.el-message-box__title {
+  font-weight: var(--font-weight-bold);
 }

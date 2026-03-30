@@ -111,24 +111,24 @@ const formatTime = (value?: string) => {
   h2 {
     margin: 0;
     color: #111827;
-    font-size: 30px;
+    font-size: var(--font-size-8xl);
     line-height: 1.12;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
   }
 }
 
 .section-eyebrow {
   margin: 0 0 10px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
 .comment-count {
   color: #64748b;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
 }
 
 .comment-form-shell {
@@ -167,7 +167,7 @@ const formatTime = (value?: string) => {
 .comment-hint {
   margin: 0;
   color: #64748b;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.7;
 }
 
@@ -202,19 +202,19 @@ const formatTime = (value?: string) => {
 .comment-name {
   margin: 0;
   color: #111827;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
 }
 
 .comment-time {
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .comment-content {
   margin: 16px 0 0;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.9;
   white-space: pre-wrap;
 }
@@ -229,7 +229,7 @@ const formatTime = (value?: string) => {
   h3 {
     margin: 0;
     color: #111827;
-    font-size: 24px;
+    font-size: var(--font-size-5xl);
   }
 
   p {
@@ -243,8 +243,8 @@ const formatTime = (value?: string) => {
   margin-top: 18px;
   color: #9a7313;
   background: transparent;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
 }
 
 .comment-skeleton {
@@ -313,7 +313,7 @@ const formatTime = (value?: string) => {
     flex-direction: column;
 
     h2 {
-      font-size: 26px;
+      font-size: var(--font-size-6xl);
     }
   }
 
@@ -323,7 +323,7 @@ const formatTime = (value?: string) => {
   }
 
   .comment-content {
-    font-size: 14px;
+    font-size: var(--font-size-md);
   }
 }
 </style>

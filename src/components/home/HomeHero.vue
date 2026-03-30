@@ -397,7 +397,7 @@ $white: #f9fafb;
 
     .tagline {
       display: inline-block;
-      font-size: 14px;
+      font-size: var(--font-size-md);
       color: $gold-color;
       letter-spacing: 0.08em;
       margin-bottom: 1rem;
@@ -412,18 +412,18 @@ $white: #f9fafb;
       }
 
       .thin {
-        font-size: 2.5rem;
-        font-weight: 200;
+        font-size: var(--font-size-13xl);
+        font-weight: var(--font-weight-thin);
       }
 
       .bold {
-        font-size: 3.5rem;
-        font-weight: 800;
+        font-size: var(--font-size-20xl);
+        font-weight: var(--font-weight-display);
       }
     }
 
     .desc {
-      font-size: 1.1rem;
+      font-size: var(--font-size-xl);
       color: rgba(255, 255, 255, 0.82);
       margin-bottom: 2.5rem;
       line-height: 1.6;
@@ -487,7 +487,7 @@ $white: #f9fafb;
         height: 44px;
         background: $gold-color;
         border: none;
-        font-weight: bold;
+        font-weight: var(--font-weight-bold);
 
         &:hover {
           background: color.adjust($gold-color, $lightness: 10%);
@@ -529,7 +529,7 @@ $white: #f9fafb;
             }
 
             .location-tag {
-              font-size: 12px;
+              font-size: var(--font-size-xs);
               opacity: 0.65;
             }
 
@@ -544,7 +544,7 @@ $white: #f9fafb;
           padding: 20px;
           text-align: center;
           color: #cbd5e1;
-          font-size: 14px;
+          font-size: var(--font-size-md);
 
           &.error {
             color: #fca5a5;
@@ -606,11 +606,11 @@ $white: #f9fafb;
     .content {
       .title {
         .thin {
-          font-size: 2rem;
+          font-size: var(--font-size-9xl);
         }
 
         .bold {
-          font-size: 2.7rem;
+          font-size: var(--font-size-15xl);
         }
       }
 

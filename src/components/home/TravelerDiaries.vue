@@ -149,15 +149,15 @@ $gold: #d4af37;
 
     .subtitle {
       color: $gold;
-      font-size: 14px;
+      font-size: var(--font-size-md);
       letter-spacing: 0.04em;
       margin-bottom: 8px;
     }
 
     .title {
       color: #1a1a1a;
-      font-size: 28px;
-      font-weight: 700;
+      font-size: var(--font-size-7xl);
+      font-weight: var(--font-weight-bold);
     }
 
     .more-btn {
@@ -220,14 +220,14 @@ $gold: #d4af37;
 
           .name {
             color: #111827;
-            font-weight: 700;
+            font-weight: var(--font-weight-bold);
             margin: 0;
           }
 
           .time {
             display: inline-flex;
             align-items: center;
-            font-size: 12px;
+            font-size: var(--font-size-xs);
             padding: 4px 10px;
             border-radius: 999px;
             background: #f3f4f6;
@@ -238,8 +238,8 @@ $gold: #d4af37;
       }
 
       .diary-title {
-        font-size: 30px;
-        font-weight: 800;
+        font-size: var(--font-size-8xl);
+        font-weight: var(--font-weight-display);
         color: #111827;
         line-height: 1.2;
         display: -webkit-box;
@@ -270,7 +270,7 @@ $gold: #d4af37;
           align-items: center;
           gap: 8px;
           color: #111827;
-          font-weight: 600;
+          font-weight: var(--font-weight-semibold);
 
           :deep(.el-icon) {
             color: $gold;
@@ -330,8 +330,8 @@ $gold: #d4af37;
     h3 {
       margin: 0 0 10px;
       color: #111827;
-      font-size: 24px;
-      font-weight: 700;
+      font-size: var(--font-size-5xl);
+      font-weight: var(--font-weight-bold);
     }
 
     p {
@@ -382,7 +382,7 @@ $gold: #d4af37;
       align-items: flex-start;
 
       .title {
-        font-size: 24px;
+        font-size: var(--font-size-5xl);
       }
     }
 

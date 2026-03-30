@@ -342,17 +342,17 @@ watch(
 .section-eyebrow {
   margin: 0 0 12px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
 .hero-copy h1 {
   margin: 0;
   color: #111827;
-  font-size: 48px;
+  font-size: var(--font-size-16xl);
   line-height: 1.05;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
   letter-spacing: -0.035em;
 }
 
@@ -360,7 +360,7 @@ watch(
   margin: 18px 0 0;
   max-width: 660px;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.86;
 }
 
@@ -382,15 +382,15 @@ watch(
 .section-head h2 {
   margin: 0;
   color: #111827;
-  font-size: 30px;
+  font-size: var(--font-size-8xl);
   line-height: 1.14;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
 }
 
 .profile-form :deep(.el-form-item__label) {
   color: #334155;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
 }
 
 .profile-form :deep(.el-input__wrapper) {
@@ -431,14 +431,14 @@ watch(
     display: block;
     margin-top: 10px;
     color: #111827;
-    font-size: 18px;
+    font-size: var(--font-size-2xl);
     line-height: 1.5;
   }
 }
 
 .readonly-label {
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .form-footer {
@@ -456,8 +456,8 @@ watch(
   min-height: 48px;
   padding: 0 20px;
   border-radius: 999px;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
 }
 
@@ -476,7 +476,7 @@ watch(
 .submit-error {
   margin: 0 0 14px;
   color: #b91c1c;
-  font-size: 14px;
+  font-size: var(--font-size-md);
 }
 
 .side-column {
@@ -493,15 +493,15 @@ watch(
   h3 {
     margin: 0;
     color: #111827;
-    font-size: 24px;
+    font-size: var(--font-size-5xl);
     line-height: 1.18;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
   }
 
   p {
     margin: 6px 0 0;
     color: #64748b;
-    font-size: 14px;
+    font-size: var(--font-size-md);
   }
 }
 
@@ -564,7 +564,7 @@ watch(
 
   .hero-copy h1,
   .section-head h2 {
-    font-size: 34px;
+    font-size: var(--font-size-10xl);
   }
 
   .readonly-grid,

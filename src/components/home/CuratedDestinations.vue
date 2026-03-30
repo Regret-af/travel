@@ -72,15 +72,15 @@ onMounted(fetchData);
 
     .subtitle {
       color: #d4af37;
-      font-size: 14px;
+      font-size: var(--font-size-md);
       letter-spacing: 0.04em;
       margin-bottom: 8px;
     }
 
     .title {
       color: #1a1a1a;
-      font-size: 32px;
-      font-weight: 700;
+      font-size: var(--font-size-9xl);
+      font-weight: var(--font-weight-bold);
       line-height: 1.2;
     }
   }
@@ -114,8 +114,8 @@ onMounted(fetchData);
     h3 {
       margin: 0 0 10px;
       color: #111827;
-      font-size: 24px;
-      font-weight: 700;
+      font-size: var(--font-size-5xl);
+      font-weight: var(--font-weight-bold);
     }
 
     p {
@@ -139,7 +139,7 @@ onMounted(fetchData);
 
     .header {
       .title {
-        font-size: 26px;
+        font-size: var(--font-size-6xl);
       }
     }
 

@@ -187,8 +187,8 @@ const resolvedNote = computed(() => {
   min-height: 34px;
   padding: 0 14px;
   border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.06em;
   backdrop-filter: blur(12px);
 }
@@ -245,21 +245,21 @@ const resolvedNote = computed(() => {
 .author-name {
   margin: 0;
   color: #111827;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
 }
 
 .publish-time {
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
 }
 
 .diary-title {
   margin: 20px 0 0;
   color: #111827;
-  font-size: 30px;
+  font-size: var(--font-size-8xl);
   line-height: 1.16;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
   letter-spacing: -0.03em;
   display: -webkit-box;
   overflow: hidden;
@@ -270,7 +270,7 @@ const resolvedNote = computed(() => {
 .diary-summary {
   margin: 14px 0 0;
   color: #475569;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   line-height: 1.85;
   display: -webkit-box;
   overflow: hidden;
@@ -292,12 +292,12 @@ const resolvedNote = computed(() => {
   align-items: center;
   gap: 8px;
   color: #334155;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
 
   :deep(.el-icon) {
     color: #c79b1d;
-    font-size: 14px;
+    font-size: var(--font-size-md);
   }
 }
 
@@ -306,8 +306,8 @@ const resolvedNote = computed(() => {
   margin-top: 20px;
   width: fit-content;
   color: #9a7313;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.04em;
 }
 
@@ -334,7 +334,7 @@ const resolvedNote = computed(() => {
   }
 
   .diary-title {
-    font-size: 24px;
+    font-size: var(--font-size-5xl);
   }
 }
 </style>

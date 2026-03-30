@@ -88,15 +88,15 @@ defineEmits<{
 .state-eyebrow {
   margin: 22px 0 0;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
 .state-title {
   margin: 14px 0 0;
   color: #111827;
-  font-size: 38px;
+  font-size: var(--font-size-12xl);
   line-height: 1.12;
 }
 
@@ -104,7 +104,7 @@ defineEmits<{
   margin: 16px 0 0;
   max-width: 560px;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.9;
 }
 
@@ -119,8 +119,8 @@ defineEmits<{
 
 .secondary-link {
   color: #64748b;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
   text-decoration: none;
   transition: color 0.25s ease;
 
@@ -137,11 +137,11 @@ defineEmits<{
   }
 
   .state-title {
-    font-size: 30px;
+    font-size: var(--font-size-8xl);
   }
 
   .state-description {
-    font-size: 14px;
+    font-size: var(--font-size-md);
     line-height: 1.8;
   }
 }

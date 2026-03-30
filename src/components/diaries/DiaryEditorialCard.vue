@@ -163,8 +163,8 @@ const summaryText = computed(() => {
 .author-name {
   margin: 0;
   color: #111827;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
 }
 
 .publish-time {
@@ -176,16 +176,16 @@ const summaryText = computed(() => {
   border-radius: 999px;
   background: rgba(241, 245, 249, 0.95);
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.05em;
 }
 
 .diary-title {
   margin: 22px 0 0;
   color: #111827;
-  font-size: 38px;
+  font-size: var(--font-size-12xl);
   line-height: 1.08;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: -0.03em;
   display: -webkit-box;
   overflow: hidden;
@@ -196,7 +196,7 @@ const summaryText = computed(() => {
 .diary-summary {
   margin: 18px 0 0;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.9;
   display: -webkit-box;
   overflow: hidden;
@@ -218,13 +218,13 @@ const summaryText = computed(() => {
   align-items: center;
   gap: 8px;
   color: #334155;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: 0.03em;
 
   :deep(.el-icon) {
     color: #c79b1d;
-    font-size: 14px;
+    font-size: var(--font-size-md);
   }
 }
 
@@ -233,8 +233,8 @@ const summaryText = computed(() => {
   margin-top: 24px;
   width: fit-content;
   color: #9a7313;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.06em;
 }
 
@@ -258,7 +258,7 @@ const summaryText = computed(() => {
   }
 
   .diary-title {
-    font-size: 32px;
+    font-size: var(--font-size-9xl);
   }
 }
 
@@ -282,11 +282,11 @@ const summaryText = computed(() => {
   }
 
   .diary-title {
-    font-size: 28px;
+    font-size: var(--font-size-7xl);
   }
 
   .diary-summary {
-    font-size: 14px;
+    font-size: var(--font-size-md);
     line-height: 1.8;
   }
 

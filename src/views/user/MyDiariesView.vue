@@ -435,17 +435,17 @@ watch(
 .section-eyebrow {
   margin: 0 0 12px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
 .hero-copy h1 {
   margin: 0;
   color: #111827;
-  font-size: 50px;
+  font-size: var(--font-size-17xl);
   line-height: 1.04;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
   letter-spacing: -0.04em;
 }
 
@@ -453,7 +453,7 @@ watch(
   margin: 18px 0 0;
   max-width: 640px;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.86;
 }
 
@@ -471,8 +471,8 @@ watch(
   border: 1px solid rgba(203, 213, 225, 0.92);
   background: rgba(255, 255, 255, 0.88);
   color: #334155;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition:
     transform 0.25s ease,
@@ -516,22 +516,22 @@ watch(
     display: block;
     margin-top: 10px;
     color: #111827;
-    font-size: 28px;
+    font-size: var(--font-size-7xl);
     line-height: 1.06;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
   }
 
   p {
     margin: 10px 0 0;
     color: #64748b;
-    font-size: 14px;
+    font-size: var(--font-size-md);
     line-height: 1.75;
   }
 }
 
 .hero-stat-label {
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.04em;
 }
 
@@ -549,9 +549,9 @@ watch(
 .sort-copy h2 {
   margin: 0;
   color: #111827;
-  font-size: 30px;
+  font-size: var(--font-size-8xl);
   line-height: 1.14;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
 }
 
 .sort-actions {
@@ -589,14 +589,14 @@ watch(
 
 .sort-label {
   color: #111827;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
 }
 
 .sort-note {
   margin-top: 6px;
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   line-height: 1.5;
 }
 
@@ -670,7 +670,7 @@ watch(
 
   .hero-copy h1,
   .sort-copy h2 {
-    font-size: 34px;
+    font-size: var(--font-size-10xl);
   }
 
   .hero-actions,

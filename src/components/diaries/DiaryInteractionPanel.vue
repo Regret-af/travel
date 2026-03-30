@@ -93,7 +93,7 @@ const formatCount = (value?: number) => formatCountStat(value);
     display: block;
     margin-top: 10px;
     color: #111827;
-    font-size: 28px;
+    font-size: var(--font-size-7xl);
     line-height: 1;
   }
 }
@@ -101,7 +101,7 @@ const formatCount = (value?: number) => formatCountStat(value);
 .stat-label {
   display: inline-flex;
   color: #64748b;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.04em;
 }
 
@@ -121,8 +121,8 @@ const formatCount = (value?: number) => formatCountStat(value);
   border: 1px solid rgba(203, 213, 225, 0.9);
   background: rgba(255, 255, 255, 0.9);
   color: #334155;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -170,7 +170,7 @@ const formatCount = (value?: number) => formatCountStat(value);
     padding: 16px;
 
     strong {
-      font-size: 24px;
+      font-size: var(--font-size-5xl);
     }
   }
 

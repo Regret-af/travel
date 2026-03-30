@@ -538,8 +538,8 @@ watch(
   background: rgba(255, 255, 255, 0.9);
   color: #334155;
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
   transition:
     transform 0.25s ease,
     border-color 0.25s ease,
@@ -597,8 +597,8 @@ watch(
   bottom: 24px;
   z-index: 1;
   color: #f8fafc;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
@@ -619,9 +619,9 @@ watch(
     margin: 0;
     max-width: 900px;
     color: #111827;
-    font-size: 54px;
+    font-size: var(--font-size-19xl);
     line-height: 1.02;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     letter-spacing: -0.035em;
   }
 }
@@ -629,8 +629,8 @@ watch(
 .section-eyebrow {
   margin: 0 0 12px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
@@ -638,7 +638,7 @@ watch(
   margin: 22px 0 0;
   max-width: 760px;
   color: #475569;
-  font-size: 18px;
+  font-size: var(--font-size-2xl);
   line-height: 1.9;
 }
 
@@ -666,14 +666,14 @@ watch(
 .author-name {
   margin: 0;
   color: #111827;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
 }
 
 .author-note,
 .publish-label {
   color: #64748b;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .publish-card {
@@ -684,8 +684,8 @@ watch(
 
   strong {
     color: #111827;
-    font-size: 18px;
-    font-weight: 700;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
   }
 }
 
@@ -711,15 +711,15 @@ watch(
     margin: 0;
     max-width: 620px;
     color: #111827;
-    font-size: 30px;
+    font-size: var(--font-size-8xl);
     line-height: 1.16;
-    font-weight: 760;
+    font-weight: var(--font-weight-title);
   }
 }
 
 @media (max-width: 1024px) {
   .title-shell h1 {
-    font-size: 44px;
+    font-size: var(--font-size-15xl);
   }
 
   .article-shell {
@@ -765,13 +765,13 @@ watch(
     padding: 26px 18px;
 
     h1 {
-      font-size: 34px;
+      font-size: var(--font-size-10xl);
       line-height: 1.08;
     }
   }
 
   .summary-copy {
-    font-size: 16px;
+    font-size: var(--font-size-lg);
   }
 
   .meta-shell,
@@ -784,7 +784,7 @@ watch(
   }
 
   .return-shell h2 {
-    font-size: 26px;
+    font-size: var(--font-size-6xl);
   }
 }
 </style>

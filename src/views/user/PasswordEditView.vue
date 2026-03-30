@@ -315,8 +315,8 @@ watch(
 .section-eyebrow {
   margin: 0 0 12px;
   color: #c79b1d;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
@@ -324,9 +324,9 @@ watch(
 .section-head h2 {
   margin: 0;
   color: #111827;
-  font-size: 42px;
+  font-size: var(--font-size-14xl);
   line-height: 1.08;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
   letter-spacing: -0.035em;
 }
 
@@ -335,7 +335,7 @@ watch(
   margin: 16px 0 0;
   max-width: 660px;
   color: #475569;
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.86;
 }
 
@@ -347,8 +347,8 @@ watch(
 
 .password-form :deep(.el-form-item__label) {
   color: #334155;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
 }
 
 .password-form :deep(.el-input__wrapper) {
@@ -372,8 +372,8 @@ watch(
   min-height: 48px;
   padding: 0 20px;
   border-radius: 999px;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
 }
 
@@ -392,15 +392,15 @@ watch(
 .submit-error {
   margin: 0 0 14px;
   color: #b91c1c;
-  font-size: 14px;
+  font-size: var(--font-size-md);
 }
 
 .tips-card h3 {
   margin: 0;
   color: #111827;
-  font-size: 28px;
+  font-size: var(--font-size-7xl);
   line-height: 1.16;
-  font-weight: 760;
+  font-weight: var(--font-weight-title);
 }
 
 .tips-list {
@@ -465,7 +465,7 @@ watch(
 
   .hero-copy h1,
   .section-head h2 {
-    font-size: 34px;
+    font-size: var(--font-size-10xl);
   }
 
   .form-actions {

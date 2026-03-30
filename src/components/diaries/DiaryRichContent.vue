@@ -131,7 +131,7 @@ const renderedContent = computed(() => {
 <style scoped lang="scss">
 .rich-content {
   color: #334155;
-  font-size: 17px;
+  font-size: var(--font-size-xl);
   line-height: 1.95;
 
   :deep(p) {
@@ -159,24 +159,24 @@ const renderedContent = computed(() => {
   }
 
   :deep(h2) {
-    font-size: 30px;
+    font-size: var(--font-size-8xl);
     margin-top: 2.1em;
   }
 
   :deep(h3) {
-    font-size: 24px;
+    font-size: var(--font-size-5xl);
     margin-top: 1.9em;
   }
 
   :deep(h4) {
-    font-size: 20px;
+    font-size: var(--font-size-3xl);
     margin-top: 1.7em;
   }
 
   :deep(strong),
   :deep(b) {
     color: #111827;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
   }
 
   :deep(em),
@@ -217,7 +217,7 @@ const renderedContent = computed(() => {
   :deep(figcaption) {
     margin-top: 0.9em;
     color: #64748b;
-    font-size: 13px;
+    font-size: var(--font-size-sm);
     text-align: center;
   }
 
@@ -230,15 +230,15 @@ const renderedContent = computed(() => {
 
 @media (max-width: 767px) {
   .rich-content {
-    font-size: 16px;
+    font-size: var(--font-size-lg);
     line-height: 1.9;
 
     :deep(h2) {
-      font-size: 26px;
+      font-size: var(--font-size-6xl);
     }
 
     :deep(h3) {
-      font-size: 22px;
+      font-size: var(--font-size-4xl);
     }
 
     :deep(img) {

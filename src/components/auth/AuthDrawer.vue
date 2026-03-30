@@ -284,8 +284,8 @@ $gold: #d4af37;
     left: 20px;
     z-index: 2;
     color: $gold;
-    font-size: 20px;
-    font-weight: 600;
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-semibold);
     letter-spacing: 0.2em;
   }
 }
@@ -299,8 +299,8 @@ $gold: #d4af37;
 
 .mode-header {
   .headline {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: var(--font-size-5xl);
+    font-weight: var(--font-weight-bold);
     margin: 0 0 6px;
     color: #111827;
   }
@@ -308,7 +308,7 @@ $gold: #d4af37;
   .subline {
     margin: 0;
     color: #6b7280;
-    font-size: 14px;
+    font-size: var(--font-size-md);
   }
 }
 
@@ -324,7 +324,7 @@ $gold: #d4af37;
 
     label {
       color: #6b7280;
-      font-size: 13px;
+      font-size: var(--font-size-sm);
     }
   }
 }
@@ -351,7 +351,7 @@ $gold: #d4af37;
 
 .forgot {
   text-align: right;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: #9ca3af;
 }
 
@@ -362,7 +362,7 @@ $gold: #d4af37;
   background: #1a1a1a;
   color: #ffffff;
   border: none;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   transition: all 0.3s ease;
 
   &:hover {
@@ -380,14 +380,14 @@ $gold: #d4af37;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: #6b7280;
 
   button {
     border: none;
     background: none;
     color: $gold;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
   }
 }
@@ -398,7 +398,7 @@ $gold: #d4af37;
   gap: 12px;
 
   .social-label {
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     color: #9ca3af;
   }
 
@@ -459,7 +459,7 @@ $gold: #d4af37;
     height: 170px;
 
     .slogan {
-      font-size: 18px;
+      font-size: var(--font-size-2xl);
     }
   }
 
@@ -469,7 +469,7 @@ $gold: #d4af37;
 
   .auth-input {
     :deep(.el-input__inner) {
-      font-size: 16px;
+      font-size: var(--font-size-lg);
     }
   }
 }
