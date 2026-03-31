@@ -8,21 +8,6 @@
           这里汇集了适合行程规划时慢慢翻看的景点内容，你可以按关键词、分类和浏览方式找到想了解的地方。
         </p>
       </div>
-
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <span class="hero-stat-label">当前结果</span>
-          <strong>{{ formattedTotal }}</strong>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-label">分类数量</span>
-          <strong>{{ categories.length }}</strong>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-label">浏览方式</span>
-          <strong>{{ currentSortOption.label }}</strong>
-        </div>
-      </div>
     </section>
 
     <section class="filters-shell">
@@ -119,22 +104,8 @@
 
     <section ref="resultsAnchorRef" class="catalog-toolbar">
       <div class="toolbar-copy">
-        <p class="toolbar-eyebrow">列表状态</p>
         <h2>{{ resultHeadline }}</h2>
-        <div class="toolbar-meta">
-          <span>第 {{ currentPage }} 页 / 共 {{ totalPages || 1 }} 页</span>
-          <span v-if="isFetching" class="loading-indicator">正在更新列表…</span>
-        </div>
-
-        <div v-if="activeDescriptors.length" class="active-descriptors">
-          <span
-            v-for="descriptor in activeDescriptors"
-            :key="descriptor"
-            class="descriptor-chip"
-          >
-            {{ descriptor }}
-          </span>
-        </div>
+        <p v-if="isFetching" class="loading-indicator">正在更新列表…</p>
       </div>
 
       <div class="sort-group">
@@ -147,7 +118,6 @@
           @click="handleSortChange(option.value)"
         >
           <span class="sort-label">{{ option.label }}</span>
-          <span class="sort-note">{{ option.note }}</span>
         </button>
       </div>
     </section>
@@ -205,18 +175,7 @@
     </section>
 
     <section v-if="listStatus === 'success' && totalPages > 1" class="pagination-shell">
-      <div class="pagination-copy">
-        <p class="section-eyebrow">分页浏览</p>
-        <h2>继续浏览景点列表</h2>
-        <p>分页会保留当前关键词、分类和排序，并在切换后回到目录内容顶部附近。</p>
-      </div>
-
       <div class="pagination-panel">
-        <div class="pagination-summary">
-          <span>共 {{ formattedTotal }} 个景点</span>
-          <span>当前第 {{ currentPage }} 页</span>
-        </div>
-
         <el-pagination
           background
           layout="prev, pager, next"
@@ -249,8 +208,8 @@ const route = useRoute();
 const pageSize = 9;
 const defaultSort = 'latest';
 const sortOptions = [
-  { value: 'latest', label: '最新发布', note: '先看最近更新的景点' },
-  { value: 'hot', label: '热门探索', note: '先看更受关注的景点' }
+  { value: 'latest', label: '最新发布' },
+  { value: 'hot', label: '热门探索' }
 ] as const;
 
 const items = ref<AttractionCardType[]>([]);
@@ -284,9 +243,6 @@ const normalizedRoute = computed(() => {
   };
 });
 
-const currentSortOption = computed(
-  () => sortOptions.find((option) => option.value === currentSort.value) || sortOptions[0]
-);
 const currentCategoryName = computed(
   () => categories.value.find((category) => category.id === currentCategoryId.value)?.name || ''
 );
@@ -294,23 +250,6 @@ const formattedTotal = computed(() => total.value.toLocaleString('zh-CN'));
 const hasActiveConditions = computed(
   () => Boolean(currentKeyword.value || currentCategoryId.value || currentSort.value !== defaultSort)
 );
-const activeDescriptors = computed(() => {
-  const descriptors: string[] = [];
-
-  if (currentKeyword.value) {
-    descriptors.push(`关键词：${currentKeyword.value}`);
-  }
-
-  if (currentCategoryName.value) {
-    descriptors.push(`分类：${currentCategoryName.value}`);
-  }
-
-  if (currentSort.value !== defaultSort) {
-    descriptors.push(`排序：${currentSortOption.value.label}`);
-  }
-
-  return descriptors;
-});
 const resultHeadline = computed(() => {
   if (currentKeyword.value && currentCategoryName.value) {
     return `“${currentKeyword.value}” · ${currentCategoryName.value} 共找到 ${formattedTotal.value} 个景点`;
@@ -557,13 +496,11 @@ onUnmounted(() => {
 
 .directory-hero {
   position: relative;
-  min-height: 340px;
+  min-height: 250px;
   padding: 44px;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.9fr);
-  gap: 28px;
-  align-items: end;
+  display: flex;
+  align-items: flex-start;
   background-position: center;
   background-size: cover;
   box-shadow: 0 26px 70px rgba(15, 23, 42, 0.08);
@@ -595,15 +532,14 @@ onUnmounted(() => {
   }
 }
 
-.hero-copy,
-.hero-stats {
+.hero-copy {
   position: relative;
   z-index: 1;
+  max-width: min(860px, 100%);
 }
 
 .hero-eyebrow,
 .section-eyebrow,
-.toolbar-eyebrow,
 .state-eyebrow {
   margin: 0 0 10px;
   color: #c79b1d;
@@ -625,43 +561,12 @@ onUnmounted(() => {
 
 .hero-description,
 .section-copy p:last-child,
-.pagination-copy p:last-child,
 .state-description {
   margin: 16px 0 0;
   max-width: 620px;
   color: #475569;
   font-size: var(--font-size-base);
   line-height: 1.86;
-}
-
-.hero-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.hero-stat {
-  padding: 18px 18px 16px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.74);
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
-
-  strong {
-    display: block;
-    margin-top: 10px;
-    font-size: var(--font-size-6xl);
-    line-height: 1;
-    color: #0f172a;
-  }
-}
-
-.hero-stat-label {
-  display: inline-flex;
-  color: #64748b;
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.04em;
 }
 
 .filters-shell {
@@ -833,7 +738,7 @@ onUnmounted(() => {
 .catalog-toolbar {
   padding: 26px 28px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
 }
@@ -850,37 +755,11 @@ onUnmounted(() => {
   }
 }
 
-.toolbar-meta {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  color: #64748b;
-  font-size: var(--font-size-md);
-}
-
 .loading-indicator {
+  margin: 10px 0 0;
   color: #9a7313;
-}
-
-.active-descriptors {
-  margin-top: 16px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.descriptor-chip {
-  display: inline-flex;
-  min-height: 34px;
-  align-items: center;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: rgba(241, 245, 249, 0.92);
-  color: #334155;
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  line-height: 1.7;
 }
 
 .sort-group {
@@ -894,7 +773,10 @@ onUnmounted(() => {
   padding: 13px 16px;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.86);
-  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 
   &:hover,
   &.active {
@@ -905,21 +787,11 @@ onUnmounted(() => {
   }
 }
 
-.sort-label,
-.sort-note {
-  display: block;
-}
-
 .sort-label {
+  display: block;
   color: #111827;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
-}
-
-.sort-note {
-  margin-top: 6px;
-  color: #64748b;
-  font-size: var(--font-size-xs);
 }
 
 .results-shell {
@@ -1065,19 +937,9 @@ onUnmounted(() => {
 
 .pagination-shell {
   padding: 28px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 24px;
+  display: flex;
+  justify-content: center;
   align-items: center;
-}
-
-.pagination-copy {
-  h2 {
-    margin: 0;
-    font-size: var(--font-size-8xl);
-    line-height: 1.15;
-    font-weight: var(--font-weight-title);
-  }
 }
 
 .pagination-panel {
@@ -1086,15 +948,6 @@ onUnmounted(() => {
   border-radius: 26px;
   background: rgba(255, 255, 255, 0.84);
   border: 1px solid rgba(226, 232, 240, 0.85);
-}
-
-.pagination-summary {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-  color: #64748b;
-  font-size: var(--font-size-sm);
 }
 
 :deep(.el-pagination) {
@@ -1141,14 +994,13 @@ onUnmounted(() => {
 
 @media (max-width: 1100px) {
   .directory-hero,
-  .filters-shell,
-  .pagination-shell,
-  .catalog-toolbar {
+  .filters-shell {
     grid-template-columns: 1fr;
   }
 
-  .hero-stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .catalog-toolbar {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .sort-group {
@@ -1213,20 +1065,14 @@ onUnmounted(() => {
 
   .hero-copy h1,
   .toolbar-copy h2,
-  .pagination-copy h2,
   .section-copy h2 {
     font-size: var(--font-size-7xl);
   }
 
   .hero-description,
   .section-copy p:last-child,
-  .pagination-copy p:last-child,
   .state-description {
     font-size: var(--font-size-md);
-  }
-
-  .hero-stats {
-    grid-template-columns: 1fr;
   }
 
   .search-card,
@@ -1309,10 +1155,5 @@ onUnmounted(() => {
     }
   }
 
-  .pagination-summary {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
 }
 </style>

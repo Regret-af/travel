@@ -94,7 +94,6 @@
         </article>
 
         <article class="tips-card">
-          <p class="section-eyebrow">安全规则</p>
           <h3>改密码前，先看一眼这几条提醒</h3>
           <ul class="tips-list">
             <li>需要先确认当前使用中的密码，才能完成这次更新。</li>

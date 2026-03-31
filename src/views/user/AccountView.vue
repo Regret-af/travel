@@ -87,7 +87,6 @@
         <article ref="notificationsRef" class="panel-card notifications-panel">
           <div class="panel-header">
             <div>
-              <p class="panel-eyebrow">通知中心</p>
               <h2>通知中心</h2>
             </div>
             <span class="notice-badge">{{ unreadCount }} 条未读通知</span>
@@ -139,7 +138,6 @@
 
       <section class="entry-grid">
         <article class="entry-card entry-card-diary">
-          <p class="entry-eyebrow">我的日记</p>
           <h2>我的日记</h2>
           <p>
             你可以在这里翻看自己已经发布过的旅行日记，按目录方式继续回顾这一路写下的故事。
@@ -148,7 +146,6 @@
         </article>
 
         <article class="entry-card entry-card-favorite">
-          <p class="entry-eyebrow">我的收藏</p>
           <h2>我的收藏</h2>
           <p>
             你可以从这里继续浏览内容，查找值得再次查看的旅行记录。
@@ -159,7 +156,6 @@
 
       <section class="action-grid">
         <article class="action-card">
-          <p class="entry-eyebrow">设置</p>
           <h2>设置</h2>
           <p>你可以在这里查看当前可用的账户设置相关信息。</p>
           <button class="entry-action entry-action-muted" type="button" @click="openSettingsEntry">编辑资料</button>

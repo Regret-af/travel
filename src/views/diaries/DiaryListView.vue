@@ -8,17 +8,12 @@
           这里收录公开发布的旅行日记，以更安静的节奏呈现沿途片段、人物感受与旅程余韵。
         </p>
       </div>
-
-      <div class="hero-note">
-        <span class="hero-note-label">本页导览</span>
-        <p>仅按“最新发布”与“热门阅读”切换目录顺序，让阅读保持克制，也让故事本身留在前景。</p>
-      </div>
     </section>
 
     <section ref="resultsAnchorRef" class="sort-shell">
       <div class="sort-copy">
-        <p class="section-eyebrow">目录排序</p>
-        <h2>选择这一册的翻阅方式</h2>
+        <h2>{{ resultHeadline }}</h2>
+        <p v-if="isFetching" class="sort-status">目录正在更新中</p>
       </div>
 
       <div class="sort-actions">
@@ -31,33 +26,7 @@
           @click="handleSortChange(option.value)"
         >
           <span class="sort-label">{{ option.label }}</span>
-          <span class="sort-note">{{ option.note }}</span>
         </button>
-      </div>
-    </section>
-
-    <section class="results-shell">
-      <div class="results-copy">
-        <p class="section-eyebrow">结果统计</p>
-        <h2>{{ resultHeadline }}</h2>
-        <p class="results-description">
-          {{ pageProgressText }}
-          <span v-if="isFetching" class="loading-copy">目录正在更新中</span>
-        </p>
-      </div>
-
-      <div class="results-summary">
-        <article class="summary-card summary-card-total">
-          <span class="result-label">已收录故事</span>
-          <strong>{{ formattedTotal }}</strong>
-          <p>公开发布的旅行日记目录正在这里缓慢展开。</p>
-        </article>
-
-        <article class="summary-card summary-card-progress">
-          <span class="result-label">当前翻阅</span>
-          <strong>第 {{ displayPageNum }} 页</strong>
-          <p>共 {{ displayPages }} 页，保持单册目录式的阅读节奏。</p>
-        </article>
       </div>
     </section>
 
@@ -138,9 +107,9 @@ const route = useRoute();
 
 const pageSize = 5;
 const defaultSort: SortValue = 'latest';
-const sortOptions: Array<{ value: SortValue; label: string; note: string }> = [
-  { value: 'latest', label: '最新发布', note: '按发布时间翻阅沿途记录' },
-  { value: 'hot', label: '热门阅读', note: '按热度顺序查看被更多人读到的故事' }
+const sortOptions: Array<{ value: SortValue; label: string }> = [
+  { value: 'latest', label: '最新发布' },
+  { value: 'hot', label: '热门阅读' }
 ];
 const placeholders = Array.from({ length: 3 }, (_, index) => index + 1);
 const resultsAnchorRef = ref<HTMLElement | null>(null);
@@ -169,29 +138,12 @@ const normalizedRoute = computed(() => {
 });
 
 const formattedTotal = computed(() => pageData.value.total.toLocaleString('zh-CN'));
-const displayPageNum = computed(() => pageData.value.pageNum || normalizedRoute.value.page);
-const displayPages = computed(() => pageData.value.pages || 1);
 const resultHeadline = computed(() => {
-  if (listStatus.value === 'loading') return '旅行目录正在更新';
-  if (listStatus.value === 'error') return '目录暂时无法读取';
+  if (listStatus.value === 'loading') return '旅行日记正在加载';
+  if (listStatus.value === 'error') return '旅行日记目录暂时无法读取';
   if (listStatus.value === 'empty') return '暂未收录可展示的旅行日记';
 
   return `当前共收录 ${formattedTotal.value} 篇旅行日记`;
-});
-const pageProgressText = computed(() => {
-  if (listStatus.value === 'loading') {
-    return `正在切换到第 ${normalizedRoute.value.page} 页的目录内容。`;
-  }
-
-  if (listStatus.value === 'error') {
-    return `当前无法加载第 ${displayPageNum.value} 页内容，请稍后重试。`;
-  }
-
-  if (listStatus.value === 'empty') {
-    return `当前目录停留在第 ${displayPageNum.value} 页，共 ${displayPages.value} 页。`;
-  }
-
-  return `当前翻阅第 ${displayPageNum.value} 页，共 ${displayPages.value} 页。`;
 });
 const heroBackgroundStyle = computed(() => {
   const coverUrl = pageData.value.list[0]?.coverUrl;
@@ -345,20 +297,17 @@ watch(
 
 .diary-hero,
 .sort-shell,
-.results-shell,
 .list-shell {
   border-radius: 32px;
 }
 
 .diary-hero {
   position: relative;
-  min-height: 340px;
-  padding: 46px 44px;
+  min-height: 262px;
+  padding: 34px 44px 38px;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.7fr);
-  gap: 24px;
-  align-items: end;
+  display: flex;
+  align-items: flex-start;
   background-position: center;
   background-size: cover;
   box-shadow: 0 26px 70px rgba(15, 23, 42, 0.08);
@@ -391,7 +340,7 @@ watch(
 }
 
 .hero-copy,
-.hero-note {
+.sort-copy {
   position: relative;
   z-index: 1;
 }
@@ -406,9 +355,10 @@ watch(
 }
 
 .hero-copy {
+  max-width: min(900px, 100%);
+
   h1 {
     margin: 0;
-    max-width: 760px;
     color: #111827;
     font-size: var(--font-size-17xl);
     line-height: 1.04;
@@ -417,56 +367,26 @@ watch(
   }
 }
 
-.hero-description,
-.results-description {
+.hero-description {
   margin: 18px 0 0;
-  max-width: 620px;
+  max-width: 760px;
   color: #475569;
   font-size: var(--font-size-base);
   line-height: 1.86;
 }
 
-.hero-note {
-  padding: 24px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
-
-  p {
-    margin: 12px 0 0;
-    color: #475569;
-    font-size: var(--font-size-base);
-    line-height: 1.8;
-  }
-}
-
-.hero-note-label,
-.result-label {
-  display: inline-flex;
-  color: #64748b;
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.04em;
-}
-
-.sort-shell,
-.results-shell {
+.sort-shell {
   padding: 28px 30px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
   border: 1px solid rgba(226, 232, 240, 0.86);
   box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
-}
-
-.sort-shell {
   display: flex;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
 }
 
-.sort-copy,
-.results-copy {
+.sort-copy {
   h2 {
     margin: 0;
     color: #111827;
@@ -474,6 +394,13 @@ watch(
     line-height: 1.14;
     font-weight: var(--font-weight-title);
   }
+}
+
+.sort-status {
+  margin: 10px 0 0;
+  color: #9a7313;
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
 }
 
 .sort-actions {
@@ -488,7 +415,10 @@ watch(
   border-radius: 24px;
   border: 1px solid rgba(203, 213, 225, 0.9);
   background: rgba(255, 255, 255, 0.88);
-  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   cursor: pointer;
   transition:
     transform 0.25s ease,
@@ -505,69 +435,11 @@ watch(
   }
 }
 
-.sort-label,
-.sort-note {
-  display: block;
-}
-
 .sort-label {
+  display: block;
   color: #111827;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
-}
-
-.sort-note {
-  margin-top: 6px;
-  color: #64748b;
-  font-size: var(--font-size-xs);
-  line-height: 1.5;
-}
-
-.results-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.88fr);
-  gap: 26px;
-  align-items: end;
-}
-
-.loading-copy {
-  margin-left: 8px;
-  color: #9a7313;
-}
-
-.results-summary {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: 14px;
-}
-
-.summary-card {
-  padding: 22px 20px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.84);
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.04);
-
-  strong {
-    display: block;
-    margin-top: 10px;
-    color: #111827;
-    font-size: var(--font-size-8xl);
-    line-height: 1.04;
-    font-weight: var(--font-weight-bold);
-  }
-
-  p {
-    margin: 12px 0 0;
-    color: #64748b;
-    font-size: var(--font-size-md);
-    line-height: 1.75;
-  }
-}
-
-.summary-card-progress {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(249, 250, 251, 0.96) 100%);
 }
 
 .list-shell {
@@ -674,14 +546,9 @@ watch(
 }
 
 @media (max-width: 1100px) {
-  .diary-hero,
-  .results-shell,
-  .sort-shell {
-    grid-template-columns: 1fr;
-  }
-
   .sort-shell {
     align-items: stretch;
+    flex-direction: column;
   }
 
   .sort-actions {
@@ -719,14 +586,13 @@ watch(
   }
 
   .diary-hero,
-  .sort-shell,
-  .results-shell {
+  .sort-shell {
     border-radius: 24px;
   }
 
   .diary-hero {
     min-height: 0;
-    padding: 28px 18px;
+    padding: 24px 18px 26px;
   }
 
   .hero-copy h1 {
@@ -734,38 +600,21 @@ watch(
   }
 
   .hero-description,
-  .results-description,
-  .hero-note p {
+  .sort-status {
     font-size: var(--font-size-md);
     line-height: 1.8;
   }
 
-  .hero-note,
-  .sort-shell,
-  .results-shell {
+  .sort-shell {
     padding: 20px 18px;
   }
 
-  .sort-copy h2,
-  .results-copy h2 {
+  .sort-copy h2 {
     font-size: var(--font-size-6xl);
   }
 
   .sort-actions {
     flex-direction: column;
-  }
-
-  .results-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .summary-card {
-    padding: 16px;
-    border-radius: 20px;
-
-    strong {
-      font-size: var(--font-size-5xl);
-    }
   }
 
   .loading-list {

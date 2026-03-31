@@ -107,7 +107,6 @@
                 v-model="form.avatarUrl"
                 biz-type="avatar"
                 shape="square"
-                eyebrow="头像上传"
                 title="换一张新的头像"
                 description="头像会出现在个人中心、日记作者信息和通知列表中。"
                 button-text="上传头像"

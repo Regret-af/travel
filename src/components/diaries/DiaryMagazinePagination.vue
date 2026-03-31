@@ -1,7 +1,6 @@
 <template>
   <section class="pagination-shell">
     <div class="pagination-copy">
-      <p class="pagination-eyebrow">目录页码</p>
       <h2>第 {{ currentPage }} 页，共 {{ totalPages }} 页</h2>
       <p>当前共收录 {{ total.toLocaleString('zh-CN') }} 篇旅行日记，按每页 {{ pageSize }} 篇的节奏继续翻阅。</p>
     </div>
@@ -111,14 +110,6 @@ const pageEntries = computed<PageEntry[]>(() => {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
   border: 1px solid rgba(226, 232, 240, 0.86);
   box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
-}
-
-.pagination-eyebrow {
-  margin: 0 0 10px;
-  color: #c79b1d;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
 }
 
 .pagination-copy {

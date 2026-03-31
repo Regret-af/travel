@@ -21,7 +21,7 @@
     </button>
 
     <div class="upload-copy">
-      <p class="upload-eyebrow">{{ eyebrow }}</p>
+      <p v-if="eyebrow" class="upload-eyebrow">{{ eyebrow }}</p>
       <h3>{{ title }}</h3>
       <p class="upload-description">{{ description }}</p>
 
@@ -65,7 +65,7 @@ const props = withDefaults(
   }>(),
   {
     modelValue: '',
-    eyebrow: '图片上传',
+    eyebrow: '',
     buttonText: '上传图片',
     tip: '支持常见图片格式',
     placeholderTitle: '选择一张图片',
@@ -217,7 +217,7 @@ const handleFileChange = async (event: Event) => {
 }
 
 .upload-copy h3 {
-  margin: 10px 0 0;
+  margin: 0;
   color: #111827;
   font-size: var(--font-size-6xl);
   line-height: 1.16;
@@ -230,6 +230,10 @@ const handleFileChange = async (event: Event) => {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
+}
+
+.upload-eyebrow + h3 {
+  margin-top: 10px;
 }
 
 .upload-description,

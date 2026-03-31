@@ -111,7 +111,6 @@
           <ImageUploadCard
             v-model="form.coverUrl"
             biz-type="diary_image"
-            eyebrow="封面上传"
             title="给这篇日记留一张封面"
             description="封面会出现在日记列表和详情页顶部，让整篇故事先以画面开场。"
             button-text="上传封面"
