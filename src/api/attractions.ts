@@ -15,6 +15,8 @@ interface AttractionApiItem {
   summary?: string;
   coverUrl?: string;
   locationText?: string;
+  latitude?: number | string;
+  longitude?: number | string;
   viewCount?: number;
   createdAt?: string;
   category?: AttractionCategoryApi | null;
@@ -38,6 +40,8 @@ export interface AttractionCard {
   summary?: string;
   coverUrl?: string;
   locationText?: string;
+  latitude?: number;
+  longitude?: number;
   viewCount?: number;
   createdAt?: string;
   category?: AttractionCategory;
@@ -66,6 +70,19 @@ export interface AttractionListParams {
 
 type RequestBehaviorOptions = Pick<AxiosRequestConfig, 'skipErrorToast'>;
 
+const toCoordinate = (value?: number | string) => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined;
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+};
+
 const mapCategory = (category?: AttractionCategoryApi | null): AttractionCategory | undefined => {
   if (!category) return undefined;
 
@@ -86,6 +103,8 @@ const mapAttraction = (item: AttractionApiItem): AttractionCard => {
     summary: item.summary,
     coverUrl: item.coverUrl,
     locationText: item.locationText,
+    latitude: toCoordinate(item.latitude),
+    longitude: toCoordinate(item.longitude),
     viewCount: item.viewCount,
     createdAt: item.createdAt,
     category
