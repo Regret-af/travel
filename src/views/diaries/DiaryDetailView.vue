@@ -30,7 +30,7 @@
       variant="empty"
       eyebrow="内容留白"
       title="这篇旅行故事暂时还没有准备好"
-      description="当前内容尚未准备完整，暂时无法形成完整的阅读页。"
+      description="这篇故事暂时还没有可继续阅读的完整内容，你可以先去日记列表看看其他旅途记录。"
       action-label="返回日记列表"
       secondary-label="返回首页"
       secondary-to="/"

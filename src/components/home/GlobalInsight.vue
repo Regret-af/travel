@@ -1,9 +1,9 @@
 <template>
   <section class="global-insight">
     <div class="map-header">
-      <div>
-        <p class="subtitle">地图探索</p>
-        <h2 class="title">从地图上发现值得去看的景点</h2>
+      <div class="home-section-heading">
+        <p class="home-section-eyebrow">地图探索</p>
+        <h2 class="home-section-title">从地图上发现值得去看的景点</h2>
       </div>
       <div v-if="status === 'success'" class="header-meta">
         <span class="meta-chip">已定位 {{ mappedItems.length }} 处景点</span>
@@ -38,7 +38,7 @@
       <div class="state-card">
         <span class="state-badge">内容待补充</span>
         <h3>暂时还没有可用于地图探索的景点</h3>
-        <p>当前景点数据里还缺少可用于落点的经纬度信息，你仍可前往景点列表继续浏览。</p>
+        <p>暂时还没有可在地图上展开浏览的景点，你仍可前往景点列表继续挑选想看的目的地。</p>
         <div class="state-actions">
           <el-button type="primary" round @click="router.push('/attractions')">查看景点列表</el-button>
         </div>
@@ -348,8 +348,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-$gold: #d4af37;
-
 .global-insight {
   padding: 50px 24px;
   border-radius: 30px;
@@ -369,21 +367,12 @@ $gold: #d4af37;
   margin-bottom: 28px;
 }
 
-.subtitle,
 .panel-eyebrow {
   margin: 0 0 10px;
-  color: $gold;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
-}
-
-.title {
-  margin: 0;
-  color: #111827;
-  font-size: var(--font-size-10xl);
-  line-height: 1.12;
-  font-weight: var(--font-weight-display);
 }
 
 .header-meta {
@@ -414,7 +403,7 @@ $gold: #d4af37;
 .meta-chip-soft {
   background: rgba(212, 175, 55, 0.1);
   border-color: rgba(212, 175, 55, 0.18);
-  color: #9a7313;
+  color: var(--color-accent-strong);
 }
 
 .state-shell,
@@ -515,7 +504,7 @@ $gold: #d4af37;
   padding: 0 14px;
   border-radius: 999px;
   background: rgba(212, 175, 55, 0.1);
-  color: #9a7313;
+  color: var(--color-accent-strong);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
@@ -615,7 +604,7 @@ $gold: #d4af37;
 
 .panel-link {
   padding-right: 0;
-  color: #9a7313;
+  color: var(--color-accent-strong);
   font-weight: var(--font-weight-bold);
 }
 
@@ -699,7 +688,7 @@ $gold: #d4af37;
 
 .card-badge-strong {
   background: rgba(212, 175, 55, 0.18);
-  color: #9a7313;
+  color: var(--color-accent-strong);
 }
 
 .card-copy {
@@ -768,7 +757,7 @@ $gold: #d4af37;
 
 .card-action:hover {
   transform: translateY(-1px);
-  background: #9a7313;
+  background: var(--color-accent-strong);
   color: #111827;
 }
 
@@ -876,7 +865,7 @@ $gold: #d4af37;
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: $gold;
+  background: var(--color-accent);
   box-shadow: 0 0 0 5px rgba(212, 175, 55, 0.18);
 }
 
@@ -927,10 +916,6 @@ $gold: #d4af37;
   .global-insight {
     padding: 32px 16px;
     border-radius: 24px;
-  }
-
-  .title {
-    font-size: var(--font-size-6xl);
   }
 
   .state-shell,

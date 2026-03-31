@@ -15,7 +15,7 @@
       variant="auth"
       eyebrow="账户资料"
       title="登录后，才能编辑属于你的公开资料"
-      description="这里仅支持修改昵称和头像，不扩展更多资料项。"
+      description="登录后即可更新昵称和头像，让你的公开形象保持在你想呈现的状态。"
       action-label="立即登录"
       secondary-label="返回个人中心"
       secondary-to="/account"
@@ -40,7 +40,7 @@
           <p class="hero-eyebrow">资料编辑</p>
           <h1>让别人看到你的第一眼，更像现在的你。</h1>
           <p class="hero-description">
-            这里仅编辑昵称和头像，不额外扩展更多个人资料字段。
+            在这里更新昵称和头像，让你的公开资料看起来更贴近现在的你。
           </p>
         </div>
 

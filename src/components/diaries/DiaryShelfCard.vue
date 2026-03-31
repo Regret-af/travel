@@ -17,7 +17,7 @@
         <span v-if="badge" class="status-badge" :class="`status-badge-${badgeTone}`">
           {{ badge }}
         </span>
-        <span v-if="invalid" class="status-badge status-badge-danger">已失效</span>
+        <span v-else-if="invalid" class="status-badge status-badge-slate">暂不可访问</span>
       </div>
     </div>
 
@@ -92,13 +92,13 @@ const summaryText = computed(() => {
   const value = props.item.summary?.trim();
 
   if (value) return value;
-  if (props.invalid) return '这条收藏对应的公开内容已经失效，暂时无法继续阅读完整正文。';
+  if (props.invalid) return '这篇内容当前暂时无法打开，你仍可以把它留在收藏里，之后再回来看看。';
 
   return '这篇旅行日记暂时没有摘要，点击可继续翻阅完整的沿途记录。';
 });
 const resolvedNote = computed(() => {
   if (props.note) return props.note;
-  return props.invalid ? '内容暂时不可继续打开' : '继续翻阅这篇旅途故事';
+  return props.invalid ? '当前暂时无法打开这篇内容' : '继续翻阅这篇旅途故事';
 });
 </script>
 

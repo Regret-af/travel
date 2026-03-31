@@ -4,15 +4,15 @@
     'h-[60px] md:h-20'
   ]">
     <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-4 md:px-8">
-      <RouterLink to="/" class="flex items-center gap-3" aria-label="返回首页">
+      <RouterLink to="/" class="site-brand flex items-center gap-3" aria-label="返回首页">
         <div
-          class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 text-lg font-bold text-white shadow-lg">
+          class="brand-mark flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 shadow-lg">
           T
         </div>
-        <div class="text-lg font-semibold text-slate-900">旅迹</div>
+        <div class="brand-name">旅迹</div>
       </RouterLink>
 
-      <nav class="hidden items-center gap-6 text-base text-slate-700 md:flex">
+      <nav class="site-nav hidden items-center gap-6 md:flex">
         <el-dropdown trigger="hover">
           <span class="nav-link inline-flex cursor-pointer items-center gap-1">
             景点
@@ -36,11 +36,11 @@
         <div ref="searchWrapperRef"
           class="search-shell hidden md:flex"
           :class="searchOpen ? 'shadow-sm' : ''">
-          <el-icon class="h-5 w-5 cursor-pointer text-slate-600" @click.stop="handleSearchIconClick">
+          <el-icon class="search-trigger-icon h-5 w-5 cursor-pointer" @click.stop="handleSearchIconClick">
             <Search />
           </el-icon>
           <input ref="searchInputRef" type="text" placeholder="搜索景点名称或关键词"
-            class="w-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all duration-300"
+            class="search-input w-0 bg-transparent outline-none transition-all duration-300"
             :class="searchOpen ? 'w-48 opacity-100' : 'opacity-0 pointer-events-none'"
             v-model="keyword"
             @focus="handleSearchFocus"
@@ -115,7 +115,7 @@
         </template>
 
         <button
-          class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-slate-700 shadow-sm backdrop-blur-sm md:hidden"
+          class="mobile-menu-button inline-flex h-10 w-10 items-center justify-center rounded-full border bg-white/70 shadow-sm backdrop-blur-sm md:hidden"
           @click="drawerOpen = true">
           <el-icon class="h-5 w-5">
             <Menu />
@@ -127,14 +127,14 @@
     <el-drawer v-model="drawerOpen" :with-header="false" size="80%" custom-class="glass-drawer">
       <div class="flex flex-col gap-4 pt-4">
         <div class="flex items-center justify-between px-2">
-          <div class="text-lg font-semibold text-slate-900">导航</div>
-          <el-icon class="h-6 w-6 cursor-pointer text-slate-700" @click="openMobileSearch">
+          <div class="drawer-title">导航</div>
+          <el-icon class="drawer-search-icon h-6 w-6 cursor-pointer" @click="openMobileSearch">
             <Search />
           </el-icon>
         </div>
         <div v-if="drawerSearchVisible" ref="mobileSearchWrapperRef" class="mobile-search-shell px-2">
           <div class="mobile-search-box">
-            <el-icon class="h-5 w-5 text-slate-500">
+            <el-icon class="mobile-search-icon h-5 w-5">
               <Search />
             </el-icon>
             <input
@@ -171,7 +171,7 @@
             </div>
           </div>
         </div>
-        <div class="flex flex-col gap-3 px-2 text-base text-slate-800">
+        <div class="mobile-nav flex flex-col gap-3 px-2">
           <button class="mobile-link mobile-link-toggle text-left" @click="toggleMobileDestinations">
             <span>景点</span>
             <el-icon class="mobile-link-arrow" :class="{ expanded: mobileDestinationExpanded }">
@@ -200,8 +200,8 @@
             <div class="flex items-center gap-3">
               <el-avatar :size="42" :src="userAvatar" />
               <div>
-                <div class="font-semibold text-slate-900">欢迎回来</div>
-                <div class="text-sm text-slate-500">进入个人中心</div>
+                <div class="mobile-profile-title">欢迎回来</div>
+                <div class="mobile-profile-caption">进入个人中心</div>
               </div>
             </div>
             <div v-if="isMobile" class="mobile-profile">
@@ -494,8 +494,36 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+.site-brand {
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-mark {
+  color: #ffffff;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.brand-name {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: 0.01em;
+}
+
+.site-nav {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-tight);
+}
+
 .nav-link {
   position: relative;
+  color: inherit;
+  font-size: inherit;
   font-weight: var(--font-weight-medium);
   padding: 0.25rem 0;
   transition: color 0.2s ease;
@@ -507,14 +535,14 @@ onUnmounted(() => {
     bottom: -6px;
     width: 100%;
     height: 2px;
-    background: linear-gradient(90deg, #22d3ee, #6366f1);
+    background: linear-gradient(90deg, var(--color-brand-cool), var(--color-brand-iris));
     transform: translateX(-50%) scaleX(0);
     transform-origin: center;
     transition: transform 0.25s ease;
   }
 
   &:hover {
-    color: #0f172a;
+    color: var(--color-text-primary);
 
     &::after {
       transform: translateX(-50%) scaleX(1);
@@ -533,11 +561,30 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.5rem;
   border-radius: 9999px;
-  border: 1px solid rgb(226 232 240);
-  background: rgb(255 255 255 / 0.7);
+  border: 1px solid var(--color-border-soft);
+  background: rgba(255, 255, 255, 0.7);
   padding: 0.25rem 0.75rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(12px);
+}
+
+.search-trigger-icon,
+.drawer-search-icon,
+.mobile-search-icon,
+.mobile-menu-button {
+  color: var(--color-text-secondary);
+}
+
+.search-input,
+.mobile-search-input {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.search-input::placeholder,
+.mobile-search-input::placeholder {
+  color: var(--color-text-subtle);
 }
 
 .search-dropdown,
@@ -572,8 +619,6 @@ onUnmounted(() => {
   width: 100%;
   border: none;
   background: transparent;
-  color: #0f172a;
-  font-size: var(--font-size-md);
   outline: none;
 }
 
@@ -597,25 +642,38 @@ onUnmounted(() => {
 }
 
 .result-name {
-  color: #0f172a;
+  color: var(--color-text-primary);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
 }
 
 .result-location {
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
 
 .search-state {
   padding: 1rem;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   text-align: center;
 }
 
 .search-state-error {
   color: #dc2626;
+}
+
+.drawer-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+.mobile-nav {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-tight);
 }
 
 .mobile-link {
@@ -625,11 +683,14 @@ onUnmounted(() => {
   border-radius: 0.65rem;
   border: none;
   background: transparent;
+  color: inherit;
+  font-size: inherit;
+  font-weight: var(--font-weight-medium);
   transition: background 0.2s ease, color 0.2s ease;
 
   &:hover {
     background: rgba(99, 102, 241, 0.1);
-    color: #0f172a;
+    color: var(--color-text-primary);
   }
 }
 
@@ -660,12 +721,14 @@ onUnmounted(() => {
   border: none;
   border-radius: 0.65rem;
   background: rgba(248, 250, 252, 0.88);
-  color: #475569;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
   transition: background 0.2s ease, color 0.2s ease;
 
   &:hover {
     background: rgba(226, 232, 240, 0.92);
-    color: #0f172a;
+    color: var(--color-text-primary);
   }
 }
 
@@ -688,9 +751,9 @@ onUnmounted(() => {
   }
 
   .profile-name {
+    color: var(--color-text-primary);
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
-    color: #1f2937;
   }
 }
 
@@ -706,19 +769,21 @@ onUnmounted(() => {
   gap: 6px;
   padding: 8px 10px;
   border-radius: 14px;
-  color: #4b5563;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
   transition: all 0.2s ease;
 
   .quick-icon {
-    color: #9ca3af;
+    color: var(--color-text-subtle);
   }
 
   &:hover {
     background: #fdfbf7;
-    color: #d4af37;
+    color: var(--color-accent);
 
     .quick-icon {
-      color: #d4af37;
+      color: var(--color-accent);
     }
   }
 }
@@ -732,25 +797,41 @@ onUnmounted(() => {
 
   .action-item {
     text-align: left;
-    color: #374151;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
     transition: color 0.2s ease, background 0.2s ease;
     padding: 6px 8px;
     border-radius: 10px;
 
     &:hover {
       background: #fdfbf7;
-      color: #d4af37;
+      color: var(--color-accent);
     }
   }
 
   .action-logout {
-    color: #9ca3af;
+    color: var(--color-text-subtle);
 
     &:hover {
       color: #f87171;
       background: transparent;
     }
   }
+}
+
+.mobile-profile-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+.mobile-profile-caption {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
 }
 
 .mobile-profile {

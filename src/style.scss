@@ -59,6 +59,16 @@
   --line-height-tight: 1.15;
   --line-height-body: 1.75;
   --line-height-relaxed: 1.9;
+  --color-text-primary: #111827;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-border-soft: rgba(226, 232, 240, 0.9);
+  --color-surface-soft: rgba(255, 255, 255, 0.88);
+  --color-accent: #c79b1d;
+  --color-accent-strong: #9a7313;
+  --color-brand-cool: #22d3ee;
+  --color-brand-iris: #6366f1;
   font-family: var(--font-family-sans);
   font-size: var(--font-size-body);
   line-height: 1.5;
@@ -134,6 +144,31 @@ small {
   min-height: 100vh;
 }
 
+.home-section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.home-section-eyebrow {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+}
+
+.home-section-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-title-md);
+  font-weight: var(--font-weight-title);
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+}
+
 .el-button,
 .el-input,
 .el-textarea,
@@ -176,4 +211,10 @@ small {
 .el-drawer__title,
 .el-message-box__title {
   font-weight: var(--font-weight-bold);
+}
+
+@media (max-width: 767px) {
+  .home-section-title {
+    font-size: var(--font-size-6xl);
+  }
 }

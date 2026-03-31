@@ -1,11 +1,11 @@
 <template>
   <section class="diary-section" v-loading="loading">
     <div class="header">
-      <div>
-        <p class="subtitle">旅行日记精选</p>
-        <h2 class="title">重叠叙事里的真实旅途</h2>
+      <div class="home-section-heading">
+        <p class="home-section-eyebrow">旅行日记</p>
+        <h2 class="home-section-title">最近值得翻开的真实旅途</h2>
       </div>
-      <el-button round class="more-btn" @click="router.push('/diaries')">查看更多日记</el-button>
+      <el-button round class="more-btn" @click="router.push('/diaries')">查看更多旅行日记</el-button>
     </div>
 
     <div v-if="diaries.length" class="list">
@@ -62,7 +62,7 @@
     </div>
 
     <div v-else-if="!loading" class="state-card">
-      <h3>暂无精选日记</h3>
+      <h3>暂无旅行日记</h3>
       <p>当前暂无可展示的旅行日记内容，你可以稍后再来查看。</p>
     </div>
   </section>
@@ -94,7 +94,7 @@ const fetchData = async () => {
   } catch (error) {
     console.error('Failed to load diaries', error);
     diaries.value = [];
-    loadError.value = '当前无法获取旅行日记精选，请稍后重试。';
+    loadError.value = '当前无法获取旅行日记内容，请稍后重试。';
   } finally {
     loading.value = false;
   }
@@ -133,8 +133,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-$gold: #d4af37;
-
 .diary-section {
   background: #fafafa;
   padding: 48px 24px;
@@ -146,19 +144,6 @@ $gold: #d4af37;
     align-items: flex-end;
     justify-content: space-between;
     gap: 20px;
-
-    .subtitle {
-      color: $gold;
-      font-size: var(--font-size-md);
-      letter-spacing: 0.04em;
-      margin-bottom: 8px;
-    }
-
-    .title {
-      color: #1a1a1a;
-      font-size: var(--font-size-7xl);
-      font-weight: var(--font-weight-bold);
-    }
 
     .more-btn {
       flex-shrink: 0;
@@ -273,7 +258,7 @@ $gold: #d4af37;
           font-weight: var(--font-weight-semibold);
 
           :deep(.el-icon) {
-            color: $gold;
+            color: var(--color-accent);
           }
         }
       }
@@ -380,10 +365,6 @@ $gold: #d4af37;
     .header {
       flex-direction: column;
       align-items: flex-start;
-
-      .title {
-        font-size: var(--font-size-5xl);
-      }
     }
 
     .diary-card {

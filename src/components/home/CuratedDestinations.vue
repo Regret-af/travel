@@ -1,8 +1,10 @@
 <template>
   <section class="curated-section" v-loading="loading">
     <div class="header">
-      <p class="subtitle">探索近期热门景点</p>
-      <h2 class="title">精选景点</h2>
+      <div class="home-section-heading">
+        <p class="home-section-eyebrow">景点</p>
+        <h2 class="home-section-title">近期热门推荐</h2>
+      </div>
     </div>
 
     <div v-if="items.length" class="grid">
@@ -17,14 +19,14 @@
     </div>
 
     <div v-else-if="loadError && !loading" class="state-card">
-      <h3>推荐景点加载失败</h3>
+      <h3>景点内容加载失败</h3>
       <p>{{ loadError }}</p>
       <el-button round @click="fetchData">重新加载</el-button>
     </div>
 
     <div v-else-if="!loading" class="state-card">
-      <h3>暂无精选推荐</h3>
-      <p>当前暂无可展示的首页精选景点，你可以稍后再来查看。</p>
+      <h3>暂无景点内容</h3>
+      <p>当前暂无可展示的景点内容，你可以稍后再来查看。</p>
     </div>
   </section>
 </template>
@@ -47,7 +49,7 @@ const fetchData = async () => {
   } catch (error) {
     console.error('Failed to load curated destinations', error);
     items.value = [];
-    loadError.value = '当前无法获取首页精选景点，请稍后重试。';
+    loadError.value = '当前无法获取景点内容，请稍后重试。';
   } finally {
     loading.value = false;
   }
@@ -69,20 +71,6 @@ onMounted(fetchData);
 
   .header {
     margin-bottom: 24px;
-
-    .subtitle {
-      color: #d4af37;
-      font-size: var(--font-size-md);
-      letter-spacing: 0.04em;
-      margin-bottom: 8px;
-    }
-
-    .title {
-      color: #1a1a1a;
-      font-size: var(--font-size-9xl);
-      font-weight: var(--font-weight-bold);
-      line-height: 1.2;
-    }
   }
 
   .grid {
@@ -136,12 +124,6 @@ onMounted(fetchData);
 @media (max-width: 640px) {
   .curated-section {
     padding: 32px 16px;
-
-    .header {
-      .title {
-        font-size: var(--font-size-6xl);
-      }
-    }
 
     .grid {
       grid-template-columns: 1fr;

@@ -21,7 +21,7 @@
       />
       <div class="comment-form-footer">
         <p class="comment-hint">
-          {{ isLoggedIn ? '仅支持一级评论，留言会直接公开显示在当前日记下。' : '评论前需要先登录。' }}
+          {{ isLoggedIn ? '留言发布后，会展示在这篇日记下方，和更多旅行者一起交流感受。' : '评论前需要先登录。' }}
         </p>
         <el-button type="primary" round :loading="submitting" @click="$emit('submit')">
           {{ isLoggedIn ? '发表评论' : '登录后评论' }}

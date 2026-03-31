@@ -476,7 +476,6 @@ watch(
 }
 
 .intro-shell {
-  margin-top: -92px;
   z-index: 2;
 }
 

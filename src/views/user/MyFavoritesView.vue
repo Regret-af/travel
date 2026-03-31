@@ -14,7 +14,7 @@
       variant="auth"
       eyebrow="旅行者空间"
       title="登录后，才会看到你保存下来的日记清单"
-      description="这里集中展示你收藏过的旅行日记，并保留失效收藏的独立视觉状态。"
+      description="这里集中展示你收藏过的旅行日记，方便你随时回来继续翻阅。"
       action-label="立即登录"
       secondary-label="返回个人中心"
       secondary-to="/account"
@@ -39,7 +39,7 @@
           <p class="hero-eyebrow">我的收藏</p>
           <h1>把想再次翻阅的旅途，留在自己的私藏目录里。</h1>
           <p class="hero-description">
-            收藏页不做批量管理和收藏夹扩展，只保留分页浏览。如果某篇内容已经失效，它仍会留在目录里，并以独立状态呈现。
+            这里收纳你保存下来的旅行日记，方便随时回看、继续翻阅。
           </p>
         </div>
 
@@ -50,14 +50,14 @@
             <p>按收藏顺序分页展示你保存过的内容。</p>
           </article>
           <article class="hero-stat">
-            <span class="hero-stat-label">本页失效</span>
+            <span class="hero-stat-label">暂不可访问</span>
             <strong>{{ invalidCount }}</strong>
-            <p>失效收藏不会消失，而是保留独立视觉状态。</p>
+            <p>这部分收藏会继续保留在目录中，方便你之后再回来看看。</p>
           </article>
           <article class="hero-stat">
             <span class="hero-stat-label">当前页码</span>
             <strong>第 {{ pageData.pageNum || currentPage }} 页</strong>
-            <p>目录体验保持轻量，不引入无限滚动。</p>
+            <p>按页浏览，帮助你更从容地查看和回顾每一次收藏。</p>
           </article>
         </div>
       </section>
@@ -74,9 +74,9 @@
             :item="item"
             :to="item.invalid ? '' : `/diaries/${item.id}`"
             :invalid="item.invalid"
-            :badge="item.invalid ? '内容失效' : '已收藏'"
-            :badge-tone="item.invalid ? 'danger' : 'gold'"
-            :note="item.invalid ? '内容暂时不可继续打开' : '继续翻阅这篇你收藏过的旅行故事'"
+            :badge="item.invalid ? '暂不可访问' : '已收藏'"
+            :badge-tone="item.invalid ? 'slate' : 'gold'"
+            :note="item.invalid ? '当前暂时无法打开这篇内容，先把这段旅程留在你的收藏里。' : '继续翻阅这篇你收藏过的旅行故事'"
           />
         </div>
 

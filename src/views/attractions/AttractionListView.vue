@@ -2,7 +2,7 @@
   <div class="attractions-page">
     <section class="directory-hero" :style="heroBackgroundStyle">
       <div class="hero-copy">
-        <p class="hero-eyebrow">景点列表</p>
+        <p class="hero-eyebrow">景点</p>
         <h1>为行程规划筛选值得了解的景点</h1>
         <p class="hero-description">
           这里汇集了适合行程规划时慢慢翻看的景点内容，你可以按关键词、分类和浏览方式找到想了解的地方。
