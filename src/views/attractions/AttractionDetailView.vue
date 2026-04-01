@@ -17,11 +17,9 @@
           <div class="hero-copy">
             <p class="hero-eyebrow">景点详情</p>
             <h1>{{ detail.name }}</h1>
-            <p v-if="heroSummary" class="hero-summary">{{ heroSummary }}</p>
 
             <div class="hero-meta">
               <span v-if="detail.locationText" class="hero-meta-pill">{{ detail.locationText }}</span>
-              <span v-if="viewCountText" class="hero-meta-pill ghost">{{ viewCountText }}</span>
             </div>
           </div>
 
@@ -35,7 +33,7 @@
         <div class="intro-card">
           <p class="section-eyebrow">景点概览</p>
           <div class="intro-headline">
-            <h2>{{ detail.name }}</h2>
+            <h2>关键信息</h2>
             <p>{{ introSummary }}</p>
           </div>
         </div>
@@ -44,13 +42,11 @@
           <article v-if="detail.category?.name" class="meta-card">
             <span class="meta-label">景点分类</span>
             <strong class="meta-value">{{ detail.category?.name }}</strong>
-            <p class="meta-note">帮助你更快理解这处景点在旅途中更接近哪一种体验。</p>
           </article>
 
           <article v-if="detail.locationText" class="meta-card">
             <span class="meta-label">所在位置</span>
             <strong class="meta-value">{{ detail.locationText }}</strong>
-            <p class="meta-note">先看看它位于哪里，也为接下来的阅读建立一份清晰的位置感。</p>
           </article>
 
           <article v-if="viewCountText" class="meta-card">
@@ -60,12 +56,79 @@
         </div>
       </section>
 
+      <section v-if="hasGuideContent" class="guide-shell">
+        <div class="guide-grid">
+          <article v-if="mapQuery" class="guide-card guide-card-map">
+            <p class="section-eyebrow">地图位置</p>
+            <h2>在地图中查看景点位置</h2>
+            <p class="guide-description">
+              {{ mapDescription }}
+            </p>
+
+            <div class="map-preview">
+              <div ref="mapContainerRef" class="map-frame" />
+
+              <div v-if="mapStatus !== 'ready'" class="map-status">
+                {{ mapStatusText }}
+              </div>
+            </div>
+
+            <div class="map-actions">
+              <button
+                v-if="mapStatus === 'ready'"
+                type="button"
+                class="guide-link"
+                @click="recenterMap"
+              >
+                回到景点位置
+              </button>
+              <a
+                v-if="baiduMapUrl"
+                class="guide-link guide-link-primary"
+                :href="baiduMapUrl"
+                target="_blank"
+                rel="noreferrer"
+              >
+                在百度地图中查看
+              </a>
+            </div>
+          </article>
+
+          <article v-if="guideFacts.length" class="guide-card guide-card-facts">
+            <p class="section-eyebrow">出行参考</p>
+            <h2>快速查看实用信息</h2>
+
+            <div class="guide-facts">
+              <div
+                v-for="fact in guideFacts"
+                :key="fact.label"
+                class="guide-fact"
+              >
+                <span class="guide-fact-label">{{ fact.label }}</span>
+                <template v-if="fact.label === '联系电话' && telephoneItems.length">
+                  <div class="guide-fact-links">
+                    <a
+                      v-for="phone in telephoneItems"
+                      :key="phone"
+                      class="guide-fact-link"
+                      :href="`tel:${phone.replace(/\\s+/g, '')}`"
+                    >
+                      {{ phone }}
+                    </a>
+                  </div>
+                </template>
+                <strong v-else class="guide-fact-value">{{ fact.value }}</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section class="story-shell">
         <div class="story-frame">
           <div class="story-intro">
             <p class="section-eyebrow">景点介绍</p>
             <h2>以阅读的方式，重新理解该景点</h2>
-            <p class="story-lead">{{ introSummary }}</p>
           </div>
 
           <div v-if="descriptionParagraphs.length" class="story-body">
@@ -80,40 +143,11 @@
           </div>
 
           <div v-else class="story-empty">
-            <p class="story-empty-title">景点正文正在补充中</p>
+            <p class="story-empty-title">当前还没有更多介绍</p>
             <p class="story-empty-text">
-              当前内容仍在补充中，你可以先通过摘要与位置信息了解该景点的基本信息。
+              目前可以先查看封面、分类和位置信息，稍后再回来了解更多内容。
             </p>
           </div>
-        </div>
-      </section>
-
-      <section v-if="detail.locationText && locationNarrative" class="location-shell">
-        <div class="location-card">
-          <div class="location-graphic" />
-          <div class="location-copy">
-            <p class="section-eyebrow">位置说明</p>
-            <h2>{{ detail.locationText }}</h2>
-            <p>
-              {{ locationNarrative }}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="return-shell">
-        <div class="return-card">
-          <div class="return-copy">
-            <p class="section-eyebrow">继续探索</p>
-            <h2>完成当前阅读后，可返回景点列表继续查阅</h2>
-            <p>
-              当前景点信息已阅读完毕。如需比较更多景点，可返回景点列表并继续按分类、排序与分页浏览。
-            </p>
-          </div>
-
-          <el-button type="primary" round class="return-button" @click="goBackToList">
-            返回景点列表
-          </el-button>
         </div>
       </section>
     </template>
@@ -156,10 +190,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getAttractionDetail, type AttractionDetail } from '@/api/attractions';
-import { formatCountStat } from '@/utils/formatters';
+import { loadBaiduMapSdk, type BaiduMapMap, type BaiduMapNamespace } from '@/utils/baiduMap';
+import { formatCountStat, formatDate } from '@/utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -168,18 +203,19 @@ const detail = ref<AttractionDetail | null>(null);
 const pageStatus = ref<'loading' | 'success' | 'empty' | 'error'>('loading');
 const errorMessage = ref('');
 const introRef = ref<HTMLElement | null>(null);
+const mapContainerRef = ref<HTMLElement | null>(null);
+const mapStatus = ref<'idle' | 'loading' | 'ready' | 'missing-ak' | 'error'>('idle');
 let fetchSequence = 0;
+let mapInstance: BaiduMapMap | null = null;
+let mapSdk: BaiduMapNamespace | null = null;
+let mapControlsInitialized = false;
+const baiduMapAk = import.meta.env.VITE_BAIDU_MAP_AK?.trim() || '';
 
 const heroBackgroundStyle = computed(() => ({
   backgroundImage: detail.value?.coverUrl
     ? `linear-gradient(115deg, rgba(15, 23, 42, 0.62) 0%, rgba(15, 23, 42, 0.26) 42%, rgba(15, 23, 42, 0.72) 100%), url(${detail.value.coverUrl})`
     : 'radial-gradient(circle at 20% 18%, rgba(34, 211, 238, 0.26), transparent 24%), radial-gradient(circle at 82% 18%, rgba(212, 175, 55, 0.22), transparent 20%), linear-gradient(135deg, #e8f6fb 0%, #f8fafc 52%, #eef3ff 100%)'
 }));
-const heroSummary = computed(() => {
-  const summary = detail.value?.summary?.trim() || '';
-  if (!summary) return '';
-  return summary.length > 90 ? `${summary.slice(0, 90)}...` : summary;
-});
 const introSummary = computed(
   () =>
     detail.value?.summary?.trim() ||
@@ -197,14 +233,85 @@ const descriptionParagraphs = computed(() => {
 const viewCountText = computed(() =>
   typeof detail.value?.viewCount === 'number' ? `${formatCountStat(detail.value.viewCount)} 浏览` : ''
 );
-const locationNarrative = computed(() => {
-  const location = detail.value?.locationText?.trim();
-  if (!location) {
-    return '';
+const updatedAtText = computed(() => {
+  const value = detail.value?.sourceSyncedAt?.trim() || detail.value?.updatedAt?.trim();
+  if (!value) return '';
+
+  return formatDate(value);
+});
+const openingHoursText = computed(() => detail.value?.openingHours?.trim() || '');
+const telephoneText = computed(() => detail.value?.telephone?.trim() || '');
+const addressDetailText = computed(() => detail.value?.addressDetail?.trim() || '');
+const telephoneItems = computed(() => {
+  const list = detail.value?.telephoneList
+    ?.map((item) => item?.trim())
+    .filter(Boolean);
+
+  if (list?.length) {
+    return list;
   }
 
-  return `${location} 是这处景点所在的位置描述，也让你在阅读之前先对它有一份地理上的想象。`;
+  return telephoneText.value ? [telephoneText.value] : [];
 });
+const mapQuery = computed(() => {
+  const segments = [detail.value?.name, addressDetailText.value, detail.value?.locationText]
+    .map((item) => item?.trim())
+    .filter(Boolean);
+
+  return segments.join(' ');
+});
+const hasCoordinates = computed(
+  () => typeof detail.value?.latitude === 'number' && typeof detail.value?.longitude === 'number'
+);
+const coordinateText = computed(() => {
+  if (!hasCoordinates.value) return '';
+
+  return `${detail.value!.latitude!.toFixed(5)}, ${detail.value!.longitude!.toFixed(5)}`;
+});
+const baiduMapUrl = computed(() => {
+  if (hasCoordinates.value) {
+    return `https://api.map.baidu.com/marker?location=${detail.value!.latitude},${detail.value!.longitude}&title=${encodeURIComponent(detail.value?.name || '景点位置')}&content=${encodeURIComponent(detail.value?.locationText || detail.value?.name || '景点位置')}&output=html`;
+  }
+
+  return mapQuery.value
+    ? `https://api.map.baidu.com/place/search?query=${encodeURIComponent(mapQuery.value)}&region=${encodeURIComponent(detail.value?.locationText || '全国')}&output=html`
+    : '';
+});
+const mapDescription = computed(() => {
+  if (detail.value?.locationText?.trim()) {
+    return `可拖动或缩放地图查看周边，迷失位置时可一键回到 ${detail.value.locationText.trim()}。`;
+  }
+
+  return '可拖动或缩放地图查看周边，迷失位置时可一键回到景点位置。';
+});
+const guideFacts = computed(() => {
+  const facts = [
+    { label: '开放时间', value: openingHoursText.value },
+    { label: '详细地址', value: addressDetailText.value },
+    { label: '联系电话', value: telephoneItems.value.join(' / ') },
+    { label: '最近同步', value: updatedAtText.value }
+  ];
+
+  return facts.filter((fact) => fact.value);
+});
+const mapStatusText = computed(() => {
+  if (mapStatus.value === 'loading') {
+    return '地图正在加载中…';
+  }
+
+  if (mapStatus.value === 'missing-ak') {
+    return '当前未配置百度地图 AK，暂时无法展示内嵌地图。';
+  }
+
+  if (mapStatus.value === 'error') {
+    return '暂时无法加载地图，可先使用下方按钮在百度地图中查看。';
+  }
+
+  return '';
+});
+const hasGuideContent = computed(
+  () => Boolean(mapQuery.value || guideFacts.value.length)
+);
 const stateTitle = computed(() =>
   pageStatus.value === 'error' ? '景点详情暂时无法加载' : '未找到对应景点内容'
 );
@@ -229,6 +336,103 @@ const scrollToIntro = () => {
       behavior: 'smooth'
     });
   });
+};
+
+const ensureMapInstance = async () => {
+  if (!mapContainerRef.value) return null;
+
+  if (!baiduMapAk) {
+    mapStatus.value = 'missing-ak';
+    return null;
+  }
+
+  mapStatus.value = 'loading';
+
+  const BMap = await loadBaiduMapSdk(baiduMapAk);
+  mapSdk = BMap;
+
+  if (!mapContainerRef.value) return null;
+
+  if (!mapInstance) {
+    mapInstance = new BMap.Map(mapContainerRef.value);
+  }
+
+  if (!mapControlsInitialized) {
+    mapInstance.enableScrollWheelZoom(true);
+    mapInstance.addControl(new BMap.NavigationControl());
+    mapInstance.addControl(new BMap.ScaleControl());
+    mapControlsInitialized = true;
+  }
+
+  return mapInstance;
+};
+
+const renderBaiduMap = async () => {
+  if (pageStatus.value !== 'success' || !detail.value || !mapQuery.value || !mapContainerRef.value) {
+    return;
+  }
+
+  try {
+    const map = await ensureMapInstance();
+    if (!map || !detail.value || !mapSdk) return;
+
+    map.clearOverlays();
+
+    if (hasCoordinates.value) {
+      const point = new mapSdk.Point(detail.value.longitude!, detail.value.latitude!);
+      map.centerAndZoom(point, 15);
+      map.addOverlay(new mapSdk.Marker(point));
+      mapStatus.value = 'ready';
+      return;
+    }
+
+    const geocoder = new mapSdk.Geocoder();
+    geocoder.getPoint(
+      mapQuery.value,
+      (point) => {
+        if (!point || !mapInstance || !mapSdk) {
+          mapStatus.value = 'error';
+          return;
+        }
+
+        mapInstance.clearOverlays();
+        mapInstance.centerAndZoom(point, 15);
+        mapInstance.addOverlay(new mapSdk.Marker(point));
+        mapStatus.value = 'ready';
+      },
+      detail.value?.locationText || undefined
+    );
+  } catch (error) {
+    console.error('Failed to render Baidu map', error);
+    mapStatus.value = baiduMapAk ? 'error' : 'missing-ak';
+  }
+};
+
+const recenterMap = () => {
+  if (!mapInstance || !mapSdk || !detail.value) return;
+
+  if (hasCoordinates.value) {
+    const point = new mapSdk.Point(detail.value.longitude!, detail.value.latitude!);
+    mapInstance.clearOverlays();
+    mapInstance.centerAndZoom(point, 15);
+    mapInstance.addOverlay(new mapSdk.Marker(point));
+    return;
+  }
+
+  if (!mapQuery.value) return;
+
+  const geocoder = new mapSdk.Geocoder();
+  geocoder.getPoint(
+    mapQuery.value,
+    (point) => {
+      if (!point || !mapInstance || !mapSdk) return;
+
+      mapInstance.clearOverlays();
+      mapInstance.centerAndZoom(point, 15);
+      mapInstance.addOverlay(new mapSdk.Marker(point));
+    },
+    detail.value?.locationText || undefined
+  );
 };
 
 const fetchDetail = async (id: string | string[] | undefined) => {
@@ -270,6 +474,34 @@ watch(
   },
   { immediate: true }
 );
+
+watch(
+  () => [
+    pageStatus.value,
+    detail.value?.id,
+    detail.value?.latitude,
+    detail.value?.longitude,
+    detail.value?.locationText,
+    mapContainerRef.value
+  ],
+  () => {
+    if (pageStatus.value !== 'success') {
+      mapStatus.value = 'idle';
+      return;
+    }
+
+    nextTick(() => {
+      renderBaiduMap();
+    });
+  },
+  { flush: 'post' }
+);
+
+onBeforeUnmount(() => {
+  mapInstance = null;
+  mapSdk = null;
+  mapControlsInitialized = false;
+});
 </script>
 
 <style scoped lang="scss">
@@ -285,9 +517,8 @@ watch(
 .detail-hero,
 .intro-card,
 .meta-card,
+.guide-card,
 .story-frame,
-.location-card,
-.return-card,
 .state-card,
 .loading-hero,
 .loading-card {
@@ -296,8 +527,8 @@ watch(
 
 .detail-hero {
   position: relative;
-  min-height: 78vh;
-  padding: 32px 36px 38px;
+  min-height: 58vh;
+  padding: 28px 36px 32px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -421,16 +652,8 @@ watch(
   letter-spacing: -0.04em;
 }
 
-.hero-summary {
-  margin: 20px 0 0;
-  max-width: 560px;
-  font-size: var(--font-size-xl);
-  line-height: 1.85;
-  color: rgba(248, 250, 252, 0.88);
-}
-
 .hero-meta {
-  margin-top: 24px;
+  margin-top: 20px;
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -469,14 +692,13 @@ watch(
   }
 }
 
-.intro-shell,
-.location-shell,
-.return-shell {
+.intro-shell {
   position: relative;
+  z-index: 2;
 }
 
-.intro-shell {
-  z-index: 2;
+.guide-shell {
+  padding-top: 2px;
 }
 
 .intro-card {
@@ -516,6 +738,12 @@ watch(
   gap: 18px;
 }
 
+.guide-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+  gap: 20px;
+}
+
 .meta-card {
   grid-column: span 4;
   padding: 24px 22px;
@@ -553,11 +781,157 @@ watch(
   font-weight: var(--font-weight-title);
 }
 
-.meta-note {
+.guide-card {
+  padding: 30px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.96) 100%);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+
+  h2 {
+    margin: 0;
+    font-size: var(--font-size-10xl);
+    line-height: 1.12;
+    font-weight: var(--font-weight-title);
+    letter-spacing: -0.03em;
+  }
+}
+
+.guide-description {
   margin: 14px 0 0;
   color: #64748b;
+  font-size: var(--font-size-lg);
+  line-height: 1.88;
+}
+
+.map-preview {
+  min-height: 196px;
+  margin-top: 24px;
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(226, 232, 240, 0.88) 0%, rgba(241, 245, 249, 0.96) 100%);
+  box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.8);
+}
+
+.map-frame {
+  width: 100%;
+  height: 100%;
+  min-height: 196px;
+  display: block;
+  background: transparent;
+}
+
+.map-status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  color: #475569;
   font-size: var(--font-size-md);
   line-height: 1.8;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(8px);
+  z-index: 1;
+}
+
+.map-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.guide-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  background: rgba(255, 255, 255, 0.92);
+  color: #111827;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: rgba(34, 211, 238, 0.3);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+  }
+
+  &.guide-link-primary {
+    background: #111827;
+    border-color: #111827;
+    color: #f8fafc;
+  }
+}
+
+.guide-facts {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.guide-fact {
+  min-height: 102px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(248, 250, 252, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+.guide-fact-label {
+  display: inline-flex;
+  color: #c79b1d;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+}
+
+.guide-fact-value {
+  display: block;
+  margin-top: 10px;
+  color: #111827;
+  font-size: var(--font-size-lg);
+  line-height: 1.72;
+  font-weight: var(--font-weight-semibold);
+}
+
+.guide-fact-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  color: #111827;
+  font-size: var(--font-size-md);
+  line-height: 1;
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+
+  &:hover {
+    border-color: rgba(34, 211, 238, 0.32);
+  }
+}
+
+.guide-fact-links {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .story-shell {
@@ -584,13 +958,6 @@ watch(
     font-weight: var(--font-weight-title);
     letter-spacing: -0.03em;
   }
-}
-
-.story-lead {
-  margin: 18px 0 0;
-  color: #334155;
-  font-size: var(--font-size-xl);
-  line-height: 1.95;
 }
 
 .story-body {
@@ -635,108 +1002,11 @@ watch(
   line-height: 1.85;
 }
 
-.location-card,
-.return-card,
 .state-card {
   overflow: hidden;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.96) 100%);
   border: 1px solid rgba(226, 232, 240, 0.85);
   box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
-}
-
-.location-card {
-  padding: 30px;
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 26px;
-  align-items: center;
-}
-
-.location-graphic {
-  min-height: 220px;
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0) 34%),
-    linear-gradient(135deg, rgba(34, 211, 238, 0.24) 0%, rgba(212, 175, 55, 0.18) 100%);
-  position: relative;
-  overflow: hidden;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    border-radius: 999px;
-  }
-
-  &::before {
-    width: 110px;
-    height: 110px;
-    top: 18%;
-    left: 22%;
-    border: 1px solid rgba(255, 255, 255, 0.56);
-  }
-
-  &::after {
-    width: 160px;
-    height: 1px;
-    left: 24px;
-    right: 24px;
-    bottom: 58px;
-    background: rgba(255, 255, 255, 0.74);
-    box-shadow:
-      0 -20px 0 rgba(255, 255, 255, 0.28),
-      0 -40px 0 rgba(255, 255, 255, 0.18);
-  }
-}
-
-.location-copy {
-  h2 {
-    margin: 0;
-    font-size: var(--font-size-10xl);
-    line-height: 1.12;
-    font-weight: var(--font-weight-title);
-    letter-spacing: -0.03em;
-  }
-
-  p {
-    margin: 16px 0 0;
-    color: #64748b;
-    font-size: var(--font-size-lg);
-    line-height: 1.92;
-    max-width: 720px;
-  }
-}
-
-.return-card {
-  padding: 34px 34px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.return-copy {
-  max-width: 760px;
-
-  h2 {
-    margin: 0;
-    font-size: var(--font-size-11xl);
-    line-height: 1.08;
-    font-weight: var(--font-weight-title);
-    letter-spacing: -0.03em;
-  }
-
-  p:last-child {
-    margin: 16px 0 0;
-    color: #64748b;
-    font-size: var(--font-size-lg);
-    line-height: 1.9;
-  }
-}
-
-.return-button {
-  min-width: 160px;
-  height: 50px;
 }
 
 .state-shell {
@@ -880,7 +1150,7 @@ watch(
 
 @media (max-width: 1100px) {
   .detail-hero {
-    min-height: 68vh;
+    min-height: 50vh;
   }
 
   .hero-copy h1 {
@@ -888,8 +1158,7 @@ watch(
   }
 
   .intro-headline,
-  .location-card,
-  .return-card,
+  .guide-grid,
   .loading-card-grid {
     grid-template-columns: 1fr;
   }
@@ -908,9 +1177,8 @@ watch(
   .detail-hero,
   .intro-card,
   .meta-card,
+  .guide-card,
   .story-frame,
-  .location-card,
-  .return-card,
   .state-card,
   .loading-hero,
   .loading-card {
@@ -918,8 +1186,8 @@ watch(
   }
 
   .detail-hero {
-    min-height: 76vh;
-    padding: 20px 18px 24px;
+    min-height: 46vh;
+    padding: 18px 18px 22px;
   }
 
   .hero-content {
@@ -932,11 +1200,6 @@ watch(
     line-height: 1.04;
   }
 
-  .hero-summary {
-    font-size: var(--font-size-base);
-    line-height: 1.85;
-  }
-
   .hero-scroll {
     width: 100%;
     justify-content: center;
@@ -947,25 +1210,21 @@ watch(
   }
 
   .intro-card,
+  .guide-card,
   .story-frame,
-  .location-card,
-  .return-card,
   .state-card {
     padding: 24px 18px;
   }
 
   .intro-headline h2,
+  .guide-card h2,
   .story-intro h2,
-  .location-copy h2,
-  .return-copy h2,
   .state-card h2 {
     font-size: var(--font-size-8xl);
   }
 
   .intro-headline p,
-  .story-lead,
-  .location-copy p,
-  .return-copy p:last-child,
+  .guide-description,
   .state-description {
     font-size: var(--font-size-base);
   }
@@ -983,6 +1242,28 @@ watch(
     font-size: var(--font-size-4xl);
   }
 
+  .guide-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .map-preview {
+    min-height: 156px;
+    border-radius: 22px;
+  }
+
+  .map-frame {
+    min-height: 156px;
+  }
+
+  .map-status {
+    padding: 18px;
+    font-size: var(--font-size-sm);
+  }
+
+  .guide-link {
+    width: 100%;
+  }
+
   .story-body,
   .story-empty {
     margin: 0;
@@ -991,14 +1272,6 @@ watch(
   .story-paragraph {
     font-size: var(--font-size-base);
     line-height: 1.95;
-  }
-
-  .location-graphic {
-    min-height: 180px;
-  }
-
-  .return-button {
-    width: 100%;
   }
 
   .state-actions {

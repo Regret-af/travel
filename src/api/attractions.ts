@@ -25,6 +25,12 @@ interface AttractionApiItem {
 interface AttractionDetailApi extends AttractionApiItem {
   description?: string;
   updatedAt?: string;
+  baiduUid?: string;
+  sourceSyncedAt?: string;
+  addressDetail?: string;
+  telephone?: string;
+  telephoneList?: string[];
+  openingHours?: string;
 }
 
 export interface AttractionCategory {
@@ -58,6 +64,12 @@ export interface PageAttractionCard {
 export interface AttractionDetail extends AttractionCard {
   description?: string;
   updatedAt?: string;
+  baiduUid?: string;
+  sourceSyncedAt?: string;
+  addressDetail?: string;
+  telephone?: string;
+  telephoneList?: string[];
+  openingHours?: string;
 }
 
 export interface AttractionListParams {
@@ -114,7 +126,13 @@ const mapAttraction = (item: AttractionApiItem): AttractionCard => {
 const mapAttractionDetail = (item: AttractionDetailApi): AttractionDetail => ({
   ...mapAttraction(item),
   description: item.description,
-  updatedAt: item.updatedAt
+  updatedAt: item.updatedAt,
+  baiduUid: item.baiduUid,
+  sourceSyncedAt: item.sourceSyncedAt,
+  addressDetail: item.addressDetail,
+  telephone: item.telephone,
+  telephoneList: item.telephoneList,
+  openingHours: item.openingHours
 });
 
 const mapPage = (page?: PaginatedData<AttractionApiItem>): PageAttractionCard => ({
