@@ -22,7 +22,9 @@ export interface BaiduMapGeocoder {
 export interface BaiduMapNamespace {
   Map: new (container: string | HTMLElement) => BaiduMapMap;
   Point: new (lng: number, lat: number) => BaiduMapPoint;
-  Marker: new (point: BaiduMapPoint) => unknown;
+  Size: new (width: number, height: number) => unknown;
+  Icon: new (imageUrl: string, size: unknown, options?: Record<string, unknown>) => unknown;
+  Marker: new (point: BaiduMapPoint, options?: Record<string, unknown>) => unknown;
   NavigationControl: new () => unknown;
   ScaleControl: new () => unknown;
   Geocoder: new () => BaiduMapGeocoder;

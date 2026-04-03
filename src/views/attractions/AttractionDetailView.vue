@@ -1,71 +1,161 @@
 <template>
   <div class="attraction-detail-page">
     <template v-if="pageStatus === 'success' && detail">
-      <section class="detail-hero" :style="heroBackgroundStyle">
+      <section class="hero-stage">
+        <div class="hero-media" :style="heroBackgroundStyle" />
         <div class="hero-overlay" />
-        <div class="hero-glow hero-glow-cyan" />
-        <div class="hero-glow hero-glow-gold" />
 
-        <div class="hero-topbar">
-          <button class="hero-back" type="button" @click="goBackToList">
-            返回景点列表
-          </button>
-          <span v-if="detail.category?.name" class="hero-category">{{ detail.category.name }}</span>
-        </div>
+        <div class="hero-shell">
+          <div class="hero-topbar">
+            <button class="hero-back" type="button" @click="goBackToList">
+              <span class="material-symbols-outlined">arrow_back</span>
+              返回景点列表
+            </button>
 
-        <div class="hero-content">
-          <div class="hero-copy">
-            <p class="hero-eyebrow">景点详情</p>
-            <h1>{{ detail.name }}</h1>
-
-            <div class="hero-meta">
-              <span v-if="detail.locationText" class="hero-meta-pill">{{ detail.locationText }}</span>
+            <div class="hero-topbar-meta">
+              <span v-if="detail.category?.name" class="hero-pill hero-pill-solid">
+                {{ detail.category.name }}
+              </span>
+              <span v-if="weatherUpdatedText" class="hero-pill">
+                天气更新 {{ weatherUpdatedText }}
+              </span>
             </div>
           </div>
 
-          <button class="hero-scroll" type="button" @click="scrollToIntro">
-            继续阅读
-          </button>
-        </div>
-      </section>
-
-      <section ref="introRef" class="intro-shell">
-        <div class="intro-card">
-          <p class="section-eyebrow">景点概览</p>
-          <div class="intro-headline">
-            <h2>关键信息</h2>
-            <p>{{ introSummary }}</p>
+          <div class="hero-content">
+            <div class="hero-copy">
+              <div class="hero-location-row">
+                <span class="material-symbols-outlined">location_on</span>
+                <span>{{ heroLocation }}</span>
+              </div>
+              <h1 class="headline-text">{{ detail.name }}</h1>
+            </div>
           </div>
         </div>
-
-        <div class="meta-grid">
-          <article v-if="detail.category?.name" class="meta-card">
-            <span class="meta-label">景点分类</span>
-            <strong class="meta-value">{{ detail.category?.name }}</strong>
-          </article>
-
-          <article v-if="detail.locationText" class="meta-card">
-            <span class="meta-label">所在位置</span>
-            <strong class="meta-value">{{ detail.locationText }}</strong>
-          </article>
-
-          <article v-if="viewCountText" class="meta-card">
-            <span class="meta-label">浏览记录</span>
-            <strong class="meta-value">{{ viewCountText }}</strong>
-          </article>
-        </div>
       </section>
 
-      <section v-if="hasGuideContent" class="guide-shell">
-        <div class="guide-grid">
-          <article v-if="mapQuery" class="guide-card guide-card-map">
-            <p class="section-eyebrow">地图位置</p>
-            <h2>在地图中查看景点位置</h2>
-            <p class="guide-description">
-              {{ mapDescription }}
-            </p>
+      <section class="tag-strip">
+        <article v-if="detail.category?.name" class="tag-card">
+          <span class="material-symbols-outlined tag-icon">park</span>
+          <span>{{ detail.category.name }}</span>
+        </article>
 
-            <div class="map-preview">
+        <article v-if="detail.locationText" class="tag-card">
+          <span class="material-symbols-outlined tag-icon">pin_drop</span>
+          <span>{{ detail.locationText }}</span>
+        </article>
+
+        <article v-if="viewCountText" class="tag-card">
+          <span class="material-symbols-outlined tag-icon">visibility</span>
+          <span>{{ viewCountText }}</span>
+        </article>
+      </section>
+
+      <section
+        ref="contentAnchorRef"
+        class="content-grid"
+        :class="{ 'content-grid-single': !showWeatherSection }"
+      >
+        <div v-if="showWeatherSection" class="weather-column">
+          <div class="weather-grid">
+            <article class="weather-card weather-card-current">
+              <div class="weather-glow" />
+              <div class="weather-current-head">
+                <div>
+                  <p class="panel-label">当前天气</p>
+                  <h2 class="headline-text weather-temp">
+                    {{ currentTemperatureText }}
+                  </h2>
+                  <p class="weather-subline">{{ currentWeatherDescription }}</p>
+                </div>
+                <span class="material-symbols-outlined weather-main-icon">
+                  {{ currentWeatherIcon }}
+                </span>
+              </div>
+
+              <div class="weather-current-meta">
+                <div v-if="humidityText" class="weather-meta-item">
+                  <span class="material-symbols-outlined">water_drop</span>
+                  <span>{{ humidityText }}</span>
+                </div>
+                <div v-if="windText" class="weather-meta-item">
+                  <span class="material-symbols-outlined">air</span>
+                  <span>{{ windText }}</span>
+                </div>
+              </div>
+            </article>
+
+            <div class="weather-sidecards">
+              <article class="weather-tip-card" :class="weatherSuitabilityClass">
+                <span class="material-symbols-outlined">
+                  {{ weatherTipIcon }}
+                </span>
+                <div>
+                  <h3>{{ weatherTipTitle }}</h3>
+                  <p>{{ weatherTipText }}</p>
+                </div>
+              </article>
+
+              <article
+                v-if="primaryAlert"
+                class="weather-alert-card"
+                :class="alertLevelClass(primaryAlert.level)"
+              >
+                <span class="material-symbols-outlined">warning</span>
+                <div>
+                  <h3>{{ primaryAlert.title || '天气预警' }}</h3>
+                  <p>{{ primaryAlert.description || '请合理安排出行。' }}</p>
+                </div>
+              </article>
+
+              <article v-else class="weather-alert-card weather-alert-card-muted">
+                <span class="material-symbols-outlined">verified</span>
+                <div>
+                  <h3>当前无天气预警</h3>
+                  <p>暂未发现会明显影响出行的天气预警信息。</p>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <article class="forecast-card">
+            <div class="forecast-head">
+              <h3 class="headline-text">3 日天气预报</h3>
+              <span v-if="weatherSourceLabel" class="forecast-source">
+                数据源 {{ weatherSourceLabel }}
+              </span>
+            </div>
+
+            <div class="forecast-grid">
+              <div
+                v-for="item in forecastItems"
+                :key="item.date || item.weekLabel || item.weatherTextDay"
+                class="forecast-item"
+              >
+                <span class="forecast-day">{{ item.weekLabel || '--' }}</span>
+                <span class="material-symbols-outlined forecast-icon">
+                  {{ resolveWeatherIcon(item.weatherTextDay, item.iconKeyDay) }}
+                </span>
+                <strong class="forecast-temp">
+                  {{ formatForecastTemp(item.tempMin, item.tempMax) }}
+                </strong>
+                <span class="forecast-weather">
+                  {{ item.weatherTextDay || '天气待更新' }}
+                </span>
+                <span
+                  class="forecast-status"
+                  :class="item.isSuitable ? 'forecast-status-ok' : 'forecast-status-risk'"
+                >
+                  {{ item.isSuitable ? '适合游玩' : '谨慎安排' }}
+                </span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="practical-column">
+          <article v-if="mapQuery" class="map-card">
+            <div class="map-frame-shell">
               <div ref="mapContainerRef" class="map-frame" />
 
               <div v-if="mapStatus !== 'ready'" class="map-status">
@@ -77,14 +167,14 @@
               <button
                 v-if="mapStatus === 'ready'"
                 type="button"
-                class="guide-link"
+                class="map-action"
                 @click="recenterMap"
               >
                 回到景点位置
               </button>
               <a
                 v-if="baiduMapUrl"
-                class="guide-link guide-link-primary"
+                class="map-action map-action-primary"
                 :href="baiduMapUrl"
                 target="_blank"
                 rel="noreferrer"
@@ -94,86 +184,92 @@
             </div>
           </article>
 
-          <article v-if="guideFacts.length" class="guide-card guide-card-facts">
-            <p class="section-eyebrow">出行参考</p>
-            <h2>快速查看实用信息</h2>
+          <article class="info-card">
+            <div class="info-head">
+              <span class="material-symbols-outlined">info</span>
+              <h3 class="headline-text">快速查看实用信息</h3>
+            </div>
 
-            <div class="guide-facts">
+            <div class="info-list">
               <div
-                v-for="fact in guideFacts"
+                v-for="fact in practicalFacts"
                 :key="fact.label"
-                class="guide-fact"
+                class="info-item"
               >
-                <span class="guide-fact-label">{{ fact.label }}</span>
-                <template v-if="fact.label === '联系电话' && telephoneItems.length">
-                  <div class="guide-fact-links">
+                <span class="info-label">{{ fact.label }}</span>
+                <template v-if="fact.type === 'phone' && telephoneItems.length">
+                  <div class="info-phone-list">
                     <a
                       v-for="phone in telephoneItems"
                       :key="phone"
-                      class="guide-fact-link"
-                      :href="`tel:${phone.replace(/\\s+/g, '')}`"
+                      class="info-phone"
+                      :href="`tel:${phone.replace(/\s+/g, '')}`"
                     >
                       {{ phone }}
                     </a>
                   </div>
                 </template>
-                <strong v-else class="guide-fact-value">{{ fact.value }}</strong>
+                <p v-else class="info-value">{{ fact.value }}</p>
               </div>
             </div>
           </article>
         </div>
       </section>
 
-      <section class="story-shell">
-        <div class="story-frame">
-          <div class="story-intro">
-            <p class="section-eyebrow">景点介绍</p>
-            <h2>以阅读的方式，重新理解该景点</h2>
+      <section class="story-section">
+        <div class="story-grid">
+          <div class="story-side">
+            <div class="story-side-inner">
+              <span class="story-label">The Core Story</span>
+              <h2 class="headline-text">以阅读的方式，重新理解该景点</h2>
+              <div class="story-divider" />
+              <p class="story-summary">{{ introSummary }}</p>
+            </div>
           </div>
 
-          <div v-if="descriptionParagraphs.length" class="story-body">
-            <p
-              v-for="(paragraph, index) in descriptionParagraphs"
-              :key="`${index}-${paragraph.slice(0, 12)}`"
-              class="story-paragraph"
-              :class="{ 'story-paragraph-first': index === 0 }"
-            >
-              {{ paragraph }}
-            </p>
-          </div>
+          <div class="story-content">
+            <div class="story-lead-card">
+              <p class="story-lead-title">景点导读</p>
+              <p class="story-lead-copy">
+                {{ introSummary }}
+              </p>
+            </div>
 
-          <div v-else class="story-empty">
-            <p class="story-empty-title">当前还没有更多介绍</p>
-            <p class="story-empty-text">
-              目前可以先查看封面、分类和位置信息，稍后再回来了解更多内容。
-            </p>
+            <DiaryRichContent
+              v-if="detail.description?.trim()"
+              :content="detail.description"
+            />
+
+            <div v-else class="story-empty">
+              <h3 class="headline-text">正文还在补充中</h3>
+              <p>
+                目前已经可以查看景点主图、天气、地图与实用信息。后续切换为富文本后，这里也能直接承载正文图片与更丰富的内容结构。
+              </p>
+            </div>
           </div>
         </div>
       </section>
     </template>
 
     <section v-else-if="pageStatus === 'loading'" class="loading-shell">
-      <div class="loading-hero">
-        <div class="loading-sheen" />
+      <div class="loading-hero" />
+
+      <div class="loading-grid">
+        <div class="loading-card loading-card-wide" />
+        <div class="loading-card" />
       </div>
-      <div class="loading-card-grid">
-        <div class="loading-card loading-card-wide">
-          <span class="loading-line short" />
-          <span class="loading-line medium" />
-          <span class="loading-line long" />
-        </div>
-        <div class="loading-card loading-card-compact">
-          <span class="loading-line medium" />
-          <span class="loading-line short" />
-        </div>
+
+      <div class="loading-grid loading-grid-columns">
+        <div class="loading-card loading-card-tall" />
+        <div class="loading-card loading-card-tall" />
       </div>
     </section>
 
     <section v-else class="state-shell">
       <div class="state-card">
         <div class="state-mark" :class="{ 'state-mark-error': pageStatus === 'error' }" />
-        <p class="section-eyebrow">{{ pageStatus === 'error' ? '暂时无法打开' : '内容暂未找到' }}</p>
-        <h2>{{ stateTitle }}</h2>
+        <p class="state-label">{{ pageStatus === 'error' ? '暂时无法打开' : '内容暂未找到' }}</p>
+        <h2 class="headline-text">{{ stateTitle }}</h2>
         <p class="state-description">{{ stateDescription }}</p>
 
         <div class="state-actions">
@@ -190,65 +286,100 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch, onBeforeUnmount } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getAttractionDetail, type AttractionDetail } from '@/api/attractions';
+import DiaryRichContent from '@/components/diaries/DiaryRichContent.vue';
+import {
+  getAttractionDetail,
+  getAttractionWeather,
+  type AttractionDetail,
+  type AttractionWeather,
+  type AttractionWeatherAlert,
+  type AttractionWeatherForecast
+} from '@/api/attractions';
 import { loadBaiduMapSdk, type BaiduMapMap, type BaiduMapNamespace } from '@/utils/baiduMap';
-import { formatCountStat, formatDate } from '@/utils/formatters';
+import { formatCountStat, formatDate, formatDateTime } from '@/utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
 
 const detail = ref<AttractionDetail | null>(null);
+const weather = ref<AttractionWeather | null>(null);
 const pageStatus = ref<'loading' | 'success' | 'empty' | 'error'>('loading');
+const weatherStatus = ref<'idle' | 'loading' | 'success' | 'hidden' | 'error'>('idle');
 const errorMessage = ref('');
-const introRef = ref<HTMLElement | null>(null);
+const contentAnchorRef = ref<HTMLElement | null>(null);
 const mapContainerRef = ref<HTMLElement | null>(null);
 const mapStatus = ref<'idle' | 'loading' | 'ready' | 'missing-ak' | 'error'>('idle');
+const baiduMapAk = import.meta.env.VITE_BAIDU_MAP_AK?.trim() || '';
 let fetchSequence = 0;
 let mapInstance: BaiduMapMap | null = null;
 let mapSdk: BaiduMapNamespace | null = null;
 let mapControlsInitialized = false;
-const baiduMapAk = import.meta.env.VITE_BAIDU_MAP_AK?.trim() || '';
+const markerIconUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#005bad" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <circle cx="28" cy="28" r="22" fill="#005bad"/>
+    <path
+      d="M28 15.5c-5.24 0-9.5 4.26-9.5 9.5 0 7.13 9.5 17.67 9.5 17.67S37.5 32.13 37.5 25c0-5.24-4.26-9.5-9.5-9.5zm0 12.83A3.33 3.33 0 1 1 28 21.67a3.33 3.33 0 0 1 0 6.66z"
+      fill="#ffffff"
+    />
+  </g>
+</svg>
+`)}`;
+
+const weatherIconPreset = new Map<string, string>([
+  ['sunny', 'sunny'],
+  ['clear-day', 'sunny'],
+  ['clear-night', 'clear_night'],
+  ['partly-cloudy-day', 'partly_cloudy_day'],
+  ['partly-cloudy-night', 'partly_cloudy_night'],
+  ['cloudy', 'cloud'],
+  ['overcast', 'cloud'],
+  ['foggy', 'foggy'],
+  ['light-rain', 'rainy'],
+  ['moderate-rain', 'rainy'],
+  ['heavy-rain', 'rainy'],
+  ['snow', 'weather_snowy'],
+  ['thunderstorm', 'thunderstorm']
+]);
 
 const heroBackgroundStyle = computed(() => ({
   backgroundImage: detail.value?.coverUrl
-    ? `linear-gradient(115deg, rgba(15, 23, 42, 0.62) 0%, rgba(15, 23, 42, 0.26) 42%, rgba(15, 23, 42, 0.72) 100%), url(${detail.value.coverUrl})`
-    : 'radial-gradient(circle at 20% 18%, rgba(34, 211, 238, 0.26), transparent 24%), radial-gradient(circle at 82% 18%, rgba(212, 175, 55, 0.22), transparent 20%), linear-gradient(135deg, #e8f6fb 0%, #f8fafc 52%, #eef3ff 100%)'
+    ? `linear-gradient(180deg, rgba(12, 17, 24, 0.08) 0%, rgba(12, 17, 24, 0.22) 42%, rgba(12, 17, 24, 0.62) 100%), url(${detail.value.coverUrl})`
+    : 'radial-gradient(circle at 16% 18%, rgba(94, 162, 255, 0.28), transparent 22%), radial-gradient(circle at 82% 14%, rgba(255, 202, 77, 0.26), transparent 18%), linear-gradient(135deg, #eef4fb 0%, #f7f9fb 58%, #eef2f6 100%)'
 }));
+const heroLocation = computed(
+  () => detail.value?.locationText?.trim() || detail.value?.addressDetail?.trim() || '景点详情'
+);
 const introSummary = computed(
   () =>
     detail.value?.summary?.trim() ||
-    '从封面、位置与正文开始，建立对该景点最直接的第一印象。'
+    '从天气、位置与正文开始，建立对这个景点最直接的第一印象。'
 );
-const descriptionParagraphs = computed(() => {
-  const description = detail.value?.description?.trim() || '';
-  if (!description) return [];
-
-  return description
-    .split(/\n+/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
-});
 const viewCountText = computed(() =>
   typeof detail.value?.viewCount === 'number' ? `${formatCountStat(detail.value.viewCount)} 浏览` : ''
 );
-const updatedAtText = computed(() => {
-  const value = detail.value?.sourceSyncedAt?.trim() || detail.value?.updatedAt?.trim();
-  if (!value) return '';
-
-  return formatDate(value);
-});
 const openingHoursText = computed(() => detail.value?.openingHours?.trim() || '');
-const telephoneText = computed(() => detail.value?.telephone?.trim() || '');
 const addressDetailText = computed(() => detail.value?.addressDetail?.trim() || '');
+const telephoneText = computed(() => detail.value?.telephone?.trim() || '');
+const weatherUpdatedText = computed(() => {
+  const value = weather.value?.sourceUpdatedAt?.trim();
+  return value ? formatDateTime(value) : '';
+});
+const weatherSourceLabel = computed(() => weather.value?.source?.trim() || '');
 const telephoneItems = computed(() => {
-  const list = detail.value?.telephoneList
+  const normalized = detail.value?.telephoneList
     ?.map((item) => item?.trim())
     .filter(Boolean);
 
-  if (list?.length) {
-    return list;
+  if (normalized?.length) {
+    return normalized;
   }
 
   return telephoneText.value ? [telephoneText.value] : [];
@@ -263,40 +394,78 @@ const mapQuery = computed(() => {
 const hasCoordinates = computed(
   () => typeof detail.value?.latitude === 'number' && typeof detail.value?.longitude === 'number'
 );
-const coordinateText = computed(() => {
-  if (!hasCoordinates.value) return '';
-
-  return `${detail.value!.latitude!.toFixed(5)}, ${detail.value!.longitude!.toFixed(5)}`;
-});
 const baiduMapUrl = computed(() => {
   if (hasCoordinates.value) {
-    return `https://api.map.baidu.com/marker?location=${detail.value!.latitude},${detail.value!.longitude}&title=${encodeURIComponent(detail.value?.name || '景点位置')}&content=${encodeURIComponent(detail.value?.locationText || detail.value?.name || '景点位置')}&output=html`;
+    return `https://api.map.baidu.com/marker?location=${detail.value!.latitude},${detail.value!.longitude}&title=${encodeURIComponent(detail.value?.name || '景点位置')}&content=${encodeURIComponent(heroLocation.value)}&output=html`;
   }
 
   return mapQuery.value
     ? `https://api.map.baidu.com/place/search?query=${encodeURIComponent(mapQuery.value)}&region=${encodeURIComponent(detail.value?.locationText || '全国')}&output=html`
     : '';
 });
-const mapDescription = computed(() => {
-  if (detail.value?.locationText?.trim()) {
-    return `可拖动或缩放地图查看周边，迷失位置时可一键回到 ${detail.value.locationText.trim()}。`;
-  }
-
-  return '可拖动或缩放地图查看周边，迷失位置时可一键回到景点位置。';
-});
-const guideFacts = computed(() => {
+const practicalFacts = computed(() => {
   const facts = [
-    { label: '开放时间', value: openingHoursText.value },
-    { label: '详细地址', value: addressDetailText.value },
-    { label: '联系电话', value: telephoneItems.value.join(' / ') },
-    { label: '最近同步', value: updatedAtText.value }
+    { label: '开放时间', value: openingHoursText.value, type: 'text' as const },
+    { label: '详细地址', value: addressDetailText.value || heroLocation.value, type: 'text' as const },
+    { label: '联系电话', value: telephoneItems.value.join(' / '), type: 'phone' as const },
+    {
+      label: '最近同步',
+      value: formatDate(detail.value?.sourceSyncedAt?.trim() || detail.value?.updatedAt?.trim()),
+      type: 'text' as const
+    }
   ];
 
-  return facts.filter((fact) => fact.value);
+  return facts.filter((item) => item.value);
 });
+const showWeatherSection = computed(
+  () => weatherStatus.value === 'success' && Boolean(weather.value?.available)
+);
+const currentWeather = computed(() => weather.value?.current);
+const forecastItems = computed<AttractionWeatherForecast[]>(() => weather.value?.forecast || []);
+const primaryAlert = computed<AttractionWeatherAlert | null>(() => weather.value?.alerts?.[0] || null);
+const currentTemperatureText = computed(() => {
+  const value = currentWeather.value?.temperature;
+  return typeof value === 'number' ? `${Math.round(value)}°` : '--';
+});
+const currentWeatherDescription = computed(() => {
+  const feelsLike = currentWeather.value?.feelsLike;
+  const weatherText = currentWeather.value?.weatherText?.trim() || '天气信息更新中';
+
+  if (typeof feelsLike === 'number') {
+    return `体感温度 ${Math.round(feelsLike)}° · ${weatherText}`;
+  }
+
+  return weatherText;
+});
+const humidityText = computed(() => {
+  const value = currentWeather.value?.humidity;
+  return typeof value === 'number' ? `湿度 ${value}%` : '';
+});
+const windText = computed(() => {
+  const segments = [currentWeather.value?.windDirection, currentWeather.value?.windLevel]
+    .map((item) => item?.trim())
+    .filter(Boolean);
+
+  return segments.join(' ');
+});
+const weatherTipText = computed(
+  () => currentWeather.value?.travelTip?.trim() || '当前天气信息较稳定，可结合景点开放时间安排出行。'
+);
+const weatherTipTitle = computed(() =>
+  currentWeather.value?.isSuitable === false ? '出行建议' : '当前适宜度'
+);
+const weatherTipIcon = computed(() =>
+  currentWeather.value?.isSuitable === false ? 'warning' : 'lightbulb'
+);
+const weatherSuitabilityClass = computed(() =>
+  currentWeather.value?.isSuitable === false ? 'weather-tip-card-caution' : 'weather-tip-card-positive'
+);
+const currentWeatherIcon = computed(() =>
+  resolveWeatherIcon(currentWeather.value?.weatherText, currentWeather.value?.iconKey)
+);
 const mapStatusText = computed(() => {
   if (mapStatus.value === 'loading') {
-    return '地图正在加载中…';
+    return '地图正在加载中...';
   }
 
   if (mapStatus.value === 'missing-ak') {
@@ -309,9 +478,6 @@ const mapStatusText = computed(() => {
 
   return '';
 });
-const hasGuideContent = computed(
-  () => Boolean(mapQuery.value || guideFacts.value.length)
-);
 const stateTitle = computed(() =>
   pageStatus.value === 'error' ? '景点详情暂时无法加载' : '未找到对应景点内容'
 );
@@ -321,21 +487,70 @@ const stateDescription = computed(() =>
     : '当前未找到可展示的景点详情，你可以返回景点列表继续浏览。'
 );
 
+function resolveWeatherIcon(weatherText?: string, iconKey?: string) {
+  const normalizedKey = iconKey?.trim().toLowerCase();
+
+  if (normalizedKey && weatherIconPreset.has(normalizedKey)) {
+    return weatherIconPreset.get(normalizedKey) || 'cloud';
+  }
+
+  const text = weatherText?.trim() || '';
+
+  if (!text) return 'cloud';
+  if (text.includes('雷')) return 'thunderstorm';
+  if (text.includes('雪')) return 'weather_snowy';
+  if (text.includes('雨')) return 'rainy';
+  if (text.includes('雾') || text.includes('霾')) return 'foggy';
+  if (text.includes('阴') || text.includes('云')) return 'cloud';
+  if (text.includes('晴')) return 'sunny';
+
+  return 'cloud';
+}
+
+function formatForecastTemp(min?: number, max?: number) {
+  const hasMin = typeof min === 'number';
+  const hasMax = typeof max === 'number';
+
+  if (hasMin && hasMax) {
+    return `${Math.round(min!)}° / ${Math.round(max!)}°`;
+  }
+
+  if (hasMax) {
+    return `${Math.round(max!)}°`;
+  }
+
+  if (hasMin) {
+    return `${Math.round(min!)}°`;
+  }
+
+  return '--';
+}
+
+function alertLevelClass(level?: string) {
+  const normalized = level?.trim().toLowerCase();
+
+  if (normalized === 'red') return 'weather-alert-card-red';
+  if (normalized === 'orange') return 'weather-alert-card-orange';
+  if (normalized === 'yellow') return 'weather-alert-card-yellow';
+  if (normalized === 'blue') return 'weather-alert-card-blue';
+  return '';
+}
+
+function createMapMarker(point: InstanceType<BaiduMapNamespace['Point']>) {
+  if (!mapSdk) {
+    return null;
+  }
+
+  const icon = new mapSdk.Icon(markerIconUrl, new mapSdk.Size(56, 56), {
+    imageSize: new mapSdk.Size(56, 56),
+    anchor: new mapSdk.Size(28, 28)
+  });
+
+  return new mapSdk.Marker(point, { icon });
+}
+
 const goBackToList = () => {
   router.push('/attractions');
-};
-
-const scrollToIntro = () => {
-  nextTick(() => {
-    const targetTop = introRef.value?.getBoundingClientRect().top;
-
-    if (typeof targetTop !== 'number') return;
-
-    window.scrollTo({
-      top: Math.max(window.scrollY + targetTop - 96, 0),
-      behavior: 'smooth'
-    });
-  });
 };
 
 const ensureMapInstance = async () => {
@@ -381,7 +596,10 @@ const renderBaiduMap = async () => {
     if (hasCoordinates.value) {
       const point = new mapSdk.Point(detail.value.longitude!, detail.value.latitude!);
       map.centerAndZoom(point, 15);
-      map.addOverlay(new mapSdk.Marker(point));
+      const marker = createMapMarker(point);
+      if (marker) {
+        map.addOverlay(marker);
+      }
       mapStatus.value = 'ready';
       return;
     }
@@ -397,7 +615,10 @@ const renderBaiduMap = async () => {
 
         mapInstance.clearOverlays();
         mapInstance.centerAndZoom(point, 15);
-        mapInstance.addOverlay(new mapSdk.Marker(point));
+        const marker = createMapMarker(point);
+        if (marker) {
+          mapInstance.addOverlay(marker);
+        }
         mapStatus.value = 'ready';
       },
       detail.value?.locationText || undefined
@@ -415,7 +636,10 @@ const recenterMap = () => {
     const point = new mapSdk.Point(detail.value.longitude!, detail.value.latitude!);
     mapInstance.clearOverlays();
     mapInstance.centerAndZoom(point, 15);
-    mapInstance.addOverlay(new mapSdk.Marker(point));
+    const marker = createMapMarker(point);
+    if (marker) {
+      mapInstance.addOverlay(marker);
+    }
     return;
   }
 
@@ -429,7 +653,10 @@ const recenterMap = () => {
 
       mapInstance.clearOverlays();
       mapInstance.centerAndZoom(point, 15);
-      mapInstance.addOverlay(new mapSdk.Marker(point));
+      const marker = createMapMarker(point);
+      if (marker) {
+        mapInstance.addOverlay(marker);
+      }
     },
     detail.value?.locationText || undefined
   );
@@ -441,25 +668,49 @@ const fetchDetail = async (id: string | string[] | undefined) => {
 
   if (!attractionId) {
     detail.value = null;
+    weather.value = null;
     errorMessage.value = '';
     pageStatus.value = 'empty';
+    weatherStatus.value = 'idle';
     return;
   }
 
   pageStatus.value = 'loading';
+  weatherStatus.value = 'loading';
   errorMessage.value = '';
+  detail.value = null;
+  weather.value = null;
 
-  try {
-    const res = await getAttractionDetail(attractionId);
-    if (requestId !== fetchSequence) return;
-    detail.value = res.data || null;
-    pageStatus.value = detail.value ? 'success' : 'empty';
-  } catch (error) {
-    if (requestId !== fetchSequence) return;
-    console.error('Failed to load attraction detail', error);
-    detail.value = null;
+  const [detailResult, weatherResult] = await Promise.allSettled([
+    getAttractionDetail(attractionId),
+    getAttractionWeather(attractionId, { skipErrorToast: true })
+  ]);
+
+  if (requestId !== fetchSequence) return;
+
+  if (detailResult.status === 'rejected') {
+    console.error('Failed to load attraction detail', detailResult.reason);
     errorMessage.value = '当前无法获取景点详情，请稍后重试。';
     pageStatus.value = 'error';
+    weatherStatus.value = 'idle';
+    return;
+  }
+
+  detail.value = detailResult.value.data || null;
+  pageStatus.value = detail.value ? 'success' : 'empty';
+
+  if (pageStatus.value !== 'success') {
+    weatherStatus.value = 'idle';
+    return;
+  }
+
+  if (weatherResult.status === 'fulfilled') {
+    weather.value = weatherResult.value.data;
+    weatherStatus.value = weather.value.available ? 'success' : 'hidden';
+  } else {
+    console.error('Failed to load attraction weather', weatherResult.reason);
+    weather.value = null;
+    weatherStatus.value = 'error';
   }
 };
 
@@ -505,508 +756,769 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+.headline-text {
+  font-family: 'Plus Jakarta Sans', var(--font-family-sans);
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
 .attraction-detail-page {
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  color: #111827;
+  color: #2c2f30;
 }
 
-.detail-hero,
-.intro-card,
-.meta-card,
-.guide-card,
-.story-frame,
-.state-card,
-.loading-hero,
-.loading-card {
-  border-radius: 32px;
-}
-
-.detail-hero {
+.hero-stage {
   position: relative;
-  min-height: 58vh;
-  padding: 28px 36px 32px;
+  min-height: 716px;
+  border-radius: 32px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  box-shadow: 0 28px 70px rgba(44, 47, 48, 0.12);
+}
+
+.hero-media,
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-media {
   background-position: center;
   background-size: cover;
-  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.12);
-}
-
-.hero-overlay,
-.hero-glow {
-  position: absolute;
-  pointer-events: none;
+  transform: scale(1.01);
 }
 
 .hero-overlay {
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.04) 0%, rgba(15, 23, 42, 0.22) 46%, rgba(15, 23, 42, 0.58) 100%);
+  background: linear-gradient(180deg, rgba(13, 21, 31, 0.06) 0%, rgba(13, 21, 31, 0.16) 36%, rgba(13, 21, 31, 0.68) 100%);
 }
 
-.hero-glow {
-  border-radius: 999px;
-  filter: blur(12px);
-  opacity: 0.72;
-}
-
-.hero-glow-cyan {
-  width: 260px;
-  height: 260px;
-  right: -40px;
-  top: 12%;
-  background: rgba(34, 211, 238, 0.22);
-}
-
-.hero-glow-gold {
-  width: 220px;
-  height: 220px;
-  left: -30px;
-  bottom: 12%;
-  background: rgba(212, 175, 55, 0.18);
-}
-
-.hero-topbar,
-.hero-content {
+.hero-shell {
   position: relative;
   z-index: 1;
+  min-height: 716px;
+  padding: 28px 32px 42px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .hero-topbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.hero-topbar-meta {
+  display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .hero-back,
-.hero-category,
-.hero-meta-pill {
+.hero-pill {
   display: inline-flex;
   align-items: center;
-  min-height: 38px;
-  padding: 0 16px;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
   border-radius: 999px;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .hero-back {
-  border: none;
-  color: #f8fafc;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  font-family: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.18);
+  color: #eef2ff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition:
-    transform 0.25s ease,
-    background 0.25s ease,
-    border-color 0.25s ease;
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
 
   &:hover {
     transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.36);
   }
 }
 
-.hero-category {
-  color: #0f172a;
-  background: rgba(255, 255, 255, 0.82);
+.hero-pill {
+  color: rgba(238, 242, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.14);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.hero-pill-solid {
+  color: #002c59;
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .hero-content {
   display: flex;
-  justify-content: space-between;
   align-items: flex-end;
+  justify-content: flex-start;
   gap: 24px;
 }
 
 .hero-copy {
-  max-width: 700px;
-  color: #f8fafc;
+  max-width: min(860px, 100%);
 }
 
-.hero-eyebrow,
-.section-eyebrow {
-  margin: 0 0 12px;
-  color: #f0cf79;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+.hero-location-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(238, 242, 255, 0.92);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   letter-spacing: 0.08em;
 }
 
 .hero-copy h1 {
-  margin: 0;
-  font-size: var(--font-size-hero);
-  line-height: 0.98;
-  font-weight: var(--font-weight-display);
-  letter-spacing: -0.04em;
+  margin: 14px 0 0;
+  color: #ffffff;
+  font-size: clamp(48px, 8vw, 86px);
+  line-height: 0.94;
+  font-weight: 800;
+  letter-spacing: -0.05em;
 }
 
-.hero-meta {
-  margin-top: 20px;
+.tag-strip {
+  margin-top: 24px;
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 14px;
 }
 
-.hero-meta-pill {
-  color: #f8fafc;
-  background: rgba(15, 23, 42, 0.34);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-
-  &.ghost {
-    background: rgba(255, 255, 255, 0.14);
-  }
-}
-
-.hero-scroll {
-  flex-shrink: 0;
-  min-height: 54px;
+.tag-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
   padding: 0 22px;
   border-radius: 999px;
-  border: none;
-  font-family: inherit;
-  background: rgba(255, 255, 255, 0.9);
-  color: #111827;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(44, 47, 48, 0.06);
+  color: #2c2f30;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
-  cursor: pointer;
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.14);
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
-  }
 }
 
-.intro-shell {
-  position: relative;
-  z-index: 2;
+.tag-icon {
+  color: #005bad;
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
 }
 
-.guide-shell {
-  padding-top: 2px;
-}
-
-.intro-card {
-  padding: 34px 34px 32px;
-  background: rgba(255, 255, 255, 0.84);
-  border: 1px solid rgba(255, 255, 255, 0.76);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
-}
-
-.intro-headline {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  gap: 28px;
-  align-items: start;
-
-  h2 {
-    margin: 0;
-    font-size: var(--font-size-14xl);
-    line-height: 1.06;
-    font-weight: var(--font-weight-title);
-    letter-spacing: -0.03em;
-  }
-
-  p {
-    margin: 0;
-    color: #475569;
-    font-size: var(--font-size-xl);
-    line-height: 1.95;
-  }
-}
-
-.meta-grid {
-  margin-top: 22px;
+.content-grid {
+  margin-top: 32px;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 18px;
+  gap: 32px;
 }
 
-.guide-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
-  gap: 20px;
+.content-grid-single {
+  grid-template-columns: 1fr;
 }
 
-.meta-card {
-  grid-column: span 4;
-  padding: 24px 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.96) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 20px 44px rgba(15, 23, 42, 0.06);
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 24px 50px rgba(15, 23, 42, 0.08);
-  }
+.weather-column,
+.practical-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.meta-card-wide {
+.weather-column {
   grid-column: span 8;
 }
 
-.meta-label {
+.practical-column {
+  grid-column: span 4;
+}
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.weather-card,
+.forecast-card,
+.map-card,
+.info-card,
+.story-lead-card,
+.story-empty,
+.loading-card,
+.state-card {
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 14px 36px rgba(44, 47, 48, 0.06);
+}
+
+.weather-card-current {
+  position: relative;
+  overflow: hidden;
+  padding: 32px;
+}
+
+.weather-glow {
+  position: absolute;
+  right: -40px;
+  top: -28px;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: rgba(94, 162, 255, 0.12);
+  filter: blur(24px);
+}
+
+.weather-current-head,
+.forecast-head,
+.info-head {
+  position: relative;
+  z-index: 1;
+}
+
+.weather-current-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.panel-label {
+  margin: 0;
+  color: #595c5d;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.weather-temp {
+  margin: 10px 0 0;
+  color: #005bad;
+  font-size: clamp(58px, 5vw, 92px);
+  line-height: 0.94;
+  font-weight: 800;
+}
+
+.weather-subline {
+  margin: 10px 0 0;
+  color: #595c5d;
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+}
+
+.weather-main-icon {
+  color: #5ea2ff;
+  font-size: 74px;
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 48;
+}
+
+.weather-current-meta {
+  position: relative;
+  z-index: 1;
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.weather-meta-item {
   display: inline-flex;
-  margin-bottom: 12px;
-  color: #c79b1d;
-  font-size: var(--font-size-xs);
+  align-items: center;
+  gap: 8px;
+  color: #2c2f30;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.weather-meta-item .material-symbols-outlined {
+  color: #005bad;
+}
+
+.weather-sidecards {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.weather-tip-card,
+.weather-alert-card {
+  padding: 24px;
+  border: 1px solid transparent;
+  border-radius: 28px;
+  display: flex;
+  gap: 14px;
+}
+
+.weather-tip-card .material-symbols-outlined,
+.weather-alert-card .material-symbols-outlined {
+  font-size: 32px;
+}
+
+.weather-tip-card h3,
+.weather-alert-card h3 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  line-height: 1.3;
   font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
 }
 
-.meta-value {
-  display: block;
-  color: #111827;
-  font-size: var(--font-size-5xl);
-  line-height: 1.2;
-  font-weight: var(--font-weight-title);
+.weather-tip-card p,
+.weather-alert-card p {
+  margin: 8px 0 0;
+  color: #595c5d;
+  font-size: var(--font-size-sm);
+  line-height: 1.8;
 }
 
-.guide-card {
-  padding: 30px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.96) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+.weather-tip-card-positive {
+  background: rgba(0, 91, 173, 0.05);
+  border-color: rgba(0, 91, 173, 0.1);
 
-  h2 {
-    margin: 0;
-    font-size: var(--font-size-10xl);
-    line-height: 1.12;
-    font-weight: var(--font-weight-title);
-    letter-spacing: -0.03em;
+  .material-symbols-outlined,
+  h3 {
+    color: #005bad;
   }
 }
 
-.guide-description {
-  margin: 14px 0 0;
-  color: #64748b;
-  font-size: var(--font-size-lg);
-  line-height: 1.88;
+.weather-tip-card-caution {
+  background: rgba(255, 202, 77, 0.14);
+  border-color: rgba(245, 186, 0, 0.2);
+
+  .material-symbols-outlined,
+  h3 {
+    color: #664b00;
+  }
 }
 
-.map-preview {
-  min-height: 196px;
+.weather-alert-card {
+  background: rgba(255, 202, 77, 0.12);
+  border-color: rgba(247, 186, 0, 0.28);
+
+  .material-symbols-outlined,
+  h3 {
+    color: #664b00;
+  }
+}
+
+.weather-alert-card-muted {
+  background: rgba(239, 241, 242, 0.86);
+  border-color: rgba(218, 221, 223, 0.9);
+
+  .material-symbols-outlined,
+  h3 {
+    color: #005bad;
+  }
+}
+
+.weather-alert-card-blue {
+  background: rgba(94, 162, 255, 0.12);
+  border-color: rgba(94, 162, 255, 0.2);
+}
+
+.weather-alert-card-yellow {
+  background: rgba(255, 202, 77, 0.14);
+  border-color: rgba(247, 186, 0, 0.22);
+}
+
+.weather-alert-card-orange {
+  background: rgba(255, 167, 38, 0.14);
+  border-color: rgba(255, 167, 38, 0.24);
+}
+
+.weather-alert-card-red {
+  background: rgba(251, 81, 81, 0.12);
+  border-color: rgba(251, 81, 81, 0.2);
+
+  .material-symbols-outlined,
+  h3 {
+    color: #b31b25;
+  }
+}
+
+.forecast-card {
+  padding: 30px;
+}
+
+.forecast-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  h3 {
+    margin: 0;
+    color: #2c2f30;
+    font-size: var(--font-size-6xl);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+}
+
+.forecast-source {
+  color: #757778;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+}
+
+.forecast-grid {
   margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.forecast-item {
+  padding: 24px 18px;
+  border-radius: 24px;
+  background: #eff1f2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.forecast-day {
+  color: #595c5d;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.forecast-icon {
+  margin: 16px 0 10px;
+  color: #005bad;
+  font-size: 42px;
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 36;
+}
+
+.forecast-temp {
+  color: #2c2f30;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.forecast-weather {
+  margin-top: 10px;
+  color: #595c5d;
+  font-size: var(--font-size-sm);
+}
+
+.forecast-status {
+  margin-top: 16px;
+  min-height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+}
+
+.forecast-status-ok {
+  background: #5ea2ff;
+  color: #002348;
+}
+
+.forecast-status-risk {
+  background: #dadddf;
+  color: #595c5d;
+}
+
+.map-card {
   position: relative;
-  border-radius: 28px;
+  padding: 0;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(226, 232, 240, 0.88) 0%, rgba(241, 245, 249, 0.96) 100%);
-  box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.8);
+}
+
+.map-frame-shell {
+  position: relative;
+  height: 288px;
+  background: linear-gradient(135deg, #e6e8ea 0%, #eff1f2 100%);
 }
 
 .map-frame {
   width: 100%;
   height: 100%;
-  min-height: 196px;
-  display: block;
-  background: transparent;
 }
 
 .map-status {
   position: absolute;
   inset: 0;
+  padding: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
   text-align: center;
-  color: #475569;
-  font-size: var(--font-size-md);
-  line-height: 1.8;
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(8px);
-  z-index: 1;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(12px);
+  color: #595c5d;
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
 }
 
 .map-actions {
-  margin-top: 20px;
+  padding: 18px;
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 12px;
 }
 
-.guide-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0 18px;
+.map-action {
+  min-height: 42px;
+  padding: 0 16px;
   border-radius: 999px;
-  border: 1px solid rgba(203, 213, 225, 0.9);
-  background: rgba(255, 255, 255, 0.92);
-  color: #111827;
+  border: 1px solid rgba(117, 119, 120, 0.18);
+  background: #ffffff;
+  color: #2c2f30;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   text-decoration: none;
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    background 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 
   &:hover {
     transform: translateY(-1px);
-    border-color: rgba(34, 211, 238, 0.3);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
-  }
-
-  &.guide-link-primary {
-    background: #111827;
-    border-color: #111827;
-    color: #f8fafc;
+    border-color: rgba(0, 91, 173, 0.24);
   }
 }
 
-.guide-facts {
+.map-action-primary {
+  background: #005bad;
+  color: #eef2ff;
+  border-color: #005bad;
+}
+
+.info-card {
+  padding: 28px;
+}
+
+.info-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #dadddf;
+
+  .material-symbols-outlined {
+    color: #005bad;
+  }
+
+  h3 {
+    margin: 0;
+    color: #2c2f30;
+    font-size: var(--font-size-4xl);
+    line-height: 1.16;
+    font-weight: 800;
+  }
+}
+
+.info-list {
   margin-top: 22px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.guide-fact {
-  min-height: 102px;
-  padding: 18px;
-  border-radius: 22px;
-  background: rgba(248, 250, 252, 0.92);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-}
-
-.guide-fact-label {
-  display: inline-flex;
-  color: #c79b1d;
-  font-size: var(--font-size-xs);
+.info-label {
+  color: #757778;
+  font-size: 11px;
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
-.guide-fact-value {
-  display: block;
-  margin-top: 10px;
-  color: #111827;
-  font-size: var(--font-size-lg);
-  line-height: 1.72;
-  font-weight: var(--font-weight-semibold);
-}
-
-.guide-fact-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 34px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  color: #111827;
+.info-value {
+  margin: 8px 0 0;
+  color: #2c2f30;
   font-size: var(--font-size-md);
-  line-height: 1;
+  line-height: 1.7;
   font-weight: var(--font-weight-semibold);
-  text-decoration: none;
-
-  &:hover {
-    border-color: rgba(34, 211, 238, 0.32);
-  }
 }
 
-.guide-fact-links {
+.info-phone-list {
   margin-top: 10px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.story-shell {
-  padding-top: 4px;
+.info-phone {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(94, 162, 255, 0.08);
+  color: #005bad;
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
 }
 
-.story-frame {
-  padding: 42px 42px 46px;
-  background:
-    radial-gradient(circle at top left, rgba(34, 211, 238, 0.08), transparent 20%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.98) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+.story-section {
+  padding: 64px 0 0;
 }
 
-.story-intro {
-  max-width: 860px;
-  margin: 0 auto 30px;
-
-  h2 {
-    margin: 0;
-    font-size: var(--font-size-12xl);
-    line-height: 1.08;
-    font-weight: var(--font-weight-title);
-    letter-spacing: -0.03em;
-  }
+.story-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.96fr) minmax(0, 1.04fr);
+  gap: 48px;
+  align-items: start;
 }
 
-.story-body {
-  max-width: 760px;
-  margin: 0 auto;
+.story-side-inner {
+  position: sticky;
+  top: 112px;
 }
 
-.story-paragraph {
+.story-label {
+  color: #005bad;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.story-side h2 {
+  margin: 16px 0 0;
+  color: #2c2f30;
+  font-size: clamp(32px, 4vw, 56px);
+  line-height: 1.08;
+  font-weight: 800;
+}
+
+.story-divider {
+  width: 88px;
+  height: 4px;
+  border-radius: 999px;
+  margin-top: 28px;
+  background: linear-gradient(90deg, #005bad, #5ea2ff);
+}
+
+.story-summary {
+  margin: 24px 0 0;
+  color: #595c5d;
+  font-size: var(--font-size-base);
+  line-height: 1.9;
+}
+
+.story-content {
+  color: #595c5d;
+}
+
+.story-lead-card {
+  padding: 24px 26px;
+  margin-bottom: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(239, 241, 242, 0.72) 100%);
+}
+
+.story-lead-title {
   margin: 0;
-  color: #475569;
-  font-size: var(--font-size-xl);
-  line-height: 2.05;
-
-  & + & {
-    margin-top: 24px;
-  }
+  color: #005bad;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
 }
 
-.story-paragraph-first {
-  color: #1f2937;
+.story-lead-copy {
+  margin: 12px 0 0;
+  color: #2c2f30;
+  font-size: var(--font-size-lg);
+  line-height: 1.95;
+}
+
+.story-content :deep(.rich-content) {
+  color: #595c5d;
+  font-size: var(--font-size-lg);
+  line-height: 1.95;
+}
+
+.story-content :deep(h2),
+.story-content :deep(h3),
+.story-content :deep(h4) {
+  font-family: 'Plus Jakarta Sans', var(--font-family-sans);
 }
 
 .story-empty {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 26px 24px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.88);
+  padding: 28px;
+
+  h3 {
+    margin: 0;
+    color: #2c2f30;
+    font-size: var(--font-size-5xl);
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 14px 0 0;
+    color: #595c5d;
+    font-size: var(--font-size-base);
+    line-height: 1.85;
+  }
 }
 
-.story-empty-title {
-  margin: 0;
-  color: #111827;
-  font-size: var(--font-size-6xl);
-  font-weight: var(--font-weight-title);
+.loading-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.story-empty-text {
-  margin: 14px 0 0;
-  color: #64748b;
-  font-size: var(--font-size-base);
-  line-height: 1.85;
+.loading-hero,
+.loading-card {
+  background: linear-gradient(90deg, rgba(230, 232, 234, 0.88), rgba(239, 241, 242, 1), rgba(230, 232, 234, 0.88));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
 }
 
-.state-card {
-  overflow: hidden;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.96) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+.loading-hero {
+  min-height: 640px;
+  border-radius: 32px;
+}
+
+.loading-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.loading-card {
+  min-height: 220px;
+}
+
+.loading-card-wide {
+  min-height: 180px;
+}
+
+.loading-grid-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.loading-card-tall {
+  min-height: 360px;
 }
 
 .state-shell {
@@ -1017,8 +1529,8 @@ onBeforeUnmount(() => {
 }
 
 .state-card {
-  width: min(100%, 680px);
-  padding: 46px 34px 42px;
+  width: min(100%, 720px);
+  padding: 48px 36px;
   text-align: center;
 }
 
@@ -1026,32 +1538,38 @@ onBeforeUnmount(() => {
   width: 92px;
   height: 92px;
   margin: 0 auto 18px;
-  border-radius: 30px;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0) 36%),
-    linear-gradient(135deg, rgba(34, 211, 238, 0.3) 0%, rgba(212, 175, 55, 0.22) 100%);
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(94, 162, 255, 0.24) 0%, rgba(255, 202, 77, 0.18) 100%);
+  box-shadow: 0 18px 40px rgba(44, 47, 48, 0.08);
+}
 
-  &.state-mark-error {
-    background:
-      radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0) 36%),
-      linear-gradient(135deg, rgba(248, 113, 113, 0.24) 0%, rgba(251, 191, 36, 0.18) 100%);
-  }
+.state-mark-error {
+  background: linear-gradient(135deg, rgba(251, 81, 81, 0.2) 0%, rgba(255, 202, 77, 0.2) 100%);
+}
+
+.state-label {
+  margin: 0;
+  color: #005bad;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .state-card h2 {
-  margin: 0;
+  margin: 16px 0 0;
+  color: #2c2f30;
   font-size: var(--font-size-12xl);
   line-height: 1.08;
-  font-weight: var(--font-weight-title);
+  font-weight: 800;
 }
 
 .state-description {
-  margin: 18px auto 0;
   max-width: 520px;
-  color: #64748b;
+  margin: 16px auto 0;
+  color: #595c5d;
   font-size: var(--font-size-lg);
-  line-height: 1.88;
+  line-height: 1.82;
 }
 
 .state-actions {
@@ -1060,72 +1578,6 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
-}
-
-.loading-shell {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.loading-hero {
-  min-height: 72vh;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, rgba(226, 232, 240, 0.8) 0%, rgba(241, 245, 249, 0.96) 100%);
-}
-
-.loading-sheen {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(255, 255, 255, 0) 100%);
-  transform: translateX(-100%);
-  animation: loading-sheen 1.3s ease-in-out infinite;
-}
-
-.loading-card-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 20px;
-}
-
-.loading-card {
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(226, 232, 240, 0.84);
-}
-
-.loading-card-wide {
-  min-height: 180px;
-}
-
-.loading-card-compact {
-  min-height: 180px;
-}
-
-.loading-line {
-  display: block;
-  height: 12px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(226, 232, 240, 0.8), rgba(241, 245, 249, 0.96), rgba(226, 232, 240, 0.8));
-  background-size: 200% 100%;
-  animation: shimmer 1.3s linear infinite;
-
-  & + & {
-    margin-top: 14px;
-  }
-
-  &.short {
-    width: 30%;
-  }
-
-  &.medium {
-    width: 58%;
-  }
-
-  &.long {
-    width: 84%;
-  }
 }
 
 @keyframes shimmer {
@@ -1138,56 +1590,35 @@ onBeforeUnmount(() => {
   }
 }
 
-@keyframes loading-sheen {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@media (max-width: 1100px) {
-  .detail-hero {
-    min-height: 50vh;
-  }
-
-  .hero-copy h1 {
-    font-size: var(--font-size-20xl);
-  }
-
-  .intro-headline,
-  .guide-grid,
-  .loading-card-grid {
+@media (max-width: 1200px) {
+  .content-grid,
+  .weather-grid,
+  .story-grid {
     grid-template-columns: 1fr;
   }
 
-  .meta-card,
-  .meta-card-wide {
-    grid-column: span 6;
+  .weather-column,
+  .practical-column {
+    grid-column: span 12;
+  }
+
+  .practical-column {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .story-side-inner {
+    position: static;
   }
 }
 
-@media (max-width: 767px) {
-  .attraction-detail-page {
-    gap: 24px;
+@media (max-width: 900px) {
+  .hero-stage {
+    min-height: 560px;
   }
 
-  .detail-hero,
-  .intro-card,
-  .meta-card,
-  .guide-card,
-  .story-frame,
-  .state-card,
-  .loading-hero,
-  .loading-card {
-    border-radius: 24px;
-  }
-
-  .detail-hero {
-    min-height: 46vh;
-    padding: 18px 18px 22px;
+  .hero-shell {
+    min-height: 560px;
   }
 
   .hero-content {
@@ -1195,83 +1626,106 @@ onBeforeUnmount(() => {
     align-items: flex-start;
   }
 
-  .hero-copy h1 {
-    font-size: var(--font-size-13xl);
-    line-height: 1.04;
+  .forecast-grid,
+  .loading-grid-columns,
+  .practical-column {
+    grid-template-columns: 1fr;
   }
+}
 
-  .hero-scroll {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .intro-shell {
-    margin-top: -48px;
-  }
-
-  .intro-card,
-  .guide-card,
-  .story-frame,
+@media (max-width: 767px) {
+  .hero-stage,
+  .weather-card,
+  .forecast-card,
+  .map-card,
+  .info-card,
+  .story-lead-card,
+  .story-empty,
+  .loading-hero,
+  .loading-card,
   .state-card {
-    padding: 24px 18px;
+    border-radius: 24px;
   }
 
-  .intro-headline h2,
-  .guide-card h2,
-  .story-intro h2,
+  .hero-stage {
+    min-height: 460px;
+  }
+
+  .hero-shell {
+    min-height: 460px;
+    padding: 18px 18px 24px;
+  }
+
+  .hero-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-topbar-meta {
+    justify-content: flex-start;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(38px, 12vw, 56px);
+  }
+
+  .tag-strip,
+  .content-grid {
+    margin-top: 20px;
+  }
+
+  .tag-card {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .weather-card-current,
+  .forecast-card,
+  .info-card,
+  .story-lead-card,
+  .story-empty,
+  .state-card {
+    padding: 22px 18px;
+  }
+
+  .weather-current-head {
+    flex-direction: column;
+  }
+
+  .weather-temp {
+    font-size: 62px;
+  }
+
+  .forecast-grid {
+    gap: 14px;
+  }
+
+  .forecast-item {
+    padding: 20px 16px;
+  }
+
+  .map-frame-shell {
+    height: 240px;
+  }
+
+  .story-section {
+    padding-top: 36px;
+  }
+
+  .story-side h2 {
+    font-size: 34px;
+  }
+
+  .story-content :deep(.rich-content) {
+    font-size: var(--font-size-base);
+  }
+
+  .loading-hero {
+    min-height: 420px;
+  }
+
   .state-card h2 {
     font-size: var(--font-size-8xl);
-  }
-
-  .intro-headline p,
-  .guide-description,
-  .state-description {
-    font-size: var(--font-size-base);
-  }
-
-  .meta-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .meta-card,
-  .meta-card-wide {
-    grid-column: span 1;
-  }
-
-  .meta-value {
-    font-size: var(--font-size-4xl);
-  }
-
-  .guide-facts {
-    grid-template-columns: 1fr;
-  }
-
-  .map-preview {
-    min-height: 156px;
-    border-radius: 22px;
-  }
-
-  .map-frame {
-    min-height: 156px;
-  }
-
-  .map-status {
-    padding: 18px;
-    font-size: var(--font-size-sm);
-  }
-
-  .guide-link {
-    width: 100%;
-  }
-
-  .story-body,
-  .story-empty {
-    margin: 0;
-  }
-
-  .story-paragraph {
-    font-size: var(--font-size-base);
-    line-height: 1.95;
   }
 
   .state-actions {
@@ -1281,10 +1735,6 @@ onBeforeUnmount(() => {
   .state-actions :deep(.el-button) {
     width: 100%;
     margin-left: 0;
-  }
-
-  .loading-hero {
-    min-height: 54vh;
   }
 }
 </style>

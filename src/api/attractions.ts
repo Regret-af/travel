@@ -33,6 +33,45 @@ interface AttractionDetailApi extends AttractionApiItem {
   openingHours?: string;
 }
 
+interface AttractionWeatherCurrentApi {
+  weatherText?: string;
+  temperature?: number;
+  feelsLike?: number;
+  humidity?: number;
+  windDirection?: string;
+  windLevel?: string;
+  isSuitable?: boolean;
+  travelTip?: string;
+  iconKey?: string;
+}
+
+interface AttractionWeatherForecastApi {
+  date?: string;
+  weekLabel?: string;
+  weatherTextDay?: string;
+  weatherTextNight?: string;
+  tempMin?: number;
+  tempMax?: number;
+  isSuitable?: boolean;
+  iconKeyDay?: string;
+  iconKeyNight?: string;
+}
+
+interface AttractionWeatherAlertApi {
+  title?: string;
+  level?: string;
+  description?: string;
+}
+
+interface AttractionWeatherApi {
+  available: boolean;
+  source?: string;
+  sourceUpdatedAt?: string;
+  current?: AttractionWeatherCurrentApi;
+  forecast?: AttractionWeatherForecastApi[];
+  alerts?: AttractionWeatherAlertApi[];
+}
+
 export interface AttractionCategory {
   id: string;
   name: string;
@@ -70,6 +109,45 @@ export interface AttractionDetail extends AttractionCard {
   telephone?: string;
   telephoneList?: string[];
   openingHours?: string;
+}
+
+export interface AttractionWeatherCurrent {
+  weatherText?: string;
+  temperature?: number;
+  feelsLike?: number;
+  humidity?: number;
+  windDirection?: string;
+  windLevel?: string;
+  isSuitable?: boolean;
+  travelTip?: string;
+  iconKey?: string;
+}
+
+export interface AttractionWeatherForecast {
+  date?: string;
+  weekLabel?: string;
+  weatherTextDay?: string;
+  weatherTextNight?: string;
+  tempMin?: number;
+  tempMax?: number;
+  isSuitable?: boolean;
+  iconKeyDay?: string;
+  iconKeyNight?: string;
+}
+
+export interface AttractionWeatherAlert {
+  title?: string;
+  level?: string;
+  description?: string;
+}
+
+export interface AttractionWeather {
+  available: boolean;
+  source?: string;
+  sourceUpdatedAt?: string;
+  current?: AttractionWeatherCurrent;
+  forecast: AttractionWeatherForecast[];
+  alerts: AttractionWeatherAlert[];
 }
 
 export interface AttractionListParams {
@@ -133,6 +211,41 @@ const mapAttractionDetail = (item: AttractionDetailApi): AttractionDetail => ({
   telephone: item.telephone,
   telephoneList: item.telephoneList,
   openingHours: item.openingHours
+});
+
+const mapAttractionWeather = (payload?: AttractionWeatherApi | null): AttractionWeather => ({
+  available: Boolean(payload?.available),
+  source: payload?.source,
+  sourceUpdatedAt: payload?.sourceUpdatedAt,
+  current: payload?.current
+    ? {
+        weatherText: payload.current.weatherText,
+        temperature: payload.current.temperature,
+        feelsLike: payload.current.feelsLike,
+        humidity: payload.current.humidity,
+        windDirection: payload.current.windDirection,
+        windLevel: payload.current.windLevel,
+        isSuitable: payload.current.isSuitable,
+        travelTip: payload.current.travelTip,
+        iconKey: payload.current.iconKey
+      }
+    : undefined,
+  forecast: (payload?.forecast || []).map((item) => ({
+    date: item.date,
+    weekLabel: item.weekLabel,
+    weatherTextDay: item.weatherTextDay,
+    weatherTextNight: item.weatherTextNight,
+    tempMin: item.tempMin,
+    tempMax: item.tempMax,
+    isSuitable: item.isSuitable,
+    iconKeyDay: item.iconKeyDay,
+    iconKeyNight: item.iconKeyNight
+  })),
+  alerts: (payload?.alerts || []).map((item) => ({
+    title: item.title,
+    level: item.level,
+    description: item.description
+  }))
 });
 
 const mapPage = (page?: PaginatedData<AttractionApiItem>): PageAttractionCard => ({
@@ -211,6 +324,17 @@ export async function getAttractionDetail(id: string | number) {
   const res = await request.get<ApiResponse<AttractionDetailApi>>(`/attractions/${id}`);
 
   return createDetailResponse(res);
+}
+
+export async function getAttractionWeather(id: string | number, options: RequestBehaviorOptions = {}) {
+  const res = await request.get<ApiResponse<AttractionWeatherApi>>(`/attractions/${id}/weather`, {
+    skipErrorToast: options.skipErrorToast
+  });
+
+  return {
+    ...res,
+    data: mapAttractionWeather(res.data)
+  };
 }
 
 export async function searchAttractionsByQuery(query: string, options: RequestBehaviorOptions = {}) {
