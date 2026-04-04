@@ -3,7 +3,14 @@ const pad = (value: number) => String(value).padStart(2, '0');
 const parseDate = (value?: string) => {
   if (!value?.trim()) return null;
 
-  const normalized = value.trim().replace(/-/g, '/');
+  const raw = value.trim();
+  const directDate = new Date(raw);
+
+  if (!Number.isNaN(directDate.getTime())) {
+    return directDate;
+  }
+
+  const normalized = raw.replace('T', ' ').replace(/-/g, '/');
   const date = new Date(normalized);
 
   if (Number.isNaN(date.getTime())) {

@@ -66,7 +66,7 @@ interface AttractionWeatherAlertApi {
 interface AttractionWeatherApi {
   available: boolean;
   source?: string;
-  sourceUpdatedAt?: string;
+  sourceUpdateTime?: string;
   current?: AttractionWeatherCurrentApi;
   forecast?: AttractionWeatherForecastApi[];
   alerts?: AttractionWeatherAlertApi[];
@@ -144,7 +144,7 @@ export interface AttractionWeatherAlert {
 export interface AttractionWeather {
   available: boolean;
   source?: string;
-  sourceUpdatedAt?: string;
+  sourceUpdateTime?: string;
   current?: AttractionWeatherCurrent;
   forecast: AttractionWeatherForecast[];
   alerts: AttractionWeatherAlert[];
@@ -216,7 +216,7 @@ const mapAttractionDetail = (item: AttractionDetailApi): AttractionDetail => ({
 const mapAttractionWeather = (payload?: AttractionWeatherApi | null): AttractionWeather => ({
   available: Boolean(payload?.available),
   source: payload?.source,
-  sourceUpdatedAt: payload?.sourceUpdatedAt,
+  sourceUpdateTime: payload?.sourceUpdateTime,
   current: payload?.current
     ? {
         weatherText: payload.current.weatherText,

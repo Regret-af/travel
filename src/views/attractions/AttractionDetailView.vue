@@ -16,9 +16,6 @@
               <span v-if="detail.category?.name" class="hero-pill hero-pill-solid">
                 {{ detail.category.name }}
               </span>
-              <span v-if="weatherUpdatedText" class="hero-pill">
-                天气更新 {{ weatherUpdatedText }}
-              </span>
             </div>
           </div>
 
@@ -121,8 +118,8 @@
           <article class="forecast-card">
             <div class="forecast-head">
               <h3 class="headline-text">3 日天气预报</h3>
-              <span v-if="weatherSourceLabel" class="forecast-source">
-                数据源 {{ weatherSourceLabel }}
+              <span v-if="weatherUpdatedText" class="forecast-source">
+                更新时间 {{ weatherUpdatedText }}
               </span>
             </div>
 
@@ -369,10 +366,9 @@ const openingHoursText = computed(() => detail.value?.openingHours?.trim() || ''
 const addressDetailText = computed(() => detail.value?.addressDetail?.trim() || '');
 const telephoneText = computed(() => detail.value?.telephone?.trim() || '');
 const weatherUpdatedText = computed(() => {
-  const value = weather.value?.sourceUpdatedAt?.trim();
+  const value = weather.value?.sourceUpdateTime?.trim();
   return value ? formatDateTime(value) : '';
 });
-const weatherSourceLabel = computed(() => weather.value?.source?.trim() || '');
 const telephoneItems = computed(() => {
   const normalized = detail.value?.telephoneList
     ?.map((item) => item?.trim())
@@ -706,6 +702,9 @@ const fetchDetail = async (id: string | string[] | undefined) => {
 
   if (weatherResult.status === 'fulfilled') {
     weather.value = weatherResult.value.data;
+    if (import.meta.env.DEV) {
+      console.log('attraction weather payload', weather.value);
+    }
     weatherStatus.value = weather.value.available ? 'success' : 'hidden';
   } else {
     console.error('Failed to load attraction weather', weatherResult.reason);
