@@ -131,7 +131,6 @@
             <div class="author-feature-copy">
               <div class="author-feature-header">
                 <h2 class="headline-text">{{ authorDisplayName }}</h2>
-                <span v-if="contentTypeLabel" class="author-badge">{{ contentTypeLabel }}</span>
               </div>
 
               <p class="author-feature-bio">
@@ -805,7 +804,7 @@ watch(
   background: rgba(255, 255, 255, 0.18);
   color: #eef2ff;
   text-decoration: none;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
 
@@ -820,7 +819,7 @@ watch(
   color: rgba(238, 242, 255, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.14);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -843,7 +842,7 @@ watch(
 .hero-copy h1 {
   margin: 0;
   color: #ffffff;
-  font-size: clamp(34px, 5.4vw, 60px);
+  font-size: clamp(38px, 5.8vw, 66px);
   line-height: 1.02;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -853,7 +852,7 @@ watch(
   max-width: 820px;
   margin: 14px 0 0;
   color: rgba(238, 242, 255, 0.9);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-base);
   line-height: 1.8;
 }
 
@@ -880,14 +879,14 @@ watch(
 .hero-author-name {
   margin: 0;
   color: #ffffff;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
 }
 
 .hero-author-note {
   margin: 0;
   color: rgba(238, 242, 255, 0.8);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 .story-shell,
@@ -906,7 +905,7 @@ watch(
   max-width: none;
   margin: 0;
   color: #595c5d;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   line-height: 1.95;
 }
 
@@ -933,7 +932,7 @@ watch(
   p {
     margin: 0;
     color: #4b5563;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl);
     font-style: italic;
     line-height: 1.9;
   }
@@ -974,36 +973,22 @@ watch(
 .author-feature-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
   justify-content: flex-start;
 
   h2 {
     margin: 0;
     color: #2c2f30;
-    font-size: clamp(24px, 3vw, 28px);
+    font-size: clamp(26px, 3.2vw, 32px);
     line-height: 1.14;
     font-weight: 800;
   }
-}
-
-.author-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 22px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(0, 91, 173, 0.1);
-  color: #005bad;
-  font-size: 10px;
-  font-weight: var(--font-weight-bold);
 }
 
 .author-feature-bio {
   max-width: 760px;
   margin: 12px 0 0;
   color: #595c5d;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   line-height: 1.8;
 }
 
@@ -1014,7 +999,7 @@ watch(
   border: 1px solid #005bad;
   background: #005bad;
   color: #eef2ff;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   white-space: nowrap;
   cursor: pointer;
@@ -1034,7 +1019,7 @@ watch(
 .section-eyebrow {
   margin: 0 0 12px;
   color: #005bad;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
@@ -1047,7 +1032,7 @@ watch(
   h2 {
     margin: 0;
     color: #111827;
-    font-size: var(--font-size-8xl);
+    font-size: var(--font-size-9xl);
     line-height: 1.14;
     font-weight: 800;
   }
@@ -1153,7 +1138,7 @@ watch(
 }
 
 .floating-action-value {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: var(--font-weight-bold);
   line-height: 1;
 }
@@ -1207,11 +1192,11 @@ watch(
   }
 
   .hero-copy h1 {
-    font-size: clamp(30px, 10vw, 42px);
+    font-size: clamp(34px, 10.5vw, 46px);
   }
 
   .hero-summary {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-md);
     line-height: 1.75;
   }
 
@@ -1225,7 +1210,7 @@ watch(
   }
 
   .story-shell :deep(.rich-content) {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-lg);
   }
 
   .story-intro {
@@ -1233,7 +1218,7 @@ watch(
     padding: 16px;
 
     p {
-      font-size: var(--font-size-md);
+      font-size: var(--font-size-base);
     }
   }
 
@@ -1250,7 +1235,7 @@ watch(
 
   .author-feature-header h2,
   .more-section-heading h2 {
-    font-size: var(--font-size-6xl);
+    font-size: var(--font-size-7xl);
   }
 
   .author-feature-action {
