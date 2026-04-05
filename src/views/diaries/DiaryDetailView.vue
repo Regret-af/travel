@@ -2,13 +2,13 @@
   <div class="diary-detail-page">
     <div v-if="detailStatus === 'loading'" class="detail-loading">
       <section class="loading-hero" />
-      <section class="loading-copy-shell">
+      <section class="loading-panel">
         <span class="loading-chip" />
         <span class="loading-line short" />
         <span class="loading-line long" />
         <span class="loading-line medium" />
       </section>
-      <section class="loading-article">
+      <section class="loading-panel loading-panel-article">
         <span v-for="line in 8" :key="line" class="loading-line" :class="{ short: line % 3 === 0 }" />
       </section>
     </div>
@@ -17,7 +17,7 @@
       v-else-if="detailStatus === 'error'"
       variant="error"
       eyebrow="阅读受阻"
-      title="这篇旅行故事暂时无法展开"
+      title="这篇旅行日记暂时无法展开"
       :description="detailError"
       action-label="重新加载"
       secondary-label="返回日记列表"
@@ -30,7 +30,7 @@
       variant="empty"
       eyebrow="内容留白"
       title="这篇旅行故事暂时还没有准备好"
-      description="这篇故事暂时还没有可继续阅读的完整内容，你可以先去日记列表看看其他旅途记录。"
+      description="这篇日记还没有可继续阅读的完整内容，你可以先回到列表查看其他旅行记录。"
       action-label="返回日记列表"
       secondary-label="返回首页"
       secondary-to="/"
@@ -38,55 +38,120 @@
     />
 
     <template v-else>
-      <RouterLink to="/diaries" class="back-link back-link-top">
-        <el-icon><ArrowLeft /></el-icon>
-        返回日记列表
-      </RouterLink>
+      <aside class="floating-actions floating-actions-desktop" aria-label="日记互动">
+        <button
+          class="floating-action"
+          :class="{ active: detail.liked }"
+          :disabled="likePending"
+          @click="handleToggleLike"
+        >
+          <span class="floating-action-icon">
+            <span class="material-symbols-outlined">favorite</span>
+          </span>
+          <span class="floating-action-value">{{ formatCount(detail.likeCount) }}</span>
+        </button>
 
-      <section class="hero-shell">
-        <div class="hero-cover">
+        <button class="floating-action" @click="scrollToComments">
+          <span class="floating-action-icon">
+            <span class="material-symbols-outlined">chat_bubble</span>
+          </span>
+          <span class="floating-action-value">{{ formatCount(detail.commentCount) }}</span>
+        </button>
+
+        <button
+          class="floating-action"
+          :class="{ active: detail.favorited }"
+          :disabled="favoritePending"
+          @click="handleToggleFavorite"
+        >
+          <span class="floating-action-icon">
+            <span class="material-symbols-outlined">bookmark</span>
+          </span>
+          <span class="floating-action-value">{{ detail.favorited ? '已收藏' : '收藏' }}</span>
+        </button>
+      </aside>
+
+      <section class="hero-stage">
+        <div class="hero-media">
           <img v-if="detail.coverUrl" :src="detail.coverUrl" :alt="detail.title" />
           <div v-else class="hero-fallback" />
-          <div class="hero-overlay" />
-          <div class="hero-note">旅行故事</div>
         </div>
-      </section>
+        <div class="hero-overlay" />
 
-      <section class="title-shell">
-        <p class="section-eyebrow">沉浸阅读</p>
-        <h1>{{ detail.title }}</h1>
-        <p v-if="detail.summary" class="summary-copy">{{ detail.summary }}</p>
-      </section>
+        <div class="hero-shell">
+          <div class="hero-topbar">
+            <RouterLink to="/diaries" class="hero-back">
+              <span class="material-symbols-outlined">arrow_back</span>
+              返回日记列表
+            </RouterLink>
+          </div>
 
-      <section class="meta-shell">
-        <div class="author-card">
-          <el-avatar :size="54" :src="detail.author?.avatarUrl" />
-          <div class="author-copy">
-            <p class="author-name">{{ detail.author?.nickname || '旅行者' }}</p>
-            <span class="author-note">记录沿途的人与风景</span>
+          <div class="hero-content">
+            <div class="hero-copy">
+              <div class="hero-pill-row">
+                <span class="hero-pill hero-pill-solid">
+                  {{ contentTypeLabel || '旅行日记' }}
+                </span>
+              </div>
+
+              <h1 class="headline-text">{{ detail.title }}</h1>
+              <p v-if="detail.summary" class="hero-summary">{{ detail.summary }}</p>
+
+              <div class="hero-author-row">
+                <div class="hero-author">
+                  <el-avatar :size="46" :src="detail.author?.avatarUrl">
+                    {{ authorInitial }}
+                  </el-avatar>
+                  <div class="hero-author-copy">
+                    <p class="hero-author-name">{{ authorDisplayName }}</p>
+                    <p v-if="formattedPublishedAt" class="hero-author-note">发布于 {{ formattedPublishedAt }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div v-if="formattedPublishedAt" class="publish-card">
-          <span class="publish-label">发布时间</span>
-          <strong>{{ formattedPublishedAt }}</strong>
+      <article class="story-shell">
+        <div v-if="detail.summary" class="story-intro">
+          <p>{{ detail.summary }}</p>
         </div>
-      </section>
 
-      <section class="article-shell">
         <DiaryRichContent :content="detail.content" />
-      </section>
 
-      <DiaryInteractionPanel
-        :detail="detail"
-        :like-pending="likePending"
-        :favorite-pending="favoritePending"
-        @toggle-like="handleToggleLike"
-        @toggle-favorite="handleToggleFavorite"
-        @focus-comment="scrollToComments"
-      />
+        <div class="story-divider" />
 
-      <div ref="commentsAnchorRef">
+        <section class="author-feature">
+          <div class="author-feature-main">
+            <el-avatar :size="84" :src="detail.author?.avatarUrl" class="author-feature-avatar">
+              {{ authorInitial }}
+            </el-avatar>
+
+            <div class="author-feature-copy">
+              <div class="author-feature-header">
+                <h2 class="headline-text">{{ authorDisplayName }}</h2>
+                <span v-if="contentTypeLabel" class="author-badge">{{ contentTypeLabel }}</span>
+              </div>
+
+              <p class="author-feature-bio">
+                {{ authorBio || '正在探索世界的某个角落，暂未更新简介。' }}
+              </p>
+            </div>
+          </div>
+
+          <button
+            v-if="authorMoreList.length"
+            type="button"
+            class="author-feature-action"
+            @click="scrollToMoreSection"
+          >
+            查看更多创作
+          </button>
+        </section>
+      </article>
+
+      <div ref="commentsAnchorRef" class="comments-shell">
         <DiaryCommentSection
           v-model="commentDraft"
           :comments="commentsPage.list"
@@ -101,14 +166,59 @@
         />
       </div>
 
-      <section class="return-shell">
-        <p class="section-eyebrow">继续翻阅</p>
-        <h2>这段旅程读到这里，故事目录仍在前方延伸</h2>
-        <RouterLink to="/diaries" class="back-link back-link-bottom">
-          <el-icon><ArrowLeft /></el-icon>
-          返回日记列表
-        </RouterLink>
+      <section v-if="showAuthorMoreSection" ref="authorMoreAnchorRef" class="more-section">
+        <div class="more-section-heading">
+          <p class="section-eyebrow">更多创作</p>
+          <h2 class="headline-text">{{ authorDisplayName }} 的更多日记</h2>
+        </div>
+
+        <div v-if="authorMoreStatus === 'loading'" class="more-skeleton-list">
+          <article v-for="item in 2" :key="item" class="more-skeleton-card" />
+        </div>
+
+        <div v-else class="more-list">
+          <DiaryShelfCard
+            v-for="item in authorMoreList"
+            :key="item.id"
+            :item="item"
+            :to="`/diaries/${item.id}`"
+            note="继续阅读这位作者的其他记录"
+          />
+        </div>
       </section>
+
+      <div class="floating-actions floating-actions-mobile" aria-label="日记互动">
+        <button
+          class="floating-action"
+          :class="{ active: detail.liked }"
+          :disabled="likePending"
+          @click="handleToggleLike"
+        >
+          <span class="floating-action-icon">
+            <span class="material-symbols-outlined">favorite</span>
+          </span>
+          <span class="floating-action-value">{{ formatCount(detail.likeCount) }}</span>
+        </button>
+
+        <button class="floating-action" @click="scrollToComments">
+          <span class="floating-action-icon">
+            <span class="material-symbols-outlined">chat_bubble</span>
+          </span>
+          <span class="floating-action-value">{{ formatCount(detail.commentCount) }}</span>
+        </button>
+
+        <button
+          class="floating-action"
+          :class="{ active: detail.favorited }"
+          :disabled="favoritePending"
+          @click="handleToggleFavorite"
+        >
+          <span class="floating-action-icon">
+            <span class="material-symbols-outlined">bookmark</span>
+          </span>
+          <span class="floating-action-value">{{ detail.favorited ? '已藏' : '收藏' }}</span>
+        </button>
+      </div>
     </template>
 
     <AuthDrawer v-model="authDrawerOpen" />
@@ -118,37 +228,40 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import { ArrowLeft } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import 'element-plus/theme-chalk/el-message.css';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import DiaryCommentSection from '@/components/diaries/DiaryCommentSection.vue';
-import DiaryInteractionPanel from '@/components/diaries/DiaryInteractionPanel.vue';
 import DiaryRichContent from '@/components/diaries/DiaryRichContent.vue';
+import DiaryShelfCard from '@/components/diaries/DiaryShelfCard.vue';
 import {
   createTravelDiaryComment,
   favoriteTravelDiary,
   getTravelDiaryComments,
   getTravelDiaryDetail,
+  getUserTravelDiaries,
   likeTravelDiary,
   unfavoriteTravelDiary,
   unlikeTravelDiary,
+  type DiaryCard,
   type DiaryDetail,
   type PageDiaryComment
 } from '@/api/diaries';
 import { useAuthStore } from '@/stores/auth';
 import { getApiErrorMessage } from '@/types/api';
-import { formatDateTime } from '@/utils/formatters';
+import { formatCountStat, formatDateTime } from '@/utils/formatters';
 
 type DetailStatus = 'loading' | 'success' | 'empty' | 'error';
 type CommentsStatus = 'idle' | 'loading' | 'success' | 'error';
+type AuthorMoreStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
 const commentsAnchorRef = ref<HTMLElement | null>(null);
+const authorMoreAnchorRef = ref<HTMLElement | null>(null);
 const authDrawerOpen = ref(false);
 
 const detail = ref<DiaryDetail>({
@@ -157,6 +270,7 @@ const detail = ref<DiaryDetail>({
   summary: '',
   coverUrl: '',
   content: '',
+  contentType: '',
   author: undefined,
   viewCount: 0,
   likeCount: 0,
@@ -173,8 +287,10 @@ const commentsPage = ref<PageDiaryComment>({
   total: 0,
   pages: 0
 });
+const authorMoreList = ref<DiaryCard[]>([]);
 const detailStatus = ref<DetailStatus>('loading');
 const commentsStatus = ref<CommentsStatus>('idle');
+const authorMoreStatus = ref<AuthorMoreStatus>('idle');
 const detailError = ref('当前无法加载这篇旅行日记，请稍后再试。');
 const commentsError = ref('评论区暂时不可用，请稍后重试。');
 const commentDraft = ref('');
@@ -183,6 +299,7 @@ const favoritePending = ref(false);
 const commentSubmitting = ref(false);
 let detailFetchSequence = 0;
 let commentsFetchSequence = 0;
+let authorMoreFetchSequence = 0;
 
 const diaryId = computed(() => {
   const raw = route.params.id;
@@ -190,6 +307,13 @@ const diaryId = computed(() => {
 });
 const isLoggedIn = computed(() => Boolean(authStore.token));
 const formattedPublishedAt = computed(() => formatDateTime(detail.value.publishedAt));
+const authorDisplayName = computed(() => detail.value.author?.nickname?.trim() || '旅行者');
+const authorInitial = computed(() => authorDisplayName.value.slice(0, 1).toUpperCase());
+const authorBio = computed(() => detail.value.author?.bio?.trim() || '');
+const contentTypeLabel = computed(() => detail.value.contentType?.trim() || '');
+const showAuthorMoreSection = computed(
+  () => authorMoreStatus.value === 'loading' || authorMoreList.value.length > 0
+);
 
 const goBackToList = () => {
   router.push('/diaries');
@@ -207,9 +331,26 @@ const ensureLoggedIn = () => {
   return false;
 };
 
+const formatCount = (value?: number) => formatCountStat(value);
+
+const scrollToElement = (element: HTMLElement | null, offset = 108) => {
+  if (!element) return;
+
+  window.scrollTo({
+    top: Math.max(window.scrollY + element.getBoundingClientRect().top - offset, 0),
+    behavior: 'smooth'
+  });
+};
+
 const scrollToComments = () => {
   nextTick(() => {
-    commentsAnchorRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    scrollToElement(commentsAnchorRef.value, 104);
+  });
+};
+
+const scrollToMoreSection = () => {
+  nextTick(() => {
+    scrollToElement(authorMoreAnchorRef.value, 104);
   });
 };
 
@@ -263,6 +404,44 @@ const fetchComments = async () => {
   }
 };
 
+const fetchAuthorMore = async () => {
+  const authorId = detail.value.author?.id?.trim();
+
+  if (!authorId) {
+    authorMoreStatus.value = 'idle';
+    authorMoreList.value = [];
+    return;
+  }
+
+  const requestId = ++authorMoreFetchSequence;
+  authorMoreStatus.value = 'loading';
+
+  try {
+    const res = await getUserTravelDiaries(
+      authorId,
+      {
+        pageNum: 1,
+        pageSize: 4,
+        sort: 'latest'
+      },
+      { skipErrorToast: true }
+    );
+
+    if (requestId !== authorMoreFetchSequence) return;
+
+    authorMoreList.value = (res.data.list || [])
+      .filter((item) => item.id !== detail.value.id)
+      .slice(0, 2);
+    authorMoreStatus.value = 'success';
+  } catch (error) {
+    if (requestId !== authorMoreFetchSequence) return;
+
+    console.error('Failed to load more diaries by author', error);
+    authorMoreList.value = [];
+    authorMoreStatus.value = 'error';
+  }
+};
+
 const fetchDetail = async () => {
   if (!diaryId.value) {
     detailStatus.value = 'error';
@@ -273,6 +452,7 @@ const fetchDetail = async () => {
   const requestId = ++detailFetchSequence;
   detailStatus.value = 'loading';
   commentsStatus.value = 'idle';
+  authorMoreStatus.value = 'idle';
   detailError.value = '当前无法加载这篇旅行日记，请稍后再试。';
   detail.value = {
     id: diaryId.value,
@@ -280,6 +460,7 @@ const fetchDetail = async () => {
     summary: '',
     coverUrl: '',
     content: '',
+    contentType: '',
     author: undefined,
     viewCount: 0,
     likeCount: 0,
@@ -296,6 +477,7 @@ const fetchDetail = async () => {
     total: 0,
     pages: 0
   };
+  authorMoreList.value = [];
 
   try {
     const res = await getTravelDiaryDetail(diaryId.value);
@@ -309,6 +491,7 @@ const fetchDetail = async () => {
 
     if (detailStatus.value === 'success') {
       fetchComments();
+      fetchAuthorMore();
     }
   } catch (error) {
     if (requestId !== detailFetchSequence) return;
@@ -448,13 +631,36 @@ watch(
 </script>
 
 <style scoped lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+.headline-text {
+  font-family: 'Plus Jakarta Sans', var(--font-family-sans);
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
 .diary-detail-page {
-  max-width: 1240px;
+  position: relative;
+  max-width: 1180px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  color: #0f172a;
+  color: #2c2f30;
+  padding-bottom: 104px;
 }
 
 .detail-loading {
@@ -464,25 +670,23 @@ watch(
 }
 
 .loading-hero,
-.loading-copy-shell,
-.loading-article {
+.loading-panel {
   border-radius: 32px;
-  background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
+  background: linear-gradient(90deg, rgba(230, 232, 234, 0.88), rgba(239, 241, 242, 1), rgba(230, 232, 234, 0.88));
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }
 
 .loading-hero {
-  min-height: 54vh;
+  min-height: 620px;
 }
 
-.loading-copy-shell {
-  padding: 34px;
-}
-
-.loading-article {
-  min-height: 520px;
+.loading-panel {
   padding: 32px;
+}
+
+.loading-panel-article {
+  min-height: 360px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -492,11 +696,11 @@ watch(
 .loading-line {
   display: block;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .loading-chip {
-  width: 118px;
+  width: 124px;
   height: 14px;
 }
 
@@ -509,7 +713,7 @@ watch(
 }
 
 .loading-line.medium {
-  width: 72%;
+  width: 68%;
 }
 
 .loading-line.long {
@@ -526,49 +730,21 @@ watch(
   }
 }
 
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  width: fit-content;
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  background: rgba(255, 255, 255, 0.9);
-  color: #334155;
-  text-decoration: none;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    color 0.25s ease,
-    box-shadow 0.25s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    border-color: rgba(212, 175, 55, 0.42);
-    color: #9a7313;
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
-  }
-}
-
-.back-link-top {
-  margin-top: 6px;
-}
-
-.hero-shell {
+.hero-stage {
   position: relative;
-}
-
-.hero-cover {
-  position: relative;
-  min-height: 60vh;
+  min-height: 600px;
+  border-radius: 32px;
   overflow: hidden;
-  border-radius: 40px;
-  box-shadow: 0 26px 72px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 28px 70px rgba(44, 47, 48, 0.12);
+}
 
+.hero-media,
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-media {
   img,
   .hero-fallback {
     width: 100%;
@@ -579,212 +755,526 @@ watch(
 
 .hero-fallback {
   background:
-    radial-gradient(circle at 22% 20%, rgba(255, 255, 255, 0.86), transparent 18%),
-    linear-gradient(145deg, rgba(34, 211, 238, 0.2) 0%, rgba(212, 175, 55, 0.16) 48%, rgba(15, 23, 42, 0.18) 100%);
+    radial-gradient(circle at 16% 18%, rgba(94, 162, 255, 0.28), transparent 22%),
+    radial-gradient(circle at 82% 14%, rgba(255, 202, 77, 0.26), transparent 18%),
+    linear-gradient(135deg, #eef4fb 0%, #f7f9fb 58%, #eef2f6 100%);
 }
 
 .hero-overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.02) 0%, rgba(15, 23, 42, 0.22) 100%),
-    linear-gradient(90deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.16) 100%);
+  background: linear-gradient(180deg, rgba(13, 21, 31, 0.06) 0%, rgba(13, 21, 31, 0.16) 36%, rgba(13, 21, 31, 0.68) 100%);
 }
 
-.hero-note {
-  position: absolute;
-  left: 26px;
-  bottom: 24px;
+.hero-shell {
+  position: relative;
   z-index: 1;
-  color: #f8fafc;
-  font-size: var(--font-size-xs);
+  min-height: 600px;
+  padding: 26px 32px 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hero-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.hero-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.hero-back,
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.hero-back {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.18);
+  color: #eef2ff;
+  text-decoration: none;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
-}
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
 
-.title-shell,
-.meta-shell,
-.article-shell,
-.return-shell {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.84);
-  box-shadow: 0 22px 58px rgba(15, 23, 42, 0.06);
-}
-
-.title-shell {
-  padding: 40px 42px;
-  border-radius: 34px;
-
-  h1 {
-    margin: 0;
-    max-width: 900px;
-    color: #111827;
-    font-size: var(--font-size-19xl);
-    line-height: 1.02;
-    font-weight: var(--font-weight-bold);
-    letter-spacing: -0.035em;
+  &:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.36);
   }
 }
 
-.section-eyebrow {
-  margin: 0 0 12px;
-  color: #c79b1d;
+.hero-pill {
+  color: rgba(238, 242, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.14);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
+  font-weight: var(--font-weight-semibold);
 }
 
-.summary-copy {
-  margin: 22px 0 0;
-  max-width: 760px;
-  color: #475569;
-  font-size: var(--font-size-2xl);
-  line-height: 1.9;
+.hero-pill-solid {
+  color: #002c59;
+  background: rgba(255, 255, 255, 0.88);
 }
 
-.meta-shell {
-  padding: 26px 28px;
-  border-radius: 32px;
+.hero-content {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 24px;
+}
+
+.hero-copy {
+  max-width: 100%;
+}
+
+.hero-copy h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(34px, 5.4vw, 60px);
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.hero-summary {
+  max-width: 820px;
+  margin: 14px 0 0;
+  color: rgba(238, 242, 255, 0.9);
+  font-size: var(--font-size-md);
+  line-height: 1.8;
+}
+
+.hero-author-row {
+  margin-top: 22px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  justify-content: flex-start;
+  gap: 18px;
 }
 
-.author-card {
+.hero-author {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
-.author-copy {
+.hero-author-copy {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
-.author-name {
+.hero-author-name {
   margin: 0;
-  color: #111827;
-  font-size: var(--font-size-lg);
+  color: #ffffff;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
 }
 
-.author-note,
-.publish-label {
-  color: #64748b;
-  font-size: var(--font-size-sm);
+.hero-author-note {
+  margin: 0;
+  color: rgba(238, 242, 255, 0.8);
+  font-size: 12px;
 }
 
-.publish-card {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-end;
+.story-shell,
+.more-section {
+  margin-top: 28px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 14px 36px rgba(44, 47, 48, 0.06);
+}
 
-  strong {
-    color: #111827;
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
+.story-shell {
+  padding: 38px 42px 46px;
+}
+
+.story-shell :deep(.rich-content) {
+  max-width: none;
+  margin: 0;
+  color: #595c5d;
+  font-size: var(--font-size-lg);
+  line-height: 1.95;
+}
+
+.story-shell :deep(h2),
+.story-shell :deep(h3),
+.story-shell :deep(h4) {
+  font-family: 'Plus Jakarta Sans', var(--font-family-sans);
+}
+
+.story-divider {
+  height: 1px;
+  margin: 36px 0 28px;
+  background: rgba(224, 227, 228, 0.92);
+}
+
+.story-intro {
+  max-width: none;
+  margin: 0 0 30px;
+  padding: 18px 20px;
+  border-left: 4px solid #005bad;
+  border-radius: 0 24px 24px 0;
+  background: linear-gradient(90deg, rgba(0, 91, 173, 0.08), rgba(0, 91, 173, 0));
+
+  p {
+    margin: 0;
+    color: #4b5563;
+    font-size: var(--font-size-lg);
+    font-style: italic;
+    line-height: 1.9;
   }
 }
 
-.article-shell {
-  padding: 54px min(10vw, 120px);
-  border-radius: 36px;
-}
-
-.article-shell :deep(.rich-content) {
-  max-width: 780px;
-  margin: 0 auto;
-}
-
-.return-shell {
-  padding: 32px 30px;
-  border-radius: 32px;
+.author-feature {
+  margin-top: 0;
+  padding: 26px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  border-radius: 24px;
+  background: #eff1f2;
+}
+
+.author-feature-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.author-feature-avatar {
+  flex-shrink: 0;
+  border: 3px solid #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.author-feature-copy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.author-feature-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
 
   h2 {
     margin: 0;
-    max-width: 620px;
-    color: #111827;
-    font-size: var(--font-size-8xl);
-    line-height: 1.16;
-    font-weight: var(--font-weight-title);
+    color: #2c2f30;
+    font-size: clamp(24px, 3vw, 28px);
+    line-height: 1.14;
+    font-weight: 800;
   }
 }
 
-@media (max-width: 1024px) {
-  .title-shell h1 {
-    font-size: var(--font-size-15xl);
+.author-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(0, 91, 173, 0.1);
+  color: #005bad;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+}
+
+.author-feature-bio {
+  max-width: 760px;
+  margin: 12px 0 0;
+  color: #595c5d;
+  font-size: var(--font-size-sm);
+  line-height: 1.8;
+}
+
+.author-feature-action {
+  min-height: 44px;
+  padding: 0 26px;
+  border-radius: 999px;
+  border: 1px solid #005bad;
+  background: #005bad;
+  color: #eef2ff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0, 91, 173, 0.16);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(0, 91, 173, 0.18);
+  }
+}
+
+.comments-shell {
+  margin-top: 28px;
+}
+
+.section-eyebrow {
+  margin: 0 0 12px;
+  color: #005bad;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+}
+
+.more-section {
+  padding: 28px;
+}
+
+.more-section-heading {
+  h2 {
+    margin: 0;
+    color: #111827;
+    font-size: var(--font-size-8xl);
+    line-height: 1.14;
+    font-weight: 800;
+  }
+}
+
+.more-list,
+.more-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.more-skeleton-card {
+  min-height: 280px;
+  border-radius: 28px;
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.floating-actions {
+  z-index: 30;
+}
+
+.floating-actions-desktop {
+  position: fixed;
+  left: max(18px, calc(50% - 662px));
+  top: 176px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.floating-actions-mobile {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  display: none;
+  transform: translateX(-50%);
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(245, 246, 247, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(20px);
+}
+
+.floating-action {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #757778;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.25s ease, color 0.25s ease;
+
+  &:hover:not(:disabled),
+  &.active {
+    transform: translateY(-2px);
+    color: #005bad;
   }
 
-  .article-shell {
-    padding: 40px 36px;
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
+}
 
-  .meta-shell,
-  .return-shell {
+.floating-action-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  border: 1px solid rgba(224, 227, 228, 0.96);
+  background: rgba(255, 255, 255, 0.98);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+
+  .material-symbols-outlined {
+    font-size: 25px;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  }
+}
+
+.floating-action:hover:not(:disabled) .floating-action-icon,
+.floating-action.active .floating-action-icon {
+  border-color: rgba(0, 91, 173, 0.2);
+  background: rgba(0, 91, 173, 0.08);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+}
+
+.floating-action-value {
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+@media (max-width: 1640px) {
+  .floating-actions-desktop {
+    display: none;
+  }
+}
+
+@media (max-width: 1200px) {
+  .hero-author-row,
+  .author-feature {
     flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .publish-card {
     align-items: flex-start;
   }
 }
 
 @media (max-width: 767px) {
   .diary-detail-page {
-    gap: 22px;
+    padding-bottom: 118px;
   }
 
   .loading-hero,
-  .loading-copy-shell,
-  .loading-article,
-  .hero-cover,
-  .title-shell,
-  .meta-shell,
-  .article-shell,
-  .return-shell {
+  .loading-panel,
+  .hero-stage,
+  .story-shell,
+  .more-section {
     border-radius: 24px;
   }
 
   .loading-hero {
-    min-height: 38vh;
+    min-height: 420px;
   }
 
-  .hero-cover {
-    min-height: 34vh;
-  }
-
-  .title-shell {
-    padding: 26px 18px;
-
-    h1 {
-      font-size: var(--font-size-10xl);
-      line-height: 1.08;
-    }
-  }
-
-  .summary-copy {
-    font-size: var(--font-size-lg);
-  }
-
-  .meta-shell,
-  .return-shell {
+  .loading-panel {
     padding: 22px 18px;
   }
 
-  .article-shell {
-    padding: 28px 18px;
+  .hero-stage {
+    min-height: 440px;
   }
 
-  .return-shell h2 {
+  .hero-shell {
+    min-height: 440px;
+    padding: 18px 18px 24px;
+  }
+
+  .hero-topbar {
+    align-items: flex-start;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(30px, 10vw, 42px);
+  }
+
+  .hero-summary {
+    font-size: var(--font-size-sm);
+    line-height: 1.75;
+  }
+
+  .story-shell,
+  .more-section {
+    margin-top: 22px;
+  }
+
+  .story-shell {
+    padding: 24px 18px 28px;
+  }
+
+  .story-shell :deep(.rich-content) {
+    font-size: var(--font-size-base);
+  }
+
+  .story-intro {
+    margin-bottom: 22px;
+    padding: 16px;
+
+    p {
+      font-size: var(--font-size-md);
+    }
+  }
+
+  .author-feature {
+    padding: 22px 18px;
+    align-items: stretch;
+  }
+
+  .author-feature-main {
+    align-items: flex-start;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .author-feature-header h2,
+  .more-section-heading h2 {
     font-size: var(--font-size-6xl);
+  }
+
+  .author-feature-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .floating-actions-mobile {
+    display: flex;
+  }
+
+  .floating-action {
+    min-width: 88px;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .floating-action-icon {
+    width: 40px;
+    height: 40px;
+
+    .material-symbols-outlined {
+      font-size: 20px;
+    }
   }
 }
 </style>

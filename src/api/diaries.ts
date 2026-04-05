@@ -6,6 +6,7 @@ interface DiaryAuthorApi {
   id: string;
   nickname?: string;
   avatarUrl?: string;
+  bio?: string;
 }
 
 interface DiaryApiItem {
@@ -14,6 +15,7 @@ interface DiaryApiItem {
   summary?: string;
   coverUrl?: string;
   author?: DiaryAuthorApi | null;
+  contentType?: string;
   viewCount?: number;
   likeCount?: number;
   favoriteCount?: number;
@@ -55,6 +57,7 @@ export interface DiaryAuthor {
   id: string;
   nickname?: string;
   avatarUrl?: string;
+  bio?: string;
 }
 
 export interface DiaryCard {
@@ -63,6 +66,7 @@ export interface DiaryCard {
   summary?: string;
   coverUrl?: string;
   author?: DiaryAuthor;
+  contentType?: string;
   viewCount?: number;
   likeCount?: number;
   favoriteCount?: number;
@@ -178,9 +182,11 @@ const mapDiary = (item: DiaryApiItem): DiaryCard => ({
     ? {
         id: item.author.id,
         nickname: item.author.nickname,
-        avatarUrl: item.author.avatarUrl
+        avatarUrl: item.author.avatarUrl,
+        bio: item.author.bio
       }
     : undefined,
+  contentType: item.contentType,
   viewCount: item.viewCount,
   likeCount: item.likeCount,
   favoriteCount: item.favoriteCount,
@@ -232,11 +238,13 @@ const mapDiaryDetail = (item?: DiaryDetailApiItem | null): DiaryDetail => ({
   summary: item?.summary,
   coverUrl: item?.coverUrl,
   content: item?.content,
+  contentType: item?.contentType,
   author: item?.author
     ? {
         id: item.author.id,
         nickname: item.author.nickname,
-        avatarUrl: item.author.avatarUrl
+        avatarUrl: item.author.avatarUrl,
+        bio: item.author.bio
       }
     : undefined,
   viewCount: item?.viewCount,
@@ -336,6 +344,19 @@ export async function getDiaryFeed(options: RequestBehaviorOptions = {}) {
 export async function getTravelDiaryList(params: DiaryListParams = {}) {
   const res = await request.get<ApiResponse<PaginatedData<DiaryApiItem>>>('/travel-diaries', {
     params: normalizeListParams(params)
+  });
+
+  return createPageResponse(res);
+}
+
+export async function getUserTravelDiaries(
+  userId: string,
+  params: DiaryListParams = {},
+  options: RequestBehaviorOptions = {}
+) {
+  const res = await request.get<ApiResponse<PaginatedData<DiaryApiItem>>>(`/users/${userId}/travel-diaries`, {
+    params: normalizeListParams(params),
+    skipErrorToast: options.skipErrorToast
   });
 
   return createPageResponse(res);
