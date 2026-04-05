@@ -67,7 +67,7 @@
           <span class="floating-action-icon">
             <span class="material-symbols-outlined">bookmark</span>
           </span>
-          <span class="floating-action-value">{{ detail.favorited ? '已收藏' : '收藏' }}</span>
+          <span class="floating-action-value">{{ formatCount(detail.favoriteCount) }}</span>
         </button>
       </aside>
 
@@ -215,7 +215,7 @@
           <span class="floating-action-icon">
             <span class="material-symbols-outlined">bookmark</span>
           </span>
-          <span class="floating-action-value">{{ detail.favorited ? '已藏' : '收藏' }}</span>
+          <span class="floating-action-value">{{ formatCount(detail.favoriteCount) }}</span>
         </button>
       </div>
     </template>
@@ -237,9 +237,9 @@ import DiaryShelfCard from '@/components/diaries/DiaryShelfCard.vue';
 import {
   createTravelDiaryComment,
   favoriteTravelDiary,
+  getMoreTravelDiariesFromAuthor,
   getTravelDiaryComments,
   getTravelDiaryDetail,
-  getUserTravelDiaries,
   likeTravelDiary,
   unfavoriteTravelDiary,
   unlikeTravelDiary,
@@ -404,9 +404,9 @@ const fetchComments = async () => {
 };
 
 const fetchAuthorMore = async () => {
-  const authorId = detail.value.author?.id?.trim();
+  const currentDiaryId = detail.value.id?.trim() || diaryId.value;
 
-  if (!authorId) {
+  if (!currentDiaryId) {
     authorMoreStatus.value = 'idle';
     authorMoreList.value = [];
     return;
@@ -416,8 +416,8 @@ const fetchAuthorMore = async () => {
   authorMoreStatus.value = 'loading';
 
   try {
-    const res = await getUserTravelDiaries(
-      authorId,
+    const res = await getMoreTravelDiariesFromAuthor(
+      currentDiaryId,
       {
         pageNum: 1,
         pageSize: 4,

@@ -349,15 +349,18 @@ export async function getTravelDiaryList(params: DiaryListParams = {}) {
   return createPageResponse(res);
 }
 
-export async function getUserTravelDiaries(
-  userId: string,
+export async function getMoreTravelDiariesFromAuthor(
+  diaryId: string,
   params: DiaryListParams = {},
   options: RequestBehaviorOptions = {}
 ) {
-  const res = await request.get<ApiResponse<PaginatedData<DiaryApiItem>>>(`/users/${userId}/travel-diaries`, {
-    params: normalizeListParams(params),
-    skipErrorToast: options.skipErrorToast
-  });
+  const res = await request.get<ApiResponse<PaginatedData<DiaryApiItem>>>(
+    `/travel-diaries/${diaryId}/more-from-author`,
+    {
+      params: normalizeListParams(params),
+      skipErrorToast: options.skipErrorToast
+    }
+  );
 
   return createPageResponse(res);
 }
