@@ -75,7 +75,7 @@ request.interceptors.request.use((config) => {
 });
 
 request.interceptors.response.use(
-  (res: AxiosResponse<ApiResponse<unknown>>) => {
+  ((res: AxiosResponse<ApiResponse<unknown>>) => {
     const payload = res.data;
 
     if (!payload || typeof payload !== 'object' || !('code' in payload)) {
@@ -106,7 +106,7 @@ request.interceptors.response.use(
         timestamp: payload.timestamp
       })
     );
-  },
+  }) as unknown as (value: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>,
   (error: AxiosError) => {
     const { response } = error;
     const config = error.config;

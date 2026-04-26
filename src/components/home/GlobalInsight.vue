@@ -320,7 +320,14 @@ const loadData = async () => {
       return;
     }
 
-    activeId.value = mappedItems.value[0].id;
+    const [firstItem] = mappedItems.value;
+
+    if (!firstItem) {
+      status.value = 'empty';
+      return;
+    }
+
+    activeId.value = firstItem.id;
     status.value = 'success';
 
     await nextTick();
@@ -350,13 +357,13 @@ onUnmounted(() => {
 <style scoped lang="scss">
 .global-insight {
   padding: 50px 24px;
-  border-radius: 30px;
+  border-radius: var(--radius-panel);
   background:
     radial-gradient(circle at 14% 16%, rgba(34, 211, 238, 0.08), transparent 22%),
     radial-gradient(circle at 88% 18%, rgba(212, 175, 55, 0.1), transparent 20%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
   border: 1px solid rgba(226, 232, 240, 0.84);
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-panel);
 }
 
 .map-header {
@@ -389,7 +396,7 @@ onUnmounted(() => {
   align-items: center;
   min-height: 34px;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
 }
@@ -442,7 +449,7 @@ onUnmounted(() => {
 .state-card,
 .map-stage,
 .insight-panel {
-  border-radius: 28px;
+  border-radius: var(--radius-card);
 }
 
 .map-skeleton {
@@ -457,7 +464,7 @@ onUnmounted(() => {
 .skeleton-title,
 .skeleton-line {
   display: block;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
 }
 
 .skeleton-pill {
@@ -494,7 +501,7 @@ onUnmounted(() => {
   text-align: center;
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-panel);
 }
 
 .state-badge {
@@ -502,7 +509,7 @@ onUnmounted(() => {
   min-height: 34px;
   align-items: center;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   background: rgba(212, 175, 55, 0.1);
   color: var(--color-accent-strong);
   font-size: var(--font-size-xs);
@@ -545,7 +552,7 @@ onUnmounted(() => {
   overflow: hidden;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-panel);
 }
 
 .map-stage {
@@ -574,7 +581,7 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(226, 232, 240, 0.88);
   color: #0f172a;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .overlay-chip-soft {
@@ -627,7 +634,7 @@ onUnmounted(() => {
   grid-template-columns: 148px minmax(0, 1fr);
   gap: 16px;
   padding: 14px;
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(226, 232, 240, 0.9);
   cursor: pointer;
@@ -644,14 +651,14 @@ onUnmounted(() => {
   transform: translateY(-2px);
   border-color: rgba(212, 175, 55, 0.32);
   background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-card);
   outline: none;
 }
 
 .card-cover {
   position: relative;
   min-height: 132px;
-  border-radius: 18px;
+  border-radius: var(--radius-control);
   overflow: hidden;
   background: linear-gradient(135deg, #dbeafe 0%, #f8fafc 48%, #eef2ff 100%);
 }
@@ -743,7 +750,7 @@ onUnmounted(() => {
   min-height: 36px;
   padding: 0 14px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   background: #111827;
   color: #f8fafc;
   font-size: var(--font-size-sm);
@@ -774,8 +781,8 @@ onUnmounted(() => {
 :deep(.insight-tooltip) {
   background: rgba(15, 23, 42, 0.9);
   border: none;
-  border-radius: 999px;
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.18);
+  border-radius: var(--radius-chip);
+  box-shadow: var(--shadow-floating);
   color: #f8fafc;
   font-family: var(--font-family-sans);
   font-size: var(--font-size-xs);
@@ -789,9 +796,9 @@ onUnmounted(() => {
 }
 
 :deep(.insight-popup .leaflet-popup-content-wrapper) {
-  border-radius: 18px;
+  border-radius: var(--radius-control);
   background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--shadow-floating);
   backdrop-filter: blur(14px);
 }
 
@@ -807,7 +814,7 @@ onUnmounted(() => {
 
 :deep(.popup-card) {
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: var(--radius-control);
 }
 
 :deep(.popup-image) {
@@ -848,25 +855,25 @@ onUnmounted(() => {
   height: 22px;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+  box-shadow: var(--shadow-control);
 }
 
 :deep(.marker-core::before) {
   content: '';
   position: absolute;
   inset: -5px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   border: 1px solid rgba(212, 175, 55, 0.28);
 }
 
 :deep(.marker-dot) {
   width: 10px;
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   background: var(--color-accent);
-  box-shadow: 0 0 0 5px rgba(212, 175, 55, 0.18);
+  box-shadow: var(--shadow-ring-accent);
 }
 
 :deep(.marker-core-active) {
@@ -915,7 +922,7 @@ onUnmounted(() => {
 @media (max-width: 767px) {
   .global-insight {
     padding: 32px 16px;
-    border-radius: 24px;
+    border-radius: var(--radius-card);
   }
 
   .state-shell,
@@ -931,7 +938,7 @@ onUnmounted(() => {
   .map-skeleton,
   .panel-skeleton,
   .state-card {
-    border-radius: 22px;
+    border-radius: var(--radius-control);
   }
 
   .insight-panel,

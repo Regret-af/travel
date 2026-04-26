@@ -319,7 +319,7 @@ $white: #f9fafb;
   position: relative;
   width: 100%;
   height: 100vh;
-  border-radius: 34px;
+  border-radius: var(--radius-panel);
   background: #1a1a1a;
   overflow: hidden;
 
@@ -439,7 +439,7 @@ $white: #f9fafb;
     .loading-bar {
       width: min(320px, 100%);
       height: 6px;
-      border-radius: 999px;
+      border-radius: var(--radius-chip);
       overflow: hidden;
       background: rgba(255, 255, 255, 0.16);
 
@@ -462,7 +462,7 @@ $white: #f9fafb;
       background: rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50px;
+      border-radius: var(--radius-chip);
 
       .search-input {
         flex: 1;
@@ -482,7 +482,7 @@ $white: #f9fafb;
       }
 
       .search-btn {
-        border-radius: 40px;
+        border-radius: var(--radius-chip);
         padding: 0 25px;
         height: 44px;
         background: $gold-color;
@@ -500,9 +500,9 @@ $white: #f9fafb;
         left: 0;
         width: 100%;
         background: rgba(26, 26, 26, 0.95);
-        border-radius: 15px;
+        border-radius: var(--radius-control);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        box-shadow: var(--shadow-floating);
         overflow: hidden;
         z-index: 50;
 
@@ -561,7 +561,7 @@ $white: #f9fafb;
       .dot {
         width: 10px;
         height: 10px;
-        border-radius: 999px;
+        border-radius: var(--radius-chip);
         background: rgba(255, 255, 255, 0.35);
         transition: all 0.25s ease;
 
@@ -597,7 +597,7 @@ $white: #f9fafb;
 
 @media (max-width: 768px) {
   .hero-container {
-    border-radius: 24px;
+    border-radius: var(--radius-card);
 
     .overlay {
       padding: 0 24px;
@@ -617,7 +617,7 @@ $white: #f9fafb;
       .search-wrapper {
         flex-direction: column;
         align-items: stretch;
-        border-radius: 28px;
+        border-radius: var(--radius-card);
 
         .search-btn {
           width: 100%;

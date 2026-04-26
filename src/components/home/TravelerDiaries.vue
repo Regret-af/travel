@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
 .diary-section {
   background: #fafafa;
   padding: 48px 24px;
-  border-radius: 24px;
+  border-radius: var(--radius-card);
 
   .header {
     margin-bottom: 24px;
@@ -184,8 +184,8 @@ onBeforeUnmount(() => {
       margin-right: -90px;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(12px);
-      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
-      border-radius: 24px;
+      box-shadow: var(--shadow-floating);
+      border-radius: var(--radius-card);
       position: relative;
       z-index: 20;
       display: flex;
@@ -214,7 +214,7 @@ onBeforeUnmount(() => {
             align-items: center;
             font-size: var(--font-size-xs);
             padding: 4px 10px;
-            border-radius: 999px;
+            border-radius: var(--radius-chip);
             background: #f3f4f6;
             color: #6b7280;
             width: fit-content;
@@ -269,7 +269,7 @@ onBeforeUnmount(() => {
       flex: 1 1 60%;
       height: 320px;
       overflow: hidden;
-      border-radius: 32px;
+      border-radius: var(--radius-panel);
       z-index: 10;
       background: linear-gradient(135deg, #dbeafe 0%, #eef2ff 100%);
 
@@ -303,7 +303,7 @@ onBeforeUnmount(() => {
   .state-card {
     min-height: 280px;
     padding: 48px 24px;
-    border-radius: 20px;
+    border-radius: var(--radius-control);
     background: rgba(255, 255, 255, 0.85);
     text-align: center;
     color: #6b7280;
@@ -342,7 +342,7 @@ onBeforeUnmount(() => {
       .image-wrap {
         flex: 0 0 auto;
         height: 260px;
-        border-radius: 22px;
+        border-radius: var(--radius-control);
         order: -1;
       }
     }
@@ -374,7 +374,7 @@ onBeforeUnmount(() => {
 
       .image-wrap {
         height: 200px;
-        border-radius: 18px;
+        border-radius: var(--radius-control);
       }
     }
   }

@@ -182,6 +182,7 @@ const sortOptions: Array<{ value: SortValue; label: string; note: string }> = [
   { value: 'latest', label: '最新发布', note: '' },
   { value: 'hot', label: '热度优先', note: '' }
 ];
+const fallbackSortLabel = sortOptions[0]?.label || '';
 const pageData = ref<PageUserDiaryCard>({
   list: [],
   pageNum: 1,
@@ -203,7 +204,7 @@ const normalizedRoute = computed(() => {
 });
 
 const currentSortLabel = computed(
-  () => sortOptions.find((option) => option.value === currentSort.value)?.label || sortOptions[0].label
+  () => sortOptions.find((option) => option.value === currentSort.value)?.label || fallbackSortLabel
 );
 
 const openAuthDrawer = () => {

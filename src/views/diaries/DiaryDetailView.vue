@@ -46,14 +46,14 @@
           @click="handleToggleLike"
         >
           <span class="floating-action-icon">
-            <span class="material-symbols-outlined">favorite</span>
+            <el-icon class="floating-action-glyph"><HeartFilledIcon /></el-icon>
           </span>
           <span class="floating-action-value">{{ formatCount(detail.likeCount) }}</span>
         </button>
 
         <button class="floating-action" @click="scrollToComments">
           <span class="floating-action-icon">
-            <span class="material-symbols-outlined">chat_bubble</span>
+            <el-icon class="floating-action-glyph"><ChatLineRound /></el-icon>
           </span>
           <span class="floating-action-value">{{ formatCount(detail.commentCount) }}</span>
         </button>
@@ -65,7 +65,7 @@
           @click="handleToggleFavorite"
         >
           <span class="floating-action-icon">
-            <span class="material-symbols-outlined">bookmark</span>
+            <el-icon class="floating-action-glyph"><CollectionTag /></el-icon>
           </span>
           <span class="floating-action-value">{{ formatCount(detail.favoriteCount) }}</span>
         </button>
@@ -81,7 +81,7 @@
         <div class="hero-shell">
           <div class="hero-topbar">
             <RouterLink to="/diaries" class="hero-back">
-              <span class="material-symbols-outlined">arrow_back</span>
+              <el-icon class="detail-icon"><Back /></el-icon>
               返回日记列表
             </RouterLink>
           </div>
@@ -194,14 +194,14 @@
           @click="handleToggleLike"
         >
           <span class="floating-action-icon">
-            <span class="material-symbols-outlined">favorite</span>
+            <el-icon class="floating-action-glyph"><HeartFilledIcon /></el-icon>
           </span>
           <span class="floating-action-value">{{ formatCount(detail.likeCount) }}</span>
         </button>
 
         <button class="floating-action" @click="scrollToComments">
           <span class="floating-action-icon">
-            <span class="material-symbols-outlined">chat_bubble</span>
+            <el-icon class="floating-action-glyph"><ChatLineRound /></el-icon>
           </span>
           <span class="floating-action-value">{{ formatCount(detail.commentCount) }}</span>
         </button>
@@ -213,7 +213,7 @@
           @click="handleToggleFavorite"
         >
           <span class="floating-action-icon">
-            <span class="material-symbols-outlined">bookmark</span>
+            <el-icon class="floating-action-glyph"><CollectionTag /></el-icon>
           </span>
           <span class="floating-action-value">{{ formatCount(detail.favoriteCount) }}</span>
         </button>
@@ -225,10 +225,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, h, nextTick, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import 'element-plus/theme-chalk/el-message.css';
+import { Back, ChatLineRound, CollectionTag } from '@element-plus/icons-vue';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import DiaryCommentSection from '@/components/diaries/DiaryCommentSection.vue';
@@ -254,6 +255,17 @@ import { formatCountStat, formatDateTime } from '@/utils/formatters';
 type DetailStatus = 'loading' | 'success' | 'empty' | 'error';
 type CommentsStatus = 'idle' | 'loading' | 'success' | 'error';
 type AuthorMoreStatus = 'idle' | 'loading' | 'success' | 'error';
+
+const HeartFilledIcon = {
+  name: 'HeartFilledIcon',
+  render: () =>
+    h('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' }, [
+      h('path', {
+        fill: 'currentColor',
+        d: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.27 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.08C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.77-3.4 6.86-8.55 11.54z'
+      })
+    ])
+};
 
 const router = useRouter();
 const route = useRoute();
@@ -630,28 +642,8 @@ watch(
 </script>
 
 <style scoped lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
-
-.headline-text {
-  font-family: 'Plus Jakarta Sans', var(--font-family-sans);
-}
-
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
+.detail-icon {
+  flex-shrink: 0;
 }
 
 .diary-detail-page {
@@ -670,7 +662,7 @@ watch(
 
 .loading-hero,
 .loading-panel {
-  border-radius: 32px;
+  border-radius: var(--radius-panel);
   background: linear-gradient(90deg, rgba(230, 232, 234, 0.88), rgba(239, 241, 242, 1), rgba(230, 232, 234, 0.88));
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
@@ -694,7 +686,7 @@ watch(
 .loading-chip,
 .loading-line {
   display: block;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   background: rgba(255, 255, 255, 0.82);
 }
 
@@ -732,9 +724,9 @@ watch(
 .hero-stage {
   position: relative;
   min-height: 600px;
-  border-radius: 32px;
+  border-radius: var(--radius-panel);
   overflow: hidden;
-  box-shadow: 0 28px 70px rgba(44, 47, 48, 0.12);
+  box-shadow: var(--shadow-elevated);
 }
 
 .hero-media,
@@ -794,7 +786,7 @@ watch(
   gap: 8px;
   min-height: 42px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -892,9 +884,9 @@ watch(
 .story-shell,
 .more-section {
   margin-top: 28px;
-  border-radius: 32px;
+  border-radius: var(--radius-panel);
   background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 14px 36px rgba(44, 47, 48, 0.06);
+  box-shadow: var(--shadow-card);
 }
 
 .story-shell {
@@ -912,7 +904,7 @@ watch(
 .story-shell :deep(h2),
 .story-shell :deep(h3),
 .story-shell :deep(h4) {
-  font-family: 'Plus Jakarta Sans', var(--font-family-sans);
+  font-family: var(--font-family-sans);
 }
 
 .story-divider {
@@ -926,7 +918,7 @@ watch(
   margin: 0 0 30px;
   padding: 18px 20px;
   border-left: 4px solid #005bad;
-  border-radius: 0 24px 24px 0;
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
   background: linear-gradient(90deg, rgba(0, 91, 173, 0.08), rgba(0, 91, 173, 0));
 
   p {
@@ -945,7 +937,7 @@ watch(
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   background: #eff1f2;
 }
 
@@ -959,7 +951,7 @@ watch(
 .author-feature-avatar {
   flex-shrink: 0;
   border: 3px solid #ffffff;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .author-feature-copy {
@@ -995,7 +987,7 @@ watch(
 .author-feature-action {
   min-height: 44px;
   padding: 0 26px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   border: 1px solid #005bad;
   background: #005bad;
   color: #eef2ff;
@@ -1003,12 +995,12 @@ watch(
   font-weight: var(--font-weight-bold);
   white-space: nowrap;
   cursor: pointer;
-  box-shadow: 0 8px 18px rgba(0, 91, 173, 0.16);
+  box-shadow: var(--shadow-control);
   transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 26px rgba(0, 91, 173, 0.18);
+    box-shadow: var(--shadow-control-hover);
   }
 }
 
@@ -1048,7 +1040,7 @@ watch(
 
 .more-skeleton-card {
   min-height: 280px;
-  border-radius: 28px;
+  border-radius: var(--radius-card);
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
@@ -1075,10 +1067,10 @@ watch(
   transform: translateX(-50%);
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   background: rgba(245, 246, 247, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.54);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+  box-shadow: var(--shadow-floating);
   backdrop-filter: blur(20px);
 }
 
@@ -1110,13 +1102,13 @@ watch(
 .floating-action-icon {
   width: 50px;
   height: 50px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   border: 1px solid rgba(224, 227, 228, 0.96);
   background: rgba(255, 255, 255, 0.98);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-card);
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease,
@@ -1124,9 +1116,8 @@ watch(
     border-color 0.25s ease,
     color 0.25s ease;
 
-  .material-symbols-outlined {
+  .floating-action-glyph {
     font-size: 25px;
-    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
   }
 }
 
@@ -1134,7 +1125,7 @@ watch(
 .floating-action.active .floating-action-icon {
   border-color: rgba(0, 91, 173, 0.2);
   background: rgba(0, 91, 173, 0.08);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+  box-shadow: var(--shadow-card);
 }
 
 .floating-action-value {
@@ -1167,7 +1158,7 @@ watch(
   .hero-stage,
   .story-shell,
   .more-section {
-    border-radius: 24px;
+    border-radius: var(--radius-card);
   }
 
   .loading-hero {
@@ -1257,7 +1248,7 @@ watch(
     width: 40px;
     height: 40px;
 
-    .material-symbols-outlined {
+    .floating-action-glyph {
       font-size: 20px;
     }
   }

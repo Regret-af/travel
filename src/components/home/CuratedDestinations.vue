@@ -67,7 +67,7 @@ onMounted(fetchData);
 .curated-section {
   background: #fafafa;
   padding: 48px 24px;
-  border-radius: 24px;
+  border-radius: var(--radius-card);
 
   .header {
     margin-bottom: 24px;
@@ -94,7 +94,7 @@ onMounted(fetchData);
 
   .state-card {
     padding: 48px 24px;
-    border-radius: 20px;
+    border-radius: var(--radius-control);
     background: rgba(255, 255, 255, 0.8);
     text-align: center;
     color: #6b7280;

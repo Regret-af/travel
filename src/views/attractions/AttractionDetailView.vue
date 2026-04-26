@@ -8,7 +8,7 @@
         <div class="hero-shell">
           <div class="hero-topbar">
             <button class="hero-back" type="button" @click="goBackToList">
-              <span class="material-symbols-outlined">arrow_back</span>
+              <el-icon class="detail-icon"><Back /></el-icon>
               返回景点列表
             </button>
 
@@ -22,7 +22,7 @@
           <div class="hero-content">
             <div class="hero-copy">
               <div class="hero-location-row">
-                <span class="material-symbols-outlined">location_on</span>
+                <el-icon class="detail-icon"><Location /></el-icon>
                 <span>{{ heroLocation }}</span>
               </div>
               <h1 class="headline-text">{{ detail.name }}</h1>
@@ -33,26 +33,22 @@
 
       <section class="tag-strip">
         <article v-if="detail.category?.name" class="tag-card">
-          <span class="material-symbols-outlined tag-icon">park</span>
+          <el-icon class="tag-icon"><Guide /></el-icon>
           <span>{{ detail.category.name }}</span>
         </article>
 
         <article v-if="detail.locationText" class="tag-card">
-          <span class="material-symbols-outlined tag-icon">pin_drop</span>
+          <el-icon class="tag-icon"><LocationFilled /></el-icon>
           <span>{{ detail.locationText }}</span>
         </article>
 
         <article v-if="viewCountText" class="tag-card">
-          <span class="material-symbols-outlined tag-icon">visibility</span>
+          <el-icon class="tag-icon"><View /></el-icon>
           <span>{{ viewCountText }}</span>
         </article>
       </section>
 
-      <section
-        ref="contentAnchorRef"
-        class="content-grid"
-        :class="{ 'content-grid-single': !showWeatherSection }"
-      >
+      <section class="content-grid" :class="{ 'content-grid-single': !showWeatherSection }">
         <div v-if="showWeatherSection" class="weather-column">
           <div class="weather-grid">
             <article class="weather-card weather-card-current">
@@ -65,18 +61,18 @@
                   </h2>
                   <p class="weather-subline">{{ currentWeatherDescription }}</p>
                 </div>
-                <span class="material-symbols-outlined weather-main-icon">
-                  {{ currentWeatherIcon }}
-                </span>
+                <el-icon class="weather-main-icon">
+                  <component :is="currentWeatherIcon" />
+                </el-icon>
               </div>
 
               <div class="weather-current-meta">
                 <div v-if="humidityText" class="weather-meta-item">
-                  <span class="material-symbols-outlined">water_drop</span>
+                  <el-icon><Drizzling /></el-icon>
                   <span>{{ humidityText }}</span>
                 </div>
                 <div v-if="windText" class="weather-meta-item">
-                  <span class="material-symbols-outlined">air</span>
+                  <el-icon><WindPower /></el-icon>
                   <span>{{ windText }}</span>
                 </div>
               </div>
@@ -84,9 +80,9 @@
 
             <div class="weather-sidecards">
               <article class="weather-tip-card" :class="weatherSuitabilityClass">
-                <span class="material-symbols-outlined">
-                  {{ weatherTipIcon }}
-                </span>
+                <el-icon>
+                  <component :is="weatherTipIcon" />
+                </el-icon>
                 <div>
                   <h3>{{ weatherTipTitle }}</h3>
                   <p>{{ weatherTipText }}</p>
@@ -98,7 +94,7 @@
                 class="weather-alert-card"
                 :class="alertLevelClass(primaryAlert.level)"
               >
-                <span class="material-symbols-outlined">warning</span>
+                <el-icon><Warning /></el-icon>
                 <div>
                   <h3>{{ primaryAlert.title || '天气预警' }}</h3>
                   <p>{{ primaryAlert.description || '请合理安排出行。' }}</p>
@@ -106,7 +102,7 @@
               </article>
 
               <article v-else class="weather-alert-card weather-alert-card-muted">
-                <span class="material-symbols-outlined">verified</span>
+                <el-icon><CircleCheckFilled /></el-icon>
                 <div>
                   <h3>当前无天气预警</h3>
                   <p>暂未发现会明显影响出行的天气预警信息。</p>
@@ -130,9 +126,9 @@
                 class="forecast-item"
               >
                 <span class="forecast-day">{{ item.weekLabel || '--' }}</span>
-                <span class="material-symbols-outlined forecast-icon">
-                  {{ resolveWeatherIcon(item.weatherTextDay, item.iconKeyDay) }}
-                </span>
+                <el-icon class="forecast-icon">
+                  <component :is="resolveWeatherIcon(item.weatherTextDay, item.iconKeyDay)" />
+                </el-icon>
                 <strong class="forecast-temp">
                   {{ formatForecastTemp(item.tempMin, item.tempMax) }}
                 </strong>
@@ -183,7 +179,7 @@
 
           <article class="info-card">
             <div class="info-head">
-              <span class="material-symbols-outlined">info</span>
+              <el-icon><InfoFilled /></el-icon>
               <h3 class="headline-text">快速查看实用信息</h3>
             </div>
 
@@ -283,8 +279,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch, type Component } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import {
+  Back,
+  CircleCheckFilled,
+  Cloudy,
+  Drizzling,
+  Guide,
+  InfoFilled,
+  Lightning,
+  Location,
+  LocationFilled,
+  MoonNight,
+  MostlyCloudy,
+  Opportunity,
+  PartlyCloudy,
+  Pouring,
+  Sunny,
+  View,
+  Warning,
+  WindPower
+} from '@element-plus/icons-vue';
 import DiaryRichContent from '@/components/diaries/DiaryRichContent.vue';
 import {
   getAttractionDetail,
@@ -305,7 +321,6 @@ const weather = ref<AttractionWeather | null>(null);
 const pageStatus = ref<'loading' | 'success' | 'empty' | 'error'>('loading');
 const weatherStatus = ref<'idle' | 'loading' | 'success' | 'hidden' | 'error'>('idle');
 const errorMessage = ref('');
-const contentAnchorRef = ref<HTMLElement | null>(null);
 const mapContainerRef = ref<HTMLElement | null>(null);
 const mapStatus = ref<'idle' | 'loading' | 'ready' | 'missing-ak' | 'error'>('idle');
 const baiduMapAk = import.meta.env.VITE_BAIDU_MAP_AK?.trim() || '';
@@ -330,20 +345,20 @@ const markerIconUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
 </svg>
 `)}`;
 
-const weatherIconPreset = new Map<string, string>([
-  ['sunny', 'sunny'],
-  ['clear-day', 'sunny'],
-  ['clear-night', 'clear_night'],
-  ['partly-cloudy-day', 'partly_cloudy_day'],
-  ['partly-cloudy-night', 'partly_cloudy_night'],
-  ['cloudy', 'cloud'],
-  ['overcast', 'cloud'],
-  ['foggy', 'foggy'],
-  ['light-rain', 'rainy'],
-  ['moderate-rain', 'rainy'],
-  ['heavy-rain', 'rainy'],
-  ['snow', 'weather_snowy'],
-  ['thunderstorm', 'thunderstorm']
+const weatherIconPreset = new Map<string, Component>([
+  ['sunny', Sunny],
+  ['clear-day', Sunny],
+  ['clear-night', MoonNight],
+  ['partly-cloudy-day', PartlyCloudy],
+  ['partly-cloudy-night', PartlyCloudy],
+  ['cloudy', Cloudy],
+  ['overcast', MostlyCloudy],
+  ['foggy', MostlyCloudy],
+  ['light-rain', Drizzling],
+  ['moderate-rain', Pouring],
+  ['heavy-rain', Pouring],
+  ['snow', Cloudy],
+  ['thunderstorm', Lightning]
 ]);
 
 const heroBackgroundStyle = computed(() => ({
@@ -451,7 +466,7 @@ const weatherTipTitle = computed(() =>
   currentWeather.value?.isSuitable === false ? '出行建议' : '当前适宜度'
 );
 const weatherTipIcon = computed(() =>
-  currentWeather.value?.isSuitable === false ? 'warning' : 'lightbulb'
+  currentWeather.value?.isSuitable === false ? Warning : Opportunity
 );
 const weatherSuitabilityClass = computed(() =>
   currentWeather.value?.isSuitable === false ? 'weather-tip-card-caution' : 'weather-tip-card-positive'
@@ -487,20 +502,20 @@ function resolveWeatherIcon(weatherText?: string, iconKey?: string) {
   const normalizedKey = iconKey?.trim().toLowerCase();
 
   if (normalizedKey && weatherIconPreset.has(normalizedKey)) {
-    return weatherIconPreset.get(normalizedKey) || 'cloud';
+    return weatherIconPreset.get(normalizedKey) || Cloudy;
   }
 
   const text = weatherText?.trim() || '';
 
-  if (!text) return 'cloud';
-  if (text.includes('雷')) return 'thunderstorm';
-  if (text.includes('雪')) return 'weather_snowy';
-  if (text.includes('雨')) return 'rainy';
-  if (text.includes('雾') || text.includes('霾')) return 'foggy';
-  if (text.includes('阴') || text.includes('云')) return 'cloud';
-  if (text.includes('晴')) return 'sunny';
+  if (!text) return Cloudy;
+  if (text.includes('雷')) return Lightning;
+  if (text.includes('雪')) return Cloudy;
+  if (text.includes('雨')) return Pouring;
+  if (text.includes('雾') || text.includes('霾')) return MostlyCloudy;
+  if (text.includes('阴') || text.includes('云')) return MostlyCloudy;
+  if (text.includes('晴')) return Sunny;
 
-  return 'cloud';
+  return Cloudy;
 }
 
 function formatForecastTemp(min?: number, max?: number) {
@@ -755,28 +770,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
-
-.headline-text {
-  font-family: 'Plus Jakarta Sans', var(--font-family-sans);
-}
-
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
+.detail-icon {
+  flex-shrink: 0;
 }
 
 .attraction-detail-page {
@@ -788,9 +783,9 @@ onBeforeUnmount(() => {
 .hero-stage {
   position: relative;
   min-height: 716px;
-  border-radius: 32px;
+  border-radius: var(--radius-panel);
   overflow: hidden;
-  box-shadow: 0 28px 70px rgba(44, 47, 48, 0.12);
+  box-shadow: var(--shadow-elevated);
 }
 
 .hero-media,
@@ -840,7 +835,7 @@ onBeforeUnmount(() => {
   gap: 8px;
   min-height: 42px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -917,9 +912,9 @@ onBeforeUnmount(() => {
   gap: 12px;
   min-height: 58px;
   padding: 0 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   background: #ffffff;
-  box-shadow: 0 10px 24px rgba(44, 47, 48, 0.06);
+  box-shadow: var(--shadow-card);
   color: #2c2f30;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
@@ -927,7 +922,6 @@ onBeforeUnmount(() => {
 
 .tag-icon {
   color: #005bad;
-  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
 }
 
 .content-grid {
@@ -970,9 +964,9 @@ onBeforeUnmount(() => {
 .story-empty,
 .loading-card,
 .state-card {
-  border-radius: 32px;
+  border-radius: var(--radius-panel);
   background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 14px 36px rgba(44, 47, 48, 0.06);
+  box-shadow: var(--shadow-card);
 }
 
 .weather-card-current {
@@ -987,7 +981,7 @@ onBeforeUnmount(() => {
   top: -28px;
   width: 180px;
   height: 180px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   background: rgba(94, 162, 255, 0.12);
   filter: blur(24px);
 }
@@ -1031,7 +1025,6 @@ onBeforeUnmount(() => {
 .weather-main-icon {
   color: #5ea2ff;
   font-size: 74px;
-  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 48;
 }
 
 .weather-current-meta {
@@ -1052,7 +1045,7 @@ onBeforeUnmount(() => {
   font-weight: var(--font-weight-semibold);
 }
 
-.weather-meta-item .material-symbols-outlined {
+.weather-meta-item .el-icon {
   color: #005bad;
 }
 
@@ -1066,13 +1059,14 @@ onBeforeUnmount(() => {
 .weather-alert-card {
   padding: 24px;
   border: 1px solid transparent;
-  border-radius: 28px;
+  border-radius: var(--radius-card);
   display: flex;
   gap: 14px;
 }
 
-.weather-tip-card .material-symbols-outlined,
-.weather-alert-card .material-symbols-outlined {
+.weather-tip-card .el-icon,
+.weather-alert-card .el-icon {
+  flex-shrink: 0;
   font-size: 32px;
 }
 
@@ -1096,7 +1090,7 @@ onBeforeUnmount(() => {
   background: rgba(0, 91, 173, 0.05);
   border-color: rgba(0, 91, 173, 0.1);
 
-  .material-symbols-outlined,
+  .el-icon,
   h3 {
     color: #005bad;
   }
@@ -1106,7 +1100,7 @@ onBeforeUnmount(() => {
   background: rgba(255, 202, 77, 0.14);
   border-color: rgba(245, 186, 0, 0.2);
 
-  .material-symbols-outlined,
+  .el-icon,
   h3 {
     color: #664b00;
   }
@@ -1116,7 +1110,7 @@ onBeforeUnmount(() => {
   background: rgba(255, 202, 77, 0.12);
   border-color: rgba(247, 186, 0, 0.28);
 
-  .material-symbols-outlined,
+  .el-icon,
   h3 {
     color: #664b00;
   }
@@ -1126,7 +1120,7 @@ onBeforeUnmount(() => {
   background: rgba(239, 241, 242, 0.86);
   border-color: rgba(218, 221, 223, 0.9);
 
-  .material-symbols-outlined,
+  .el-icon,
   h3 {
     color: #005bad;
   }
@@ -1151,7 +1145,7 @@ onBeforeUnmount(() => {
   background: rgba(251, 81, 81, 0.12);
   border-color: rgba(251, 81, 81, 0.2);
 
-  .material-symbols-outlined,
+  .el-icon,
   h3 {
     color: #b31b25;
   }
@@ -1192,7 +1186,7 @@ onBeforeUnmount(() => {
 
 .forecast-item {
   padding: 24px 18px;
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   background: #eff1f2;
   display: flex;
   flex-direction: column;
@@ -1210,7 +1204,6 @@ onBeforeUnmount(() => {
   margin: 16px 0 10px;
   color: #005bad;
   font-size: 42px;
-  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 36;
 }
 
 .forecast-temp {
@@ -1229,7 +1222,7 @@ onBeforeUnmount(() => {
   margin-top: 16px;
   min-height: 30px;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   display: inline-flex;
   align-items: center;
   font-size: 11px;
@@ -1288,7 +1281,7 @@ onBeforeUnmount(() => {
 .map-action {
   min-height: 42px;
   padding: 0 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   border: 1px solid rgba(117, 119, 120, 0.18);
   background: #ffffff;
   color: #2c2f30;
@@ -1324,7 +1317,7 @@ onBeforeUnmount(() => {
   padding-bottom: 18px;
   border-bottom: 1px solid #dadddf;
 
-  .material-symbols-outlined {
+  .el-icon {
     color: #005bad;
   }
 
@@ -1369,7 +1362,7 @@ onBeforeUnmount(() => {
 .info-phone {
   min-height: 34px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   display: inline-flex;
   align-items: center;
   background: rgba(94, 162, 255, 0.08);
@@ -1414,7 +1407,7 @@ onBeforeUnmount(() => {
 .story-divider {
   width: 88px;
   height: 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-chip);
   margin-top: 28px;
   background: linear-gradient(90deg, #005bad, #5ea2ff);
 }
@@ -1460,7 +1453,7 @@ onBeforeUnmount(() => {
 .story-content :deep(h2),
 .story-content :deep(h3),
 .story-content :deep(h4) {
-  font-family: 'Plus Jakarta Sans', var(--font-family-sans);
+  font-family: var(--font-family-sans);
 }
 
 .story-empty {
@@ -1496,7 +1489,7 @@ onBeforeUnmount(() => {
 
 .loading-hero {
   min-height: 640px;
-  border-radius: 32px;
+  border-radius: var(--radius-panel);
 }
 
 .loading-grid {
@@ -1537,9 +1530,9 @@ onBeforeUnmount(() => {
   width: 92px;
   height: 92px;
   margin: 0 auto 18px;
-  border-radius: 28px;
+  border-radius: var(--radius-card);
   background: linear-gradient(135deg, rgba(94, 162, 255, 0.24) 0%, rgba(255, 202, 77, 0.18) 100%);
-  box-shadow: 0 18px 40px rgba(44, 47, 48, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .state-mark-error {
@@ -1643,7 +1636,7 @@ onBeforeUnmount(() => {
   .loading-hero,
   .loading-card,
   .state-card {
-    border-radius: 24px;
+    border-radius: var(--radius-card);
   }
 
   .hero-stage {
