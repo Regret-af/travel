@@ -2,20 +2,15 @@
   <div class="diaries-page">
     <section class="diary-hero" :style="heroBackgroundStyle">
       <div class="hero-copy">
-        <p class="hero-eyebrow">旅行日记</p>
-        <h1>把沿途风景与真实心绪，翻成一册适合慢慢阅读的故事目录</h1>
+        <h1>旅行日记</h1>
         <p class="hero-description">
-          这里收录公开发布的旅行日记，以更安静的节奏呈现沿途片段、人物感受与旅程余韵。
+          记录每一段不期而遇的惊喜，分享探索世界的每一刻感动
         </p>
       </div>
     </section>
 
-    <section ref="resultsAnchorRef" class="sort-shell">
-      <div class="sort-copy">
-        <h2>{{ resultHeadline }}</h2>
-        <p v-if="isFetching" class="sort-status">目录正在更新中</p>
-      </div>
-
+    <section ref="resultsAnchorRef" class="catalog-bar">
+      <p class="catalog-summary">{{ resultHeadline }}</p>
       <div class="sort-actions">
         <button
           v-for="option in sortOptions"
@@ -28,6 +23,7 @@
           <span class="sort-label">{{ option.label }}</span>
         </button>
       </div>
+      <p v-if="isFetching" class="sort-status">目录正在更新中</p>
     </section>
 
     <section class="list-shell">
@@ -39,8 +35,13 @@
             <span class="loading-line short" />
             <span class="loading-line medium" />
             <span class="loading-line long" />
-            <div class="loading-metrics">
-              <span v-for="metric in 4" :key="metric" class="loading-metric" />
+            <div class="loading-footer">
+              <span class="loading-avatar" />
+              <div class="loading-author">
+                <span class="loading-line author" />
+                <span class="loading-line date" />
+              </div>
+              <span class="loading-metric" />
             </div>
           </div>
         </article>
@@ -48,10 +49,9 @@
 
       <div v-else-if="listStatus === 'success'" class="diary-list">
         <DiaryEditorialCard
-          v-for="(item, index) in pageData.list"
+          v-for="item in pageData.list"
           :key="item.id"
           :item="item"
-          :index="index"
         />
       </div>
 
@@ -105,13 +105,13 @@ type ListStatus = 'loading' | 'success' | 'empty' | 'error';
 const router = useRouter();
 const route = useRoute();
 
-const pageSize = 5;
+const pageSize = 6;
 const defaultSort: SortValue = 'latest';
 const sortOptions: Array<{ value: SortValue; label: string }> = [
   { value: 'latest', label: '最新发布' },
-  { value: 'hot', label: '热门阅读' }
+  { value: 'hot', label: '热门推荐' }
 ];
-const placeholders = Array.from({ length: 3 }, (_, index) => index + 1);
+const placeholders = Array.from({ length: pageSize }, (_, index) => index + 1);
 const resultsAnchorRef = ref<HTMLElement | null>(null);
 
 const pageData = ref<PageDiaryCard>({
@@ -140,7 +140,7 @@ const normalizedRoute = computed(() => {
 const formattedTotal = computed(() => pageData.value.total.toLocaleString('zh-CN'));
 const resultHeadline = computed(() => {
   if (listStatus.value === 'loading') return '旅行日记正在加载';
-  if (listStatus.value === 'error') return '旅行日记目录暂时无法读取';
+  if (listStatus.value === 'error') return '日记目录暂时无法读取';
   if (listStatus.value === 'empty') return '暂未收录可展示的旅行日记';
 
   return `当前共收录 ${formattedTotal.value} 篇旅行日记`;
@@ -150,8 +150,8 @@ const heroBackgroundStyle = computed(() => {
 
   return {
     backgroundImage: coverUrl
-      ? `linear-gradient(108deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.9) 44%, rgba(255, 255, 255, 0.55) 100%), url(${coverUrl})`
-      : 'radial-gradient(circle at 16% 18%, rgba(34, 211, 238, 0.16), transparent 20%), radial-gradient(circle at 84% 24%, rgba(212, 175, 55, 0.18), transparent 18%), linear-gradient(135deg, #f8fafc 0%, #ffffff 64%, #f6f9fc 100%)'
+      ? `linear-gradient(180deg, rgba(15, 23, 42, 0.22) 0%, rgba(15, 23, 42, 0.4) 100%), url(${coverUrl})`
+      : 'linear-gradient(180deg, rgba(15, 23, 42, 0.26) 0%, rgba(15, 23, 42, 0.42) 100%), radial-gradient(circle at 24% 22%, rgba(34, 211, 238, 0.3), transparent 24%), radial-gradient(circle at 76% 20%, rgba(212, 175, 55, 0.24), transparent 22%), linear-gradient(135deg, #0f172a 0%, #005bad 58%, #002c59 100%)'
   };
 });
 
@@ -287,159 +287,129 @@ watch(
 
 <style scoped lang="scss">
 .diaries-page {
-  max-width: 1180px;
+  max-width: 1400px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 40px;
   color: #0f172a;
 }
 
 .diary-hero,
-.sort-shell,
+.catalog-bar,
 .list-shell {
-  border-radius: 32px;
+  border-radius: var(--radius-panel);
 }
 
 .diary-hero {
   position: relative;
-  min-height: 262px;
-  padding: 34px 44px 38px;
+  min-height: 500px;
+  padding: 64px 48px;
   overflow: hidden;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
   background-position: center;
   background-size: cover;
-  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.08);
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    border-radius: 999px;
-    pointer-events: none;
-  }
-
-  &::before {
-    width: 300px;
-    height: 300px;
-    right: -70px;
-    top: -120px;
-    background: rgba(255, 255, 255, 0.26);
-    filter: blur(14px);
-  }
-
-  &::after {
-    width: 220px;
-    height: 220px;
-    left: 52%;
-    bottom: -120px;
-    background: rgba(212, 175, 55, 0.12);
-    filter: blur(18px);
-  }
-}
-
-.hero-copy,
-.sort-copy {
-  position: relative;
-  z-index: 1;
-}
-
-.hero-eyebrow,
-.section-eyebrow {
-  margin: 0 0 12px;
-  color: #c79b1d;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
+  box-shadow: var(--shadow-elevated);
 }
 
 .hero-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   max-width: min(900px, 100%);
+  text-align: center;
 
   h1 {
     margin: 0;
-    color: #111827;
-    font-size: var(--font-size-17xl);
-    line-height: 1.04;
-    font-weight: var(--font-weight-bold);
-    letter-spacing: -0.035em;
+    color: #ffffff;
+    font-size: var(--font-size-display-md);
+    line-height: 1.14;
+    font-weight: var(--font-weight-display);
+    text-shadow: 0 12px 34px rgba(15, 23, 42, 0.32);
   }
 }
 
 .hero-description {
   margin: 18px 0 0;
   max-width: 760px;
-  color: #475569;
-  font-size: var(--font-size-base);
-  line-height: 1.86;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-title-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.55;
+  text-shadow: 0 10px 28px rgba(15, 23, 42, 0.28);
 }
 
-.sort-shell {
-  padding: 28px 30px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+.catalog-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 20px;
 }
 
-.sort-copy {
-  h2 {
-    margin: 0;
-    color: #111827;
-    font-size: var(--font-size-8xl);
-    line-height: 1.14;
-    font-weight: var(--font-weight-title);
-  }
-}
-
-.sort-status {
-  margin: 10px 0 0;
-  color: #9a7313;
-  font-size: var(--font-size-sm);
-  line-height: 1.7;
+.catalog-summary {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
 }
 
 .sort-actions {
   display: inline-flex;
-  gap: 12px;
+  gap: 0;
   flex-shrink: 0;
+  padding: 6px;
+  border-radius: var(--radius-chip);
+  background: #f2f3fb;
+  box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.06);
 }
 
 .sort-chip {
-  min-width: 158px;
-  padding: 14px 18px;
-  border-radius: 24px;
-  border: 1px solid rgba(203, 213, 225, 0.9);
-  background: rgba(255, 255, 255, 0.88);
+  min-width: 118px;
+  min-height: 38px;
+  padding: 0 22px;
+  border: none;
+  border-radius: var(--radius-chip);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   cursor: pointer;
   transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
     background 0.25s ease,
+    color 0.25s ease,
     box-shadow 0.25s ease;
 
   &:hover,
   &.active {
-    transform: translateY(-2px);
-    border-color: rgba(212, 175, 55, 0.42);
-    background: rgba(212, 175, 55, 0.1);
-    box-shadow: 0 14px 28px rgba(212, 175, 55, 0.08);
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+
+    .sort-label {
+      color: var(--color-brand-primary);
+    }
   }
 }
 
 .sort-label {
   display: block;
-  color: #111827;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.sort-status {
+  flex-basis: 100%;
+  margin: -8px 0 0;
+  color: var(--color-accent-strong);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
 }
 
 .list-shell {
@@ -449,52 +419,35 @@ watch(
 
 .diary-list,
 .loading-list {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
 }
 
 .loading-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.82fr);
-  align-items: center;
-}
-
-.loading-card:nth-child(even) {
-  grid-template-columns: minmax(340px, 0.82fr) minmax(0, 1.08fr);
-
-  .loading-cover {
-    order: 2;
-  }
-
-  .loading-content {
-    margin-left: 0;
-    margin-right: -92px;
-  }
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border-soft);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
 }
 
 .loading-cover {
-  min-height: 400px;
-  border-radius: 36px;
+  height: 288px;
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }
 
 .loading-content {
-  position: relative;
-  z-index: 1;
-  margin-left: -92px;
-  padding: 32px;
-  border-radius: 32px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(226, 232, 240, 0.84);
-  box-shadow: 0 22px 56px rgba(15, 23, 42, 0.08);
+  min-height: 300px;
+  padding: 30px;
 }
 
 .loading-chip,
 .loading-line,
-.loading-metric {
+.loading-metric,
+.loading-avatar {
   display: block;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
@@ -503,36 +456,65 @@ watch(
 }
 
 .loading-chip {
-  width: 126px;
-  height: 36px;
+  width: 92px;
+  height: 28px;
 }
 
 .loading-line {
   margin-top: 18px;
-  height: 14px;
+  height: 12px;
 }
 
 .loading-line.short {
-  width: 58%;
+  width: 78%;
 }
 
 .loading-line.medium {
-  width: 78%;
+  width: 100%;
 }
 
 .loading-line.long {
   width: 88%;
 }
 
-.loading-metrics {
+.loading-footer {
   display: flex;
-  gap: 14px;
-  margin-top: 28px;
+  align-items: center;
+  gap: 12px;
+  margin-top: 74px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(226, 232, 240, 0.86);
+}
+
+.loading-avatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.loading-author {
+  flex: 1;
 }
 
 .loading-metric {
-  width: 78px;
-  height: 38px;
+  width: 74px;
+  height: 18px;
+}
+
+.loading-line.author,
+.loading-line.date {
+  margin-top: 0;
+}
+
+.loading-line.author {
+  width: 86px;
+  height: 10px;
+}
+
+.loading-line.date {
+  width: 68px;
+  height: 8px;
+  margin-top: 8px;
 }
 
 @keyframes shimmer {
@@ -546,7 +528,18 @@ watch(
 }
 
 @media (max-width: 1100px) {
-  .sort-shell {
+  .diary-list,
+  .loading-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-bar {
+    align-items: flex-end;
+  }
+}
+
+@media (max-width: 860px) {
+  .catalog-bar {
     align-items: stretch;
     flex-direction: column;
   }
@@ -560,92 +553,62 @@ watch(
   }
 }
 
-@media (max-width: 1024px) {
-  .loading-card,
-  .loading-card:nth-child(even) {
-    grid-template-columns: 1fr;
-
-    .loading-cover {
-      order: 1;
-    }
-
-    .loading-content {
-      margin: -52px 18px 0;
-      order: 2;
-    }
-  }
-
-  .loading-cover {
-    min-height: 340px;
-  }
-}
-
 @media (max-width: 767px) {
   .diaries-page {
-    gap: 22px;
+    gap: 28px;
   }
 
   .diary-hero,
-  .sort-shell {
+  .catalog-bar {
     border-radius: 24px;
   }
 
   .diary-hero {
-    min-height: 0;
-    padding: 24px 18px 26px;
+    min-height: 360px;
+    padding: 44px 18px;
   }
 
   .hero-copy h1 {
-    font-size: var(--font-size-10xl);
+    font-size: var(--font-size-title-lg);
   }
 
-  .hero-description,
+  .hero-description {
+    font-size: var(--font-size-xl);
+  }
+
+  .diary-list,
+  .loading-list {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .catalog-summary,
   .sort-status {
-    font-size: var(--font-size-md);
-    line-height: 1.8;
-  }
-
-  .sort-shell {
-    padding: 20px 18px;
-  }
-
-  .sort-copy h2 {
-    font-size: var(--font-size-6xl);
+    font-size: var(--font-size-sm);
   }
 
   .sort-actions {
-    flex-direction: column;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  .loading-list {
-    gap: 22px;
+  .sort-actions::-webkit-scrollbar {
+    display: none;
   }
 
-  .loading-card,
-  .loading-card:nth-child(even) {
-    .loading-content {
-      margin: -30px 12px 0;
-      padding: 22px 20px;
-      border-radius: 24px;
-    }
+  .sort-chip {
+    min-width: 108px;
+    flex: 1 0 auto;
+    padding: 0 18px;
   }
 
   .loading-cover {
-    min-height: 240px;
-    border-radius: 26px;
+    height: 230px;
   }
 
-  .loading-line.short {
-    width: 72%;
-  }
-
-  .loading-line.medium,
-  .loading-line.long {
-    width: 100%;
-  }
-
-  .loading-metrics {
-    flex-wrap: wrap;
+  .loading-content {
+    min-height: 260px;
+    padding: 24px 22px 22px;
   }
 }
 </style>
