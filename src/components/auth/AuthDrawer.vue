@@ -99,6 +99,7 @@ import { useAuthStore } from '@/stores/auth';
 
 interface Props {
   modelValue: boolean;
+  initialMode?: 'login' | 'register';
 }
 
 const props = defineProps<Props>();
@@ -226,6 +227,7 @@ watch(
   drawerVisible,
   (visible) => {
     if (visible) {
+      isLogin.value = props.initialMode !== 'register';
       lockBodyScroll();
       return;
     }

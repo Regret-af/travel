@@ -1,34 +1,38 @@
 <template>
   <div class="account-page">
-    <AuthDrawer v-model="authDrawerOpen" />
+    <AuthDrawer v-model="authDrawerOpen" :initial-mode="authInitialMode" />
 
-    <section v-if="pageState === 'loading'" class="state-panel loading-panel" aria-label="个人中心加载中">
+    <section v-if="pageState === 'loading'" class="state-panel loading-panel" aria-label="个人主页加载中">
       <div class="loading-hero" />
       <div class="loading-grid">
         <div class="loading-card" />
-        <div class="loading-card" />
-      </div>
-      <div class="loading-grid loading-grid-secondary">
         <div class="loading-card" />
         <div class="loading-card" />
       </div>
     </section>
 
-    <section v-else-if="pageState === 'auth'" class="state-panel auth-panel">
-      <p class="state-eyebrow">旅行者空间</p>
-      <h1>登录后，才会看见属于你的个人中心</h1>
-      <p class="state-copy">
-        这里将展示你的账户资料、通知中心，以及与日记和收藏相关的内容。
-      </p>
-      <div class="state-actions">
-        <button class="primary-action" type="button" @click="openAuthDrawer">立即登录</button>
-        <button class="secondary-action" type="button" @click="goHome">返回首页</button>
+    <section v-else-if="pageState === 'auth'" class="guest-hero">
+      <div class="guest-bg" />
+      <div class="guest-overlay" />
+      <div class="guest-panel">
+        <div class="guest-icon">
+          <el-icon><UserFilled /></el-icon>
+        </div>
+        <h1>开启你的私人旅行杂志</h1>
+        <p>
+          登录以记录每一次不期而遇，收藏那些拨动心弦的瞬间，与世界分享你的探索之旅。
+        </p>
+        <div class="guest-actions">
+          <button class="primary-action" type="button" @click="openLoginDrawer">立即登录</button>
+          <button class="secondary-action" type="button" @click="openRegisterDrawer">注册账户</button>
+        </div>
+        <span class="guest-note">登录即表示你同意平台服务协议和隐私政策</span>
       </div>
     </section>
 
     <section v-else-if="pageState === 'error'" class="state-panel error-panel">
       <p class="state-eyebrow">连接中断</p>
-      <h1>个人中心暂时没有顺利展开</h1>
+      <h1>个人主页暂时没有顺利展开</h1>
       <p class="state-copy">{{ pageError }}</p>
       <div class="state-actions">
         <button class="primary-action" type="button" @click="initializePage">重新加载</button>
@@ -37,144 +41,188 @@
     </section>
 
     <template v-else>
-      <section class="account-hero">
-        <div class="hero-copy">
-          <p class="hero-eyebrow">个人中心</p>
-          <h1>{{ displayName }}</h1>
-          <p class="hero-description">
-            这里是你的个人中心，集中展示身份信息、通知中心，以及与你相关的内容。
-          </p>
-
-          <div class="hero-meta">
-            <span v-if="joinedText" class="meta-pill">{{ joinedText }}</span>
-            <span class="meta-pill">{{ unreadSummary }}</span>
-          </div>
-
-          <div class="hero-actions">
-            <button class="hero-action hero-action-primary" type="button" @click="scrollToNotifications">
-              查看通知中心
-            </button>
-            <button class="hero-action" type="button" @click="handleLogout">退出登录</button>
-          </div>
-        </div>
-
-        <div class="hero-identity">
-          <div class="avatar-shell">
-            <el-avatar :size="125" :src="profile?.avatarUrl">
+      <section class="profile-hero" :style="heroBackgroundStyle">
+        <div class="hero-shade" />
+        <div class="hero-inner">
+          <div class="avatar-frame">
+            <el-avatar :size="160" :src="profile?.avatarUrl">
               {{ avatarFallback }}
             </el-avatar>
           </div>
+
+          <div class="hero-copy">
+            <h1>{{ displayName }}</h1>
+            <p class="hero-description">{{ profileSignature }}</p>
+            <div class="hero-meta">
+              <span v-if="joinedText" class="meta-pill">
+                <el-icon><Calendar /></el-icon>
+                {{ joinedText }}
+              </span>
+              <span class="meta-pill">
+                <el-icon><Bell /></el-icon>
+                {{ unreadSummary }}
+              </span>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <button class="primary-action" type="button" @click="openSettingsEntry">编辑资料</button>
+            <button class="icon-action" type="button" aria-label="查看通知中心" @click="scrollToNotifications">
+              <el-icon><Bell /></el-icon>
+              <span v-if="unreadCount > 0" class="action-badge">{{ unreadCountLabel }}</span>
+            </button>
+          </div>
         </div>
       </section>
 
-      <section class="content-grid">
-        <article class="panel-card info-panel">
-          <div class="panel-header">
-            <div>
-              <p class="panel-eyebrow">账户基础</p>
-              <h2>个人中心资料</h2>
-            </div>
+      <main class="profile-content">
+        <section class="journals-section">
+          <div class="section-header">
+            <h2>我的日记</h2>
+            <button class="text-link" type="button" @click="goToDiaries">查看全部</button>
           </div>
 
-          <div class="info-grid">
-            <div v-for="item in infoItems" :key="item.label" class="info-item">
-              <span class="info-label">{{ item.label }}</span>
-              <strong class="info-value">{{ item.value }}</strong>
-            </div>
-          </div>
-        </article>
-
-        <article ref="notificationsRef" class="panel-card notifications-panel">
-          <div class="panel-header">
-            <div>
-              <h2>通知中心</h2>
-            </div>
-            <span class="notice-badge">{{ unreadCount }} 条未读通知</span>
+          <div v-if="diariesState === 'loading'" class="diary-preview-row">
+            <article v-for="item in 3" :key="item" class="diary-preview-loading" />
           </div>
 
-          <div v-if="notificationsState === 'loading'" class="notice-skeleton">
-            <div v-for="placeholder in 3" :key="placeholder" class="notice-skeleton-item" />
-          </div>
-
-          <div v-else-if="notificationsState === 'error'" class="notice-feedback notice-feedback-error">
-            <p>通知中心暂时没有加载成功。</p>
-            <button type="button" class="inline-link" @click="loadNotifications">重试加载通知</button>
-          </div>
-
-          <div v-else-if="notifications.length === 0" class="notice-feedback notice-feedback-empty">
-            <p class="notice-empty-title">空状态</p>
-            <h3>通知中心里还没有新通知</h3>
-            <p>你的评论、点赞、收藏和系统通知，都会集中收纳在这里。</p>
-          </div>
-
-          <div v-else class="notice-list">
-            <button
-              v-for="item in notifications"
+          <div v-else-if="recentDiaries.length" class="diary-preview-row">
+            <DiaryEditorialCard
+              v-for="item in recentDiaries"
               :key="item.id"
-              type="button"
-              class="notice-item"
-              :class="{ 'notice-item-read': item.isRead }"
-              @click="handleNotificationClick(item)"
-            >
-              <el-avatar :size="42" :src="item.sender?.avatarUrl">
-                {{ getSenderFallback(item.sender?.nickname) }}
-              </el-avatar>
-              <div class="notice-copy">
-                <div class="notice-line">
-                  <span class="notice-type">{{ getNotificationTypeLabel(item.type) }}</span>
-                  <time>{{ formatDateTime(item.createdAt, 'MM.DD HH:mm') }}</time>
-                </div>
-                <h3>{{ item.title || '新通知' }}</h3>
-                <p>{{ item.content || '点击查看这条通知的详情。' }}</p>
-                <span class="notice-sender">
-                  {{ item.sender?.nickname || '通知中心' }}
-                  <span v-if="!item.isRead" class="unread-dot" />
-                </span>
-              </div>
-            </button>
+              :item="item"
+              class="diary-preview-card"
+            />
           </div>
-        </article>
-      </section>
 
-      <section class="entry-grid">
-        <article class="entry-card entry-card-diary">
-          <h2>我的日记</h2>
-          <p>
-            你可以在这里翻看自己已经发布过的旅行日记，按目录方式继续回顾这一路写下的故事。
-          </p>
-          <button class="entry-action" type="button" @click="goToDiaries">查看我的日记</button>
-        </article>
+          <article v-else class="empty-card">
+            <h3>还没有可展示的日记</h3>
+            <p>发布第一篇旅行日记后，它会出现在这里。</p>
+            <button class="entry-action" type="button" @click="goToPublish">发布日记</button>
+          </article>
+        </section>
 
-        <article class="entry-card entry-card-favorite">
-          <h2>我的收藏</h2>
-          <p>
-            你可以从这里继续浏览内容，查找值得再次查看的旅行记录。
-          </p>
-          <button class="entry-action" type="button" @click="goToDiaryDiscovery">查看我的收藏</button>
-        </article>
-      </section>
+        <div class="lower-grid">
+          <section class="favorites-section">
+            <div class="section-header">
+              <h2>我的收藏</h2>
+              <button class="text-link" type="button" @click="goToFavorites">查看全部</button>
+            </div>
 
-      <section class="action-grid">
-        <article class="action-card">
-          <h2>设置</h2>
-          <p>你可以在这里查看当前可用的账户设置相关信息。</p>
-          <button class="entry-action entry-action-muted" type="button" @click="openSettingsEntry">编辑资料</button>
-        </article>
+            <div v-if="favoritesState === 'loading'" class="favorite-list">
+              <article v-for="item in 2" :key="item" class="favorite-card favorite-card-loading" />
+            </div>
 
-        <article class="action-card action-card-security">
-          <p class="entry-eyebrow">账户安全</p>
-          <h2>修改密码</h2>
-          <p>如果你想更新当前账号密码，可以从这里进入修改密码页，完成这次安全调整。</p>
-          <button class="entry-action" type="button" @click="goToPasswordEdit">前往修改密码</button>
-        </article>
-      </section>
+            <div v-else-if="favoriteDiaries.length" class="favorite-list">
+              <article
+                v-for="item in favoriteDiaries"
+                :key="`${item.id}-${item.invalid ? 'invalid' : 'valid'}`"
+                class="favorite-card"
+                :class="{ disabled: item.invalid }"
+                @click="goToFavoriteDetail(item)"
+              >
+                <div class="favorite-cover">
+                  <img v-if="item.coverUrl" :src="item.coverUrl" :alt="item.title" />
+                  <div v-else class="cover-fallback" />
+                </div>
+                <div class="favorite-copy">
+                  <h3>{{ item.title }}</h3>
+                  <p>{{ item.summary || '继续翻阅这篇你收藏过的旅行故事。' }}</p>
+                </div>
+                <el-icon class="favorite-icon"><StarFilled /></el-icon>
+              </article>
+            </div>
+
+            <article v-else class="empty-card compact">
+              <h3>暂时还没有收藏</h3>
+              <p>去旅行日记列表里收藏想再次翻阅的内容。</p>
+            </article>
+          </section>
+
+          <aside class="side-stack">
+            <section ref="notificationsRef" class="glass-card notification-card">
+              <div class="section-header compact-header">
+                <h2>通知中心</h2>
+                <span class="notice-count">{{ unreadSummary }}</span>
+              </div>
+
+              <div v-if="notificationsState === 'loading'" class="notice-list">
+                <div v-for="item in 2" :key="item" class="notice-skeleton" />
+              </div>
+
+              <div v-else-if="notificationsState === 'error'" class="feedback-card">
+                <p>通知中心暂时没有加载成功。</p>
+                <button type="button" class="inline-link" @click="loadNotifications">重试加载通知</button>
+              </div>
+
+              <div v-else-if="notifications.length" class="notice-list">
+                <button
+                  v-for="item in notifications"
+                  :key="item.id"
+                  type="button"
+                  class="notice-item"
+                  :class="{ read: item.isRead }"
+                  @click="handleNotificationClick(item)"
+                >
+                  <span class="notice-mark">
+                    <el-icon>
+                      <component :is="getNotificationIcon(item.type)" />
+                    </el-icon>
+                  </span>
+                  <span class="notice-copy">
+                    <strong>{{ item.title || getNotificationTypeLabel(item.type) }}</strong>
+                    <span>{{ item.content || '点击查看这条通知的详情。' }}</span>
+                    <time>{{ formatDateTime(item.createdAt, 'MM.DD HH:mm') }}</time>
+                  </span>
+                </button>
+              </div>
+
+              <div v-else class="feedback-card">
+                <h3>暂无新通知</h3>
+                <p>评论、点赞、收藏和系统消息会集中出现在这里。</p>
+              </div>
+
+              <button class="wide-action" type="button" @click="scrollToNotifications">查看全部通知</button>
+            </section>
+
+            <section class="settings-card">
+              <div class="section-header compact-header">
+                <h2>账号与设置</h2>
+                <button class="text-link" type="button" @click="scrollToNotifications">通知设置</button>
+              </div>
+
+              <button class="setting-row" type="button" @click="goToPasswordEdit">
+                <span class="setting-icon"><el-icon><Lock /></el-icon></span>
+                <span>账号与安全</span>
+                <el-icon><ArrowRight /></el-icon>
+              </button>
+
+              <button class="setting-row danger" type="button" @click="handleLogout">
+                <span class="setting-icon"><el-icon><SwitchButton /></el-icon></span>
+                <span>退出登录</span>
+              </button>
+            </section>
+          </aside>
+        </div>
+      </main>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import {
+  ArrowRight,
+  Bell,
+  Calendar,
+  ChatDotRound,
+  InfoFilled,
+  Lock,
+  StarFilled,
+  SwitchButton,
+  UserFilled
+} from '@element-plus/icons-vue';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import {
   getNotificationUnreadCount,
@@ -182,63 +230,84 @@ import {
   readNotification,
   type NotificationItem
 } from '@/api/notifications';
+import {
+  getMyFavoriteDiaries,
+  getMyTravelDiaries,
+  type FavoriteDiaryCard,
+  type UserDiaryCard
+} from '@/api/diaries';
+import DiaryEditorialCard from '@/components/diaries/DiaryEditorialCard.vue';
 import { useAuthStore } from '@/stores/auth';
 import { getApiErrorMessage } from '@/types/api';
 
 type PageState = 'loading' | 'auth' | 'ready' | 'error';
-type NotificationsState = 'idle' | 'loading' | 'success' | 'error';
+type AsyncState = 'idle' | 'loading' | 'success' | 'error';
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const authDrawerOpen = ref(false);
+const authInitialMode = ref<'login' | 'register'>('login');
 const notificationsRef = ref<HTMLElement | null>(null);
 const pageState = ref<PageState>('loading');
 const pageError = ref('当前网络或服务暂时不可用，请稍后再试。');
-const notificationsState = ref<NotificationsState>('idle');
+const notificationsState = ref<AsyncState>('idle');
+const diariesState = ref<AsyncState>('idle');
+const favoritesState = ref<AsyncState>('idle');
 const notifications = ref<NotificationItem[]>([]);
+const recentDiaries = ref<UserDiaryCard[]>([]);
+const favoriteDiaries = ref<FavoriteDiaryCard[]>([]);
 const unreadCount = ref(0);
 const notificationPendingIds = ref<string[]>([]);
 
 const profile = computed(() => authStore.user);
-const displayName = computed(() => profile.value?.nickname?.trim() || '旅行者');
+const displayName = computed(() => profile.value?.nickname?.trim() || profile.value?.username?.trim() || '旅行者');
 const avatarFallback = computed(() => displayName.value.slice(0, 1).toUpperCase());
+const profileSignature = computed(() => {
+  if (profile.value?.email) {
+    return '探寻未知的风景，记录真实的感动';
+  }
+
+  return '把沿途风景与真实心绪，整理成自己的旅行主页。';
+});
 const unreadSummary = computed(() =>
-  unreadCount.value > 0 ? `未读通知 ${unreadCount.value} 条` : '暂时没有未读通知'
+  unreadCount.value > 0 ? `未读通知 ${unreadCount.value} 条` : '暂无未读通知'
 );
+const unreadCountLabel = computed(() => (unreadCount.value > 99 ? '99+' : String(unreadCount.value)));
 const joinedText = computed(() => {
   const createdAt = profile.value?.createdAt?.trim();
-  return createdAt ? `加入时间 ${formatDateTime(createdAt, 'YYYY.MM.DD')}` : '';
+  return createdAt ? `加入于 ${formatDateTime(createdAt, 'YYYY年M月')}` : '';
 });
-const infoItems = computed(() => {
-  const items = [
-    { label: '昵称', value: displayName.value },
-    profile.value?.createdAt?.trim()
-      ? { label: '加入时间', value: formatDateTime(profile.value.createdAt, 'YYYY.MM.DD') }
-      : null
-  ];
+const heroBackgroundStyle = computed(() => {
+  const coverUrl = recentDiaries.value[0]?.coverUrl || favoriteDiaries.value[0]?.coverUrl;
 
-  return items.filter(Boolean) as Array<{ label: string; value: string }>;
+  return {
+    backgroundImage: coverUrl
+      ? `linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(247, 249, 251, 0.86) 88%, #f7f9fb 100%), url(${coverUrl})`
+      : 'radial-gradient(circle at 18% 22%, rgba(34, 211, 238, 0.16), transparent 22%), radial-gradient(circle at 82% 18%, rgba(212, 175, 55, 0.18), transparent 20%), linear-gradient(135deg, #eef6ff 0%, #f8fafc 52%, #f7f9fb 100%)'
+  };
 });
 
-function formatDateTime(value?: string, mode: 'YYYY.MM.DD' | 'MM.DD HH:mm' = 'YYYY.MM.DD') {
-  if (!value) {
-    return '时间未知';
-  }
+function formatDateTime(value?: string, mode: 'YYYY.MM.DD' | 'MM.DD HH:mm' | 'YYYY年M月' = 'YYYY.MM.DD') {
+  if (!value) return '时间未知';
 
   const normalized = value.replace(/-/g, '/');
   const date = new Date(normalized);
 
   if (Number.isNaN(date.getTime())) {
-    return mode === 'MM.DD HH:mm'
-      ? value.slice(5, 16).replace(' ', ' ')
-      : value.slice(0, 10).replace(/-/g, '.');
+    if (mode === 'MM.DD HH:mm') return value.slice(5, 16);
+    if (mode === 'YYYY年M月') return value.slice(0, 7).replace('-', '年') + '月';
+    return value.slice(0, 10).replace(/-/g, '.');
   }
 
   const pad = (num: number) => String(num).padStart(2, '0');
 
   if (mode === 'MM.DD HH:mm') {
     return `${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  if (mode === 'YYYY年M月') {
+    return `${date.getFullYear()}年${date.getMonth() + 1}月`;
   }
 
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
@@ -252,11 +321,24 @@ function getNotificationTypeLabel(type?: string) {
   return '旅行通知';
 }
 
-function getSenderFallback(name?: string) {
-  return (name || '旅').slice(0, 1).toUpperCase();
+function getNotificationIcon(type?: string) {
+  if (type === 'COMMENT') return ChatDotRound;
+  if (type === 'SYSTEM') return InfoFilled;
+  return StarFilled;
 }
 
 function openAuthDrawer() {
+  authInitialMode.value = 'login';
+  authDrawerOpen.value = true;
+}
+
+function openLoginDrawer() {
+  authInitialMode.value = 'login';
+  authDrawerOpen.value = true;
+}
+
+function openRegisterDrawer() {
+  authInitialMode.value = 'register';
   authDrawerOpen.value = true;
 }
 
@@ -268,8 +350,17 @@ function goToDiaries() {
   router.push('/account/diaries');
 }
 
-function goToDiaryDiscovery() {
+function goToPublish() {
+  router.push('/account/diaries/new');
+}
+
+function goToFavorites() {
   router.push('/account/favorites');
+}
+
+function goToFavoriteDetail(item: FavoriteDiaryCard) {
+  if (item.invalid) return;
+  router.push(`/diaries/${item.id}`);
 }
 
 function openSettingsEntry() {
@@ -304,7 +395,7 @@ async function loadNotifications() {
       getNotificationUnreadCount(),
       getNotifications({
         pageNum: 1,
-        pageSize: 4
+        pageSize: 2
       })
     ]);
 
@@ -326,6 +417,55 @@ async function loadNotifications() {
   }
 }
 
+async function loadDiaryPreview() {
+  if (!authStore.token) {
+    recentDiaries.value = [];
+    diariesState.value = 'idle';
+    return;
+  }
+
+  diariesState.value = 'loading';
+
+  try {
+    const res = await getMyTravelDiaries({
+      pageNum: 1,
+      pageSize: 3,
+      sort: 'latest'
+    });
+
+    recentDiaries.value = res.data.list;
+    diariesState.value = 'success';
+  } catch (error) {
+    console.error('Failed to load account diary preview', error);
+    recentDiaries.value = [];
+    diariesState.value = 'error';
+  }
+}
+
+async function loadFavoritePreview() {
+  if (!authStore.token) {
+    favoriteDiaries.value = [];
+    favoritesState.value = 'idle';
+    return;
+  }
+
+  favoritesState.value = 'loading';
+
+  try {
+    const res = await getMyFavoriteDiaries({
+      pageNum: 1,
+      pageSize: 2
+    });
+
+    favoriteDiaries.value = res.data.list;
+    favoritesState.value = 'success';
+  } catch (error) {
+    console.error('Failed to load account favorite preview', error);
+    favoriteDiaries.value = [];
+    favoritesState.value = 'error';
+  }
+}
+
 async function initializePage() {
   if (!authStore.token) {
     pageState.value = 'auth';
@@ -344,7 +484,11 @@ async function initializePage() {
     }
 
     pageState.value = 'ready';
-    await loadNotifications();
+    await Promise.all([
+      loadNotifications(),
+      loadDiaryPreview(),
+      loadFavoritePreview()
+    ]);
   } catch (error) {
     console.error('Failed to initialize account page', error);
 
@@ -391,7 +535,6 @@ async function handleNotificationClick(item: NotificationItem) {
       openAuthDrawer();
       return;
     }
-
   } finally {
     notificationPendingIds.value = notificationPendingIds.value.filter((id) => id !== item.id);
   }
@@ -404,6 +547,8 @@ async function handleNotificationClick(item: NotificationItem) {
 function handleLogout() {
   authStore.logout();
   notifications.value = [];
+  recentDiaries.value = [];
+  favoriteDiaries.value = [];
   unreadCount.value = 0;
   pageState.value = 'auth';
   router.push('/account');
@@ -420,485 +565,605 @@ watch(
 
     if (!token) {
       notifications.value = [];
+      recentDiaries.value = [];
+      favoriteDiaries.value = [];
       unreadCount.value = 0;
       pageState.value = 'auth';
     }
-  }
+  },
+  { immediate: true }
 );
-
-onMounted(() => {
-  initializePage();
-});
 </script>
 
 <style scoped lang="scss">
 .account-page {
-  max-width: 1240px;
+  width: min(100%, 1400px);
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  color: #0f172a;
+  color: var(--color-text-primary);
 }
 
-.account-hero,
-.panel-card,
-.entry-card,
-.action-card,
-.state-panel,
-.loading-hero,
-.loading-card {
-  border-radius: 32px;
-}
-
-.account-hero,
-.panel-card,
-.entry-card,
-.action-card,
-.state-panel {
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
-}
-
-.account-hero {
+.guest-hero {
   position: relative;
+  min-height: calc(100svh - 88px);
+  margin: -88px -24px 0;
+  padding: 128px 32px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  padding: 42px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-  gap: 28px;
-  background:
-    radial-gradient(circle at 14% 18%, rgba(34, 211, 238, 0.16), transparent 22%),
-    radial-gradient(circle at 88% 16%, rgba(212, 175, 55, 0.18), transparent 20%),
-    linear-gradient(140deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 255, 255, 0.96) 50%, rgba(245, 247, 250, 0.98) 100%);
+}
 
-  &::after {
-    content: '';
-    position: absolute;
-    inset: auto -100px -120px auto;
-    width: 280px;
-    height: 280px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.48);
-    filter: blur(12px);
+.guest-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.18), rgba(15, 23, 42, 0.12)),
+    url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=85') center / cover;
+  transform: scale(1.04);
+}
+
+.guest-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(255, 255, 255, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(247, 249, 251, 0.04) 0%, rgba(247, 249, 251, 0.3) 74%, #f7f9fb 100%);
+}
+
+.guest-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 720px);
+  padding: 56px 64px;
+  border-radius: var(--radius-panel);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.44);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(20px);
+  text-align: center;
+
+  h1 {
+    margin: 0;
+    color: #002c59;
+    font-size: var(--font-size-display-md);
+    line-height: 1.12;
+    font-weight: var(--font-weight-display);
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    max-width: 500px;
+    margin: 18px auto 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-body-lg);
+    line-height: 1.9;
   }
 }
 
-.hero-copy,
-.hero-identity {
-  position: relative;
-  z-index: 1;
+.guest-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-chip);
+  background: rgba(0, 68, 131, 0.1);
+  color: #004483;
+  font-size: var(--font-size-16xl);
 }
 
-.hero-eyebrow,
-.panel-eyebrow,
-.entry-eyebrow,
+.guest-actions {
+  margin-top: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.guest-note {
+  display: block;
+  margin-top: 24px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+}
+
+.profile-hero {
+  position: relative;
+  min-height: 500px;
+  margin: -88px -24px 0;
+  padding: 148px 32px 48px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background-position: center;
+  background-size: cover;
+}
+
+.hero-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.16) 0%, rgba(247, 249, 251, 0.22) 52%, #f7f9fb 100%);
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1400px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 28px;
+}
+
+.avatar-frame {
+  width: 176px;
+  height: 176px;
+  padding: 8px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 24px 54px rgba(15, 23, 42, 0.18);
+
+  :deep(.el-avatar) {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 26px;
+    background: linear-gradient(135deg, var(--color-brand-cool), var(--color-brand-iris));
+    color: #ffffff;
+    font-size: var(--font-size-16xl);
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+.hero-copy {
+  min-width: 0;
+  padding-bottom: 8px;
+
+  h1 {
+    margin: 0;
+    color: #191c21;
+    font-size: var(--font-size-display-md);
+    line-height: 1.04;
+    font-weight: var(--font-weight-display);
+    letter-spacing: -0.03em;
+  }
+}
+
 .state-eyebrow {
-  margin: 0 0 12px;
-  color: #c79b1d;
+  margin: 0 0 10px;
+  color: var(--color-accent);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
 }
 
-.hero-copy {
-  h1 {
-    margin: 0;
-    font-size: var(--font-size-20xl);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
-    font-weight: var(--font-weight-bold);
-    color: #111827;
-  }
-}
-
 .hero-description,
 .state-copy,
-.entry-card p,
-.action-card p,
-.notice-feedback p {
-  color: #475569;
-  line-height: 1.85;
+.empty-card p,
+.feedback-card p,
+.favorite-copy p,
+.notice-copy span {
+  color: var(--color-text-secondary);
+  line-height: 1.8;
 }
 
 .hero-description {
-  margin: 18px 0 0;
-  max-width: 620px;
-  font-size: var(--font-size-base);
+  margin: 10px 0 0;
+  max-width: 680px;
+  font-size: var(--font-size-body-lg);
 }
 
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 28px;
+  gap: 14px;
+  margin-top: 16px;
 }
 
-.meta-pill,
-.notice-badge {
+.meta-pill {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   min-height: 34px;
   padding: 0 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  color: #475569;
+  border-radius: var(--radius-chip);
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid var(--color-border-soft);
+  color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+  backdrop-filter: blur(12px);
 }
 
-.hero-actions,
-.state-actions {
+.hero-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 30px;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 10px;
 }
 
-.hero-action,
 .primary-action,
 .secondary-action,
-.entry-action {
-  min-height: 48px;
-  padding: 0 20px;
-  border-radius: 999px;
-  border: 1px solid rgba(203, 213, 225, 0.92);
-  background: rgba(255, 255, 255, 0.88);
-  color: #334155;
+.entry-action,
+.wide-action {
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: var(--radius-chip);
+  border: 1px solid transparent;
+  background: #004483;
+  color: #ffffff;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease,
-    color 0.25s ease,
-    background 0.25s ease;
+  box-shadow: 0 14px 30px rgba(0, 68, 131, 0.18);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    background: #005bad;
+    box-shadow: 0 18px 36px rgba(0, 68, 131, 0.22);
   }
 }
 
-.hero-action-primary,
-.primary-action,
-.entry-action {
-  border-color: rgba(212, 175, 55, 0.24);
-  background: #111827;
-  color: #f8fafc;
-
-  &:hover {
-    border-color: rgba(212, 175, 55, 0.5);
-    background: #9a7313;
-    color: #111827;
-  }
+.secondary-action {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-soft);
+  box-shadow: none;
 }
 
-.entry-action-muted {
-  background: rgba(255, 255, 255, 0.92);
-  color: #334155;
+.icon-action {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-chip);
+  background: rgba(255, 255, 255, 0.86);
+  color: #004483;
+  border: 1px solid var(--color-border-soft);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
 }
 
-.hero-identity {
+.action-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--radius-chip);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ba1a1a;
+  color: #ffffff;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  border: 2px solid #ffffff;
+}
+
+.profile-content {
+  padding: 56px 0 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 18px;
+  gap: 56px;
 }
 
-.avatar-shell {
-  padding: 18px;
-  border-radius: 36px;
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-
-  :deep(.el-avatar) {
-    border: 3px solid rgba(212, 175, 55, 0.32);
-    background: linear-gradient(135deg, #22d3ee, #6366f1);
-    color: #ffffff;
-    font-size: var(--font-size-10xl);
-    font-weight: var(--font-weight-bold);
-  }
-}
-
-.identity-card {
-  width: min(100%, 320px);
-  padding: 22px 24px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(18px);
-
-  strong {
-    display: block;
-    margin-top: 10px;
-    color: #111827;
-    font-size: var(--font-size-3xl);
-    line-height: 1.3;
-  }
-
-  p {
-    margin: 8px 0 0;
-    color: #64748b;
-    font-size: var(--font-size-md);
-  }
-}
-
-.identity-label,
-.info-label,
-.notice-type,
-.notice-sender,
-.notice-line time {
-  color: #64748b;
-  font-size: var(--font-size-xs);
-}
-
-.content-grid,
-.entry-grid,
-.action-grid,
-.loading-grid {
-  display: grid;
-  gap: 24px;
-}
-
-.content-grid,
-.loading-grid {
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-}
-
-.entry-grid,
-.action-grid,
-.loading-grid-secondary {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.panel-card,
-.entry-card,
-.action-card,
-.state-panel {
-  padding: 30px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
-}
-
-.panel-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
+.section-header {
   margin-bottom: 24px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
 
   h2 {
     margin: 0;
-    color: #111827;
-    font-size: var(--font-size-8xl);
-    line-height: 1.15;
+    color: #191c21;
+    font-size: var(--font-size-title-lg);
+    line-height: 1.16;
     font-weight: var(--font-weight-title);
   }
 }
 
-.info-grid {
+.compact-header {
+  align-items: center;
+  margin-bottom: 20px;
+
+  h2 {
+    font-size: var(--font-size-8xl);
+  }
+}
+
+.text-link,
+.inline-link {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #004483;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.diary-preview-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
 }
 
-.info-item {
-  padding: 18px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(226, 232, 240, 0.84);
+.diary-preview-card {
+  min-height: 100%;
 }
 
-.info-value {
-  display: block;
-  margin-top: 10px;
-  color: #111827;
-  font-size: var(--font-size-2xl);
-  line-height: 1.5;
+.lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(330px, 0.9fr);
+  gap: 36px;
 }
 
+.favorite-list,
+.side-stack,
 .notice-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
-.notice-item {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 14px;
-  width: 100%;
+.favorite-card,
+.glass-card,
+.settings-card,
+.empty-card {
+  border-radius: var(--radius-card);
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border-soft);
+  box-shadow: 0 14px 36px rgba(44, 47, 48, 0.06);
+}
+
+.favorite-card {
   padding: 16px;
-  border-radius: 24px;
-  border: 1px solid rgba(212, 175, 55, 0.16);
-  background: rgba(212, 175, 55, 0.08);
-  text-align: left;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
   cursor: pointer;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease,
-    background 0.25s ease;
+  transition: transform 0.24s ease, background 0.24s ease;
 
   &:hover {
     transform: translateY(-2px);
-    border-color: rgba(212, 175, 55, 0.32);
-    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.07);
+    background: #ffffff;
   }
 
-  :deep(.el-avatar) {
-    background: linear-gradient(135deg, rgba(34, 211, 238, 0.22), rgba(99, 102, 241, 0.22));
-    color: #111827;
-    font-weight: var(--font-weight-bold);
+  &.disabled {
+    cursor: default;
+    opacity: 0.72;
   }
 }
 
-.notice-item-read {
-  background: rgba(255, 255, 255, 0.84);
-  border-color: rgba(226, 232, 240, 0.84);
+.favorite-cover {
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #e7e8ef;
+
+  img,
+  .cover-fallback {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.cover-fallback {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(15, 23, 42, 0.16)),
+    linear-gradient(135deg, #d5e3ff 0%, #f7f9fb 58%, #ffdf98 100%);
+}
+
+.favorite-copy {
+  min-width: 0;
+
+  h3 {
+    margin: 0 0 6px;
+    color: #191c21;
+    font-size: var(--font-size-xl);
+    line-height: 1.35;
+    font-weight: var(--font-weight-title);
+  }
+
+  p {
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.favorite-icon {
+  color: #004483;
+}
+
+.notification-card,
+.settings-card,
+.empty-card {
+  padding: 24px;
+}
+
+.notice-count {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.notice-item {
+  width: 100%;
+  padding: 0 0 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  border: none;
+  border-bottom: 1px solid var(--color-border-soft);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+
+  &:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  &.read {
+    opacity: 0.72;
+  }
+}
+
+.notice-mark,
+.setting-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-chip);
+  background: rgba(94, 162, 255, 0.12);
+  color: #004483;
 }
 
 .notice-copy {
   min-width: 0;
-}
-
-.notice-line {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    color: #191c21;
+    font-size: var(--font-size-md);
+    line-height: 1.4;
+  }
+
+  span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: var(--font-size-sm);
+  }
+
+  time {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+  }
+}
+
+.wide-action {
+  width: 100%;
+  margin-top: 20px;
+  background: #f8fafc;
+  color: #004483;
+  border-color: var(--color-border-soft);
+  box-shadow: none;
+
+  &:hover {
+    background: #ffffff;
+  }
+}
+
+.setting-row {
+  width: 100%;
+  min-height: 76px;
+  padding: 0 18px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.notice-type {
-  color: #9a7313;
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.04em;
-}
-
-.notice-copy h3 {
-  margin: 8px 0 0;
-  color: #111827;
-  font-size: var(--font-size-2xl);
-  line-height: 1.4;
-}
-
-.notice-copy p {
-  margin: 8px 0 0;
-  color: #475569;
+  gap: 14px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border-soft);
+  background: rgba(255, 255, 255, 0.88);
+  color: #191c21;
   font-size: var(--font-size-md);
-  line-height: 1.75;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-weight: var(--font-weight-semibold);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.24s ease, background 0.24s ease;
+
+  & + & {
+    margin-top: 12px;
+  }
+
+  &:hover {
+    transform: translateX(4px);
+    background: #ffffff;
+  }
+
+  &.danger {
+    grid-template-columns: auto minmax(0, 1fr);
+    color: #ba1a1a;
+    background: rgba(186, 26, 26, 0.05);
+    border-color: rgba(186, 26, 26, 0.1);
+
+    .setting-icon {
+      color: #ba1a1a;
+      background: rgba(186, 26, 26, 0.08);
+    }
+  }
 }
 
-.notice-sender {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-}
+.empty-card {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 
-.unread-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #d4af37;
-}
-
-.notice-feedback {
-  padding: 28px 24px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.84);
-  border: 1px solid rgba(226, 232, 240, 0.84);
+  &.compact {
+    min-height: 150px;
+  }
 
   h3 {
-    margin: 10px 0 0;
-    color: #111827;
+    margin: 0;
+    color: #191c21;
     font-size: var(--font-size-6xl);
     line-height: 1.2;
   }
 
   p {
-    margin: 0;
-    font-size: var(--font-size-md);
+    margin: 12px 0 0;
+  }
+
+  .entry-action {
+    margin-top: 20px;
   }
 }
 
-.notice-empty-title {
-  color: #9a7313 !important;
-  letter-spacing: 0.06em;
-  font-weight: var(--font-weight-bold);
-}
+.feedback-card {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(248, 250, 252, 0.88);
 
-.inline-link {
-  margin-top: 12px;
-  border: none;
-  padding: 0;
-  background: transparent;
-  color: #9a7313;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-  cursor: pointer;
-}
-
-.entry-card,
-.action-card {
-  position: relative;
-  overflow: hidden;
-
-  h2 {
-    margin: 0;
-    color: #111827;
-    font-size: var(--font-size-9xl);
-    line-height: 1.12;
-    font-weight: var(--font-weight-title);
-  }
-
+  h3,
   p {
-    margin: 16px 0 0;
-    font-size: var(--font-size-md);
+    margin: 0;
   }
-}
 
-.entry-card::after,
-.action-card::after {
-  content: '';
-  position: absolute;
-  right: -40px;
-  bottom: -50px;
-  width: 180px;
-  height: 180px;
-  border-radius: 999px;
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.entry-card-diary::after {
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.18) 0%, transparent 70%);
-}
-
-.entry-card-favorite::after {
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
-}
-
-.action-card::after {
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
-}
-
-.action-card-security {
-  border-color: rgba(212, 175, 55, 0.2);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 248, 235, 0.82) 100%);
+  h3 {
+    color: #191c21;
+    font-size: var(--font-size-xl);
+  }
 }
 
 .state-panel {
   min-height: 420px;
   padding: 54px 42px;
+  border-radius: var(--radius-panel);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -906,11 +1171,13 @@ onMounted(() => {
     radial-gradient(circle at 18% 22%, rgba(34, 211, 238, 0.14), transparent 20%),
     radial-gradient(circle at 82% 18%, rgba(212, 175, 55, 0.16), transparent 18%),
     linear-gradient(140deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%);
+  border: 1px solid var(--color-border-soft);
+  box-shadow: var(--shadow-panel);
 
   h1 {
     margin: 0;
-    max-width: 720px;
-    color: #111827;
+    max-width: 760px;
+    color: #191c21;
     font-size: var(--font-size-18xl);
     line-height: 1.04;
     letter-spacing: -0.04em;
@@ -924,35 +1191,55 @@ onMounted(() => {
   font-size: var(--font-size-base);
 }
 
+.state-actions {
+  margin-top: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .loading-panel {
   gap: 24px;
 }
 
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
 .loading-hero,
 .loading-card,
-.notice-skeleton-item {
+.diary-preview-loading,
+.favorite-card-loading,
+.notice-skeleton {
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }
 
 .loading-hero {
-  min-height: 320px;
+  min-height: 260px;
+  border-radius: var(--radius-panel);
 }
 
 .loading-card {
   min-height: 260px;
+  border-radius: var(--radius-card);
+}
+
+.diary-preview-loading {
+  min-height: 430px;
+  border-radius: var(--radius-card);
+}
+
+.favorite-card-loading {
+  min-height: 130px;
 }
 
 .notice-skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.notice-skeleton-item {
-  min-height: 108px;
-  border-radius: 24px;
+  min-height: 78px;
+  border-radius: 20px;
 }
 
 @keyframes shimmer {
@@ -965,93 +1252,127 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 1080px) {
-  .account-hero,
-  .content-grid,
-  .entry-grid,
-  .action-grid,
-  .loading-grid,
-  .loading-grid-secondary {
+@media (max-width: 1100px) {
+  .hero-inner,
+  .lower-grid {
     grid-template-columns: 1fr;
   }
 
-  .hero-identity {
-    align-items: flex-start;
+  .hero-actions {
+    justify-content: flex-start;
   }
 
-  .identity-card {
-    width: 100%;
+  .diary-preview-row,
+  .loading-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 767px) {
-  .account-page {
-    gap: 22px;
+  .guest-hero {
+    min-height: calc(100svh - 60px);
+    padding: 110px 18px 34px;
   }
 
-  .account-hero,
-  .panel-card,
-  .entry-card,
-  .action-card,
-  .state-panel,
-  .loading-hero,
-  .loading-card {
-    border-radius: 24px;
+  .guest-panel {
+    padding: 34px 22px;
+    border-radius: var(--radius-card);
+
+    h1 {
+      font-size: var(--font-size-11xl);
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      font-size: var(--font-size-base);
+    }
   }
 
-  .account-hero,
-  .panel-card,
-  .entry-card,
-  .action-card,
-  .state-panel {
-    padding: 24px 18px;
+  .guest-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-hero {
+    min-height: 0;
+    margin: -88px -24px 0;
+    padding: 124px 18px 30px;
+  }
+
+  .hero-inner {
+    gap: 18px;
+  }
+
+  .avatar-frame {
+    width: 132px;
+    height: 132px;
+    border-radius: 26px;
+
+    :deep(.el-avatar) {
+      border-radius: 20px;
+      font-size: var(--font-size-10xl);
+    }
   }
 
   .hero-copy h1,
   .state-panel h1 {
     font-size: var(--font-size-11xl);
-    line-height: 1.08;
+    letter-spacing: -0.02em;
   }
 
-  .panel-header,
-  .notice-line {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .panel-header h2,
-  .entry-card h2,
-  .action-card h2 {
-    font-size: var(--font-size-6xl);
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
+  .hero-description {
+    font-size: var(--font-size-base);
   }
 
   .hero-actions,
+  .section-header,
   .state-actions {
+    align-items: stretch;
     flex-direction: column;
   }
 
-  .hero-action,
   .primary-action,
-  .secondary-action,
-  .entry-action {
+  .secondary-action {
     width: 100%;
-    justify-content: center;
   }
 
-  .notice-item {
+  .profile-content {
+    padding-top: 36px;
+    gap: 40px;
+  }
+
+  .section-header h2 {
+    font-size: var(--font-size-8xl);
+  }
+
+  .diary-preview-row,
+  .loading-grid {
     grid-template-columns: 1fr;
   }
 
-  .loading-hero {
-    min-height: 220px;
+  .lower-grid {
+    gap: 28px;
   }
 
-  .loading-card {
-    min-height: 180px;
+  .favorite-card {
+    grid-template-columns: 82px minmax(0, 1fr);
+
+    .favorite-icon {
+      display: none;
+    }
+  }
+
+  .favorite-cover {
+    width: 82px;
+    height: 82px;
+  }
+
+  .notification-card,
+  .settings-card,
+  .empty-card,
+  .state-panel {
+    padding: 22px 18px;
+    border-radius: var(--radius-card);
   }
 }
 </style>
