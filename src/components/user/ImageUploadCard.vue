@@ -60,7 +60,7 @@ const props = withDefaults(
     tip?: string;
     placeholderTitle?: string;
     placeholderDescription?: string;
-    shape?: 'landscape' | 'square';
+    shape?: 'landscape' | 'square' | 'circle';
     disabled?: boolean;
   }>(),
   {
@@ -167,6 +167,31 @@ const handleFileChange = async (event: Event) => {
 
 .upload-card-square .preview-shell {
   aspect-ratio: 1 / 1;
+}
+
+.upload-card-circle {
+  align-items: center;
+  text-align: center;
+
+  .preview-shell {
+    width: min(100%, 192px);
+    aspect-ratio: 1 / 1;
+    border-radius: 999px;
+    border: 4px solid #ffffff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  }
+
+  .preview-overlay {
+    inset: auto 10px 10px;
+  }
+
+  .upload-copy {
+    width: 100%;
+  }
+
+  .upload-actions {
+    justify-content: center;
+  }
 }
 
 .preview-image,

@@ -7,6 +7,7 @@ export interface UserMe {
   username?: string;
   nickname?: string;
   avatarUrl?: string;
+  bio?: string;
   status?: number;
   roles?: string[];
   createdAt?: string;
@@ -19,12 +20,14 @@ export function getMe() {
 export interface UpdateUserProfilePayload {
   nickname: string;
   avatarUrl: string;
+  bio?: string;
 }
 
 export interface UpdateUserProfileResult {
   id: string;
   nickname?: string;
   avatarUrl?: string;
+  bio?: string;
 }
 
 export interface UpdatePasswordPayload {

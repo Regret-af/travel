@@ -7,6 +7,7 @@ export interface AuthUser {
   nickname?: string;
   email?: string;
   avatarUrl?: string;
+  bio?: string;
   status?: number;
   roles?: string[];
   createdAt?: string;

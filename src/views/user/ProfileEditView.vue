@@ -36,37 +36,19 @@
 
     <template v-else>
       <section class="page-hero">
+        <div class="hero-bg" />
         <div class="hero-copy">
-          <p class="hero-eyebrow">资料编辑</p>
-          <h1>让别人看到你的第一眼，更像现在的你。</h1>
-          <p class="hero-description">
-            在这里更新昵称和头像，让你的公开资料看起来更贴近现在的你。
-          </p>
+          <h1>编辑个人资料</h1>
+          <p>在这里定制你的旅行者名片</p>
         </div>
-
       </section>
 
-      <section class="content-grid">
-        <div class="main-column">
-          <article class="preview-card">
-            <p class="section-eyebrow">资料预览</p>
-            <div class="identity-row">
-              <el-avatar :size="76" :src="form.avatarUrl">
-                {{ avatarFallback }}
-              </el-avatar>
-              <div>
-                <h3>{{ previewNickname }}</h3>
-                <p>头像与昵称会用于你的公开展示形象。</p>
-              </div>
-            </div>
-          </article>
-
-          <article class="form-card">
+      <section class="edit-shell">
+        <div class="form-column">
+          <article class="form-card glass-card">
             <div class="section-head">
-              <div>
-                <p class="section-eyebrow">公开资料</p>
-                <h2>更新这张属于你的名片</h2>
-              </div>
+              <h2>基本信息</h2>
+              <p>这些信息将向其他旅行者公开展示</p>
             </div>
 
             <el-form ref="formRef" :model="form" :rules="rules" label-position="top" class="profile-form">
@@ -79,22 +61,29 @@
                 />
               </el-form-item>
 
-              <div class="form-footer">
-                <p v-if="submitError" class="submit-error">{{ submitError }}</p>
-                <div class="form-actions">
-                  <button class="submit-button" type="button" :disabled="submitting" @click="handleSubmit">
-                    {{ submitting ? '保存中...' : '保存资料' }}
-                  </button>
-                  <button class="secondary-button" type="button" :disabled="submitting" @click="goToAccount">
-                    返回个人中心
-                  </button>
-                </div>
-              </div>
+              <el-form-item label="个人简介" prop="bio">
+                <el-input
+                  v-model="form.bio"
+                  type="textarea"
+                  :rows="6"
+                  maxlength="255"
+                  show-word-limit
+                  resize="none"
+                  placeholder="分享你的旅行故事、最爱的目的地或是探险宣言..."
+                />
+              </el-form-item>
+
+              <p v-if="submitError" class="submit-error">{{ submitError }}</p>
             </el-form>
           </article>
         </div>
 
-        <div class="side-column side-column-upload">
+        <div class="avatar-column">
+          <div class="section-head">
+            <h2>头像设置</h2>
+            <p>清晰的头像有助于让旅伴快速认识你</p>
+          </div>
+
           <el-form
             ref="uploadFormRef"
             :model="form"
@@ -106,17 +95,30 @@
               <ImageUploadCard
                 v-model="form.avatarUrl"
                 biz-type="avatar"
-                shape="square"
-                title="换一张新的头像"
-                description="头像会出现在个人中心、日记作者信息和通知列表中。"
-                button-text="上传头像"
-                placeholder-title="选择头像图片"
+                shape="circle"
+                title="更换头像"
+                description="头像会出现在个人主页、日记作者信息和通知列表中。"
+                button-text="更换头像"
+                placeholder-title="选择头像"
                 placeholder-description="建议使用清晰、主体明确的图片"
-                tip="上传成功后会自动更新头像"
+                tip="支持 JPG、PNG 或 GIF 格式，建议尺寸 800x800px。"
                 @uploaded="handleAvatarUploaded"
               />
             </el-form-item>
           </el-form>
+        </div>
+
+        <div class="form-footer">
+          <p>所有修改将在确认保存后立即生效</p>
+          <div class="form-actions">
+            <button class="secondary-button" type="button" :disabled="submitting" @click="goToAccount">
+              返回
+            </button>
+            <button class="submit-button" type="button" :disabled="submitting" @click="handleSubmit">
+              <el-icon><Check /></el-icon>
+              {{ submitting ? '保存中...' : '保存所有修改' }}
+            </button>
+          </div>
         </div>
       </section>
     </template>
@@ -124,10 +126,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus';
 import 'element-plus/theme-chalk/el-message.css';
 import { useRouter } from 'vue-router';
+import { Check } from '@element-plus/icons-vue';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import ImageUploadCard from '@/components/user/ImageUploadCard.vue';
@@ -149,7 +152,8 @@ const formRef = ref<FormInstance>();
 const uploadFormRef = ref<FormInstance>();
 const form = reactive({
   nickname: '',
-  avatarUrl: ''
+  avatarUrl: '',
+  bio: ''
 });
 
 const rules: FormRules<typeof form> = {
@@ -178,11 +182,15 @@ const rules: FormRules<typeof form> = {
       },
       trigger: ['change', 'blur']
     }
+  ],
+  bio: [
+    {
+      max: 255,
+      message: '个人简介最多 255 个字符',
+      trigger: ['blur', 'change']
+    }
   ]
 };
-
-const previewNickname = computed(() => form.nickname.trim() || '旅行者');
-const avatarFallback = computed(() => previewNickname.value.slice(0, 1).toUpperCase());
 
 const openAuthDrawer = () => {
   authDrawerOpen.value = true;
@@ -195,6 +203,7 @@ const goToAccount = () => {
 const syncProfile = () => {
   form.nickname = authStore.user?.nickname || '';
   form.avatarUrl = authStore.user?.avatarUrl || '';
+  form.bio = authStore.user?.bio || '';
 };
 
 const initializePage = async () => {
@@ -255,7 +264,8 @@ const handleSubmit = async () => {
   try {
     await updateMyProfile({
       nickname: form.nickname.trim(),
-      avatarUrl: form.avatarUrl.trim()
+      avatarUrl: form.avatarUrl.trim(),
+      bio: form.bio.trim() || undefined
     });
 
     await authStore.fetchMe();
@@ -294,93 +304,158 @@ watch(
 
 <style scoped lang="scss">
 .profile-edit-page {
-  max-width: 1240px;
+  max-width: 1400px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 0;
   color: #0f172a;
 }
 
 .page-hero,
-.form-card,
-.preview-card,
 .loading-hero,
 .loading-card {
   border-radius: 32px;
 }
 
 .page-hero {
-  padding: 42px;
-  display: grid;
-  gap: 24px;
+  position: relative;
+  height: 320px;
+  margin: -88px -24px 0;
+  padding: 120px 24px 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0;
+  background: rgba(239, 246, 255, 0.6);
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
   background:
-    radial-gradient(circle at 16% 20%, rgba(34, 211, 238, 0.14), transparent 22%),
-    radial-gradient(circle at 84% 16%, rgba(212, 175, 55, 0.16), transparent 20%),
-    linear-gradient(140deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 255, 255, 0.96) 50%, rgba(245, 247, 250, 0.98) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+    radial-gradient(circle at center, rgba(0, 91, 173, 0.12), transparent 46%),
+    linear-gradient(180deg, rgba(248, 250, 252, 0.74), rgba(239, 246, 255, 0.78)),
+    url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=80') center / cover;
+  opacity: 0.6;
+  mix-blend-mode: multiply;
 }
 
-.hero-eyebrow,
-.section-eyebrow {
-  margin: 0 0 12px;
-  color: #c79b1d;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+
+  h1 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-display-sm);
+    line-height: 1.12;
+    font-weight: var(--font-weight-display);
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 14px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-5xl);
+    line-height: 1.4;
+    font-weight: var(--font-weight-semibold);
+  }
 }
 
-.hero-copy h1 {
-  margin: 0;
-  color: #111827;
-  font-size: var(--font-size-16xl);
-  line-height: 1.05;
-  font-weight: var(--font-weight-title);
-  letter-spacing: -0.035em;
-}
-
-.hero-description {
-  margin: 18px 0 0;
-  max-width: 660px;
-  color: #475569;
-  font-size: var(--font-size-base);
-  line-height: 1.86;
-}
-
-.content-grid,
+.edit-shell,
 .loading-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 64px;
+}
+
+.edit-shell {
+  position: relative;
+  z-index: 2;
+  margin-top: -80px;
+  padding: 0 32px 80px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.13);
+  backdrop-filter: blur(12px);
 }
 
 .form-card,
-.preview-card {
-  padding: 30px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+.avatar-column {
+  padding: 48px 0;
 }
 
-.section-head h2 {
-  margin: 0;
-  color: #111827;
-  font-size: var(--font-size-8xl);
-  line-height: 1.14;
-  font-weight: var(--font-weight-title);
+.glass-card {
+  min-width: 0;
+}
+
+.section-head {
+  margin-bottom: 32px;
+
+  h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-5xl);
+    line-height: 1.35;
+    font-weight: var(--font-weight-title);
+  }
+
+  p {
+    margin: 8px 0 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
 }
 
 .profile-form :deep(.el-form-item__label) {
-  color: #334155;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
+  padding: 0 0 10px 8px;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
 }
 
 .profile-form :deep(.el-input__wrapper) {
+  min-height: 56px;
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 0 0 1px rgba(226, 232, 240, 0.95) inset !important;
+  background: #eff1f2;
+  box-shadow: 0 0 0 1px transparent inset !important;
+  transition: box-shadow 0.24s ease;
+}
+
+.profile-form :deep(.el-input__wrapper.is-focus),
+.profile-form :deep(.el-textarea__inner:focus) {
+  box-shadow:
+    0 0 0 1px #004483 inset,
+    var(--shadow-ring-accent) !important;
+}
+
+.profile-form :deep(.el-input__inner) {
+  padding: 0 8px;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+}
+
+.profile-form :deep(.el-textarea__inner) {
+  min-height: 168px !important;
+  padding: 18px 22px;
+  border: none;
+  border-radius: 22px;
+  background: #eff1f2;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-body);
+  box-shadow: 0 0 0 1px transparent inset !important;
+  transition: box-shadow 0.24s ease;
+}
+
+.profile-form :deep(.el-input__count),
+.profile-form :deep(.el-textarea .el-input__count) {
+  background: transparent;
 }
 
 .upload-form {
@@ -400,73 +475,111 @@ watch(
 }
 
 .form-footer {
-  margin-top: 24px;
+  grid-column: 1 / -1;
+  margin-top: -16px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(226, 232, 240, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+  }
 }
 
 .form-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 18px;
+  justify-content: flex-end;
 }
 
 .submit-button,
 .secondary-button {
-  min-height: 48px;
-  padding: 0 20px;
+  min-height: 56px;
+  padding: 0 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border-radius: 999px;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
+  transition: transform 0.24s ease, background 0.24s ease, box-shadow 0.24s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.66;
+  }
 }
 
 .submit-button {
-  border: 1px solid rgba(212, 175, 55, 0.24);
-  background: #111827;
-  color: #f8fafc;
+  border: 1px solid transparent;
+  background: #005bad;
+  color: #ffffff;
+  box-shadow: 0 16px 32px rgba(0, 91, 173, 0.18);
 }
 
 .secondary-button {
-  border: 1px solid rgba(203, 213, 225, 0.92);
-  background: rgba(255, 255, 255, 0.92);
-  color: #334155;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--color-text-muted);
 }
 
 .submit-error {
-  margin: 0 0 14px;
+  margin: 18px 0 0;
   color: #b91c1c;
   font-size: var(--font-size-md);
 }
 
-.main-column {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+.avatar-column {
+  min-width: 0;
 }
 
-.side-column {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+.avatar-upload-item :deep(.upload-card) {
+  padding: 40px;
+  border-radius: 24px;
+  background: var(--color-surface-container-low, #f2f3fb);
+  border-color: transparent;
+  box-shadow: none;
 }
 
-.identity-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.avatar-upload-item :deep(.upload-copy h3) {
+  font-size: var(--font-size-xl);
+}
 
-  h3 {
-    margin: 0;
-    color: #111827;
-    font-size: var(--font-size-5xl);
-    line-height: 1.18;
-    font-weight: var(--font-weight-title);
-  }
+.avatar-upload-item :deep(.upload-description) {
+  max-width: 260px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-  p {
-    margin: 6px 0 0;
-    color: #64748b;
-    font-size: var(--font-size-md);
+.avatar-upload-item :deep(.upload-action) {
+  background: #ffffff;
+  color: #004483;
+  border-color: rgba(0, 68, 131, 0.2);
+  box-shadow: none;
+
+  &:hover:not(:disabled) {
+    background: #005bad;
+    color: #ffffff;
   }
+}
+
+.avatar-upload-item :deep(.upload-tip) {
+  display: block;
+  width: 100%;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
 }
 
 .loading-shell {
@@ -501,9 +614,14 @@ watch(
 }
 
 @media (max-width: 1080px) {
-  .content-grid,
+  .edit-shell,
   .loading-grid {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .avatar-column {
+    padding-top: 0;
   }
 }
 
@@ -513,27 +631,62 @@ watch(
   }
 
   .page-hero,
-  .form-card,
-  .preview-card,
   .loading-hero,
   .loading-card {
     border-radius: 24px;
   }
 
-  .page-hero,
-  .form-card,
-  .preview-card {
-    padding: 24px 18px;
+  .page-hero {
+    height: 260px;
+    margin: -88px -24px 0;
+    padding: 108px 18px 56px;
   }
 
-  .hero-copy h1,
+  .hero-copy h1 {
+    font-size: var(--font-size-11xl);
+  }
+
+  .hero-copy p {
+    font-size: var(--font-size-xl);
+  }
+
+  .edit-shell {
+    margin-top: -54px;
+    padding: 0 18px 48px;
+    border-radius: 24px;
+    gap: 0;
+  }
+
+  .form-card,
+  .avatar-column {
+    padding: 28px 0;
+  }
+
   .section-head h2 {
-    font-size: var(--font-size-10xl);
+    font-size: var(--font-size-4xl);
   }
 
   .form-actions {
-    grid-template-columns: 1fr;
     flex-direction: column;
+  }
+
+  .form-footer {
+    margin-top: 0;
+    align-items: stretch;
+    flex-direction: column;
+
+    p {
+      text-align: center;
+    }
+  }
+
+  .submit-button,
+  .secondary-button {
+    width: 100%;
+  }
+
+  .avatar-upload-item :deep(.upload-card) {
+    padding: 28px 18px;
   }
 }
 </style>
