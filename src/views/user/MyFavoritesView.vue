@@ -35,49 +35,46 @@
 
     <template v-else>
       <section class="page-hero">
-        <div class="hero-copy">
-          <p class="hero-eyebrow">我的收藏</p>
-          <h1>把想再次翻阅的旅途，留在自己的私藏目录里。</h1>
-          <p class="hero-description">
-            这里收纳你保存下来的旅行日记，方便随时回看、继续翻阅。
-          </p>
-        </div>
-
-        <div class="hero-stats">
-          <article class="hero-stat">
-            <span class="hero-stat-label">当前收藏</span>
-            <strong>{{ pageData.total.toLocaleString('zh-CN') }}</strong>
-            <p>按收藏顺序分页展示你保存过的内容。</p>
-          </article>
-          <article class="hero-stat">
-            <span class="hero-stat-label">暂不可访问</span>
-            <strong>{{ invalidCount }}</strong>
-            <p>这部分收藏会继续保留在目录中，方便你之后再回来看看。</p>
-          </article>
-          <article class="hero-stat">
-            <span class="hero-stat-label">当前页码</span>
-            <strong>第 {{ pageData.pageNum || currentPage }} 页</strong>
-            <p>按页浏览，帮助你更从容地查看和回顾每一次收藏。</p>
-          </article>
+        <div class="hero-overlay">
+          <div class="hero-copy">
+            <h1>我的收藏</h1>
+            <p class="hero-description">这里收纳你保存下来的旅行日记</p>
+          </div>
         </div>
       </section>
 
-      <section class="list-shell">
-        <div v-if="listStatus === 'loading'" class="loading-list">
-          <div v-for="placeholder in 3" :key="placeholder" class="loading-card" />
+      <section class="content-shell">
+        <div class="content-toolbar">
+          <div>
+            <h2>全部收藏</h2>
+            <p class="catalog-summary">{{ favoriteSummary }}</p>
+            <p v-if="invalidCount > 0" class="invalid-summary">
+              其中 {{ invalidCount }} 篇暂不可访问，已在列表中标记。
+            </p>
+          </div>
+
+          <button class="sort-button" type="button" aria-label="当前排序方式">
+            <span>排序方式：最近收藏</span>
+            <el-icon><ArrowDown /></el-icon>
+          </button>
         </div>
 
-        <div v-else-if="listStatus === 'success'" class="card-list">
-          <DiaryShelfCard
+        <div v-if="listStatus === 'loading'" class="loading-list">
+          <div v-for="placeholder in pageSize" :key="placeholder" class="loading-card" />
+        </div>
+
+        <div v-else-if="listStatus === 'success'" class="favorites-grid">
+          <article
             v-for="item in pageData.list"
             :key="`${item.id}-${item.invalid ? 'invalid' : 'valid'}`"
-            :item="item"
-            :to="item.invalid ? '' : `/diaries/${item.id}`"
-            :invalid="item.invalid"
-            :badge="item.invalid ? '暂不可访问' : '已收藏'"
-            :badge-tone="item.invalid ? 'slate' : 'gold'"
-            :note="item.invalid ? '当前暂时无法打开这篇内容，先把这段旅程留在你的收藏里。' : '继续翻阅这篇你收藏过的旅行故事'"
-          />
+            class="favorite-card-frame"
+            :class="{ invalid: item.invalid }"
+            @click.capture="handleInvalidCardClick($event, item.invalid)"
+          >
+            <span class="favorite-mark">已收藏</span>
+            <span v-if="item.invalid" class="invalid-mask">暂不可访问</span>
+            <DiaryEditorialCard :item="item" />
+          </article>
         </div>
 
         <DiaryCollectionState
@@ -120,10 +117,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { ArrowDown } from '@element-plus/icons-vue';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
+import DiaryEditorialCard from '@/components/diaries/DiaryEditorialCard.vue';
 import DiaryMagazinePagination from '@/components/diaries/DiaryMagazinePagination.vue';
-import DiaryShelfCard from '@/components/diaries/DiaryShelfCard.vue';
 import { getMyFavoriteDiaries, type PageFavoriteDiaryCard } from '@/api/diaries';
 import { useAuthStore } from '@/stores/auth';
 import { getApiErrorMessage } from '@/types/api';
@@ -156,7 +154,14 @@ const currentPage = computed(() => {
 });
 
 const invalidCount = computed(() => pageData.value.list.filter((item) => item.invalid).length);
+const formattedTotal = computed(() => pageData.value.total.toLocaleString('zh-CN'));
+const favoriteSummary = computed(() => {
+  if (listStatus.value === 'loading') return '收藏目录正在加载';
+  if (listStatus.value === 'error') return '收藏目录暂时无法读取';
+  if (listStatus.value === 'empty') return '暂未收藏可展示的旅行日记';
 
+  return `当前共收藏 ${formattedTotal.value} 篇旅行日记`;
+});
 const openAuthDrawer = () => {
   authDrawerOpen.value = true;
 };
@@ -265,6 +270,12 @@ const handlePageChange = (page: number) => {
   updateRoute(page);
 };
 
+const handleInvalidCardClick = (event: MouseEvent, invalid?: boolean) => {
+  if (!invalid) return;
+  event.preventDefault();
+  event.stopPropagation();
+};
+
 watch(
   () => route.fullPath,
   () => {
@@ -299,116 +310,183 @@ watch(
 
 <style scoped lang="scss">
 .my-favorites-page {
-  max-width: 1240px;
+  width: min(100%, 1400px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  color: #0f172a;
-}
-
-.page-hero,
-.loading-hero,
-.loading-card {
-  border-radius: 32px;
+  color: var(--color-text-primary);
 }
 
 .page-hero {
+  position: relative;
+  min-height: 400px;
+  margin: -88px -24px 0;
   overflow: hidden;
-  padding: 42px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 26px;
-  background:
-    radial-gradient(circle at 14% 18%, rgba(34, 211, 238, 0.14), transparent 22%),
-    radial-gradient(circle at 88% 16%, rgba(212, 175, 55, 0.14), transparent 20%),
-    linear-gradient(140deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 255, 255, 0.96) 50%, rgba(245, 247, 250, 0.98) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+  background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=85');
+  background-position: center;
+  background-size: cover;
 }
 
-.hero-eyebrow {
-  margin: 0 0 12px;
-  color: #c79b1d;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
+.hero-overlay {
+  min-height: inherit;
+  padding: 116px 32px 64px;
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.34) 100%);
+}
+
+.hero-copy {
+  width: min(100%, 1400px);
+  margin: 0 auto;
 }
 
 .hero-copy h1 {
   margin: 0;
-  color: #111827;
-  font-size: var(--font-size-17xl);
-  line-height: 1.04;
-  font-weight: var(--font-weight-title);
-  letter-spacing: -0.04em;
+  color: #ffffff;
+  font-size: var(--font-size-hero);
+  line-height: 1.2;
+  font-weight: var(--font-weight-display);
 }
 
 .hero-description {
-  margin: 18px 0 0;
+  margin: 10px 0 0;
   max-width: 640px;
-  color: #475569;
-  font-size: var(--font-size-base);
-  line-height: 1.86;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-5xl);
+  line-height: 1.4;
+  font-weight: var(--font-weight-semibold);
 }
 
-.hero-stats {
-  display: grid;
-  gap: 14px;
+.content-shell {
+  padding: 48px 32px 24px;
 }
 
-.hero-stat {
-  padding: 22px 20px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.04);
+.content-toolbar {
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
 
-  strong {
-    display: block;
-    margin-top: 10px;
-    color: #111827;
-    font-size: var(--font-size-7xl);
-    line-height: 1.06;
+  h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-title-lg);
+    line-height: 1.3;
     font-weight: var(--font-weight-title);
   }
 
-  p {
-    margin: 10px 0 0;
-    color: #64748b;
-    font-size: var(--font-size-md);
-    line-height: 1.75;
+}
+
+.catalog-summary {
+  margin: 8px 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
+}
+
+.invalid-summary {
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+}
+
+.sort-button {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: var(--radius-chip);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: #ffffff;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.favorites-grid,
+.loading-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.favorite-card-frame {
+  position: relative;
+  min-width: 0;
+  min-height: 100%;
+
+  :deep(.diary-card) {
+    height: 100%;
+  }
+
+  &.invalid {
+    opacity: 0.72;
   }
 }
 
-.hero-stat-label {
-  color: #64748b;
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.04em;
+.favorite-mark,
+.invalid-mask {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-chip);
+  backdrop-filter: blur(12px);
 }
 
-.card-list,
-.loading-list,
+.favorite-mark {
+  top: 16px;
+  right: 16px;
+  min-height: 38px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #005bad;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.invalid-mask {
+  inset: 16px 16px auto auto;
+  min-height: 38px;
+  padding: 0 14px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #ffffff;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.favorite-card-frame.invalid .favorite-mark {
+  display: none;
+}
+
 .loading-shell {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 24px;
 }
 
 .loading-hero,
 .loading-card {
+  border-radius: var(--radius-card);
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }
 
 .loading-hero {
-  min-height: 280px;
+  min-height: 320px;
+  border-radius: var(--radius-panel);
 }
 
 .loading-card {
-  min-height: 300px;
+  min-height: 590px;
 }
 
 @keyframes shimmer {
@@ -421,29 +499,58 @@ watch(
   }
 }
 
-@media (max-width: 1024px) {
-  .page-hero {
-    grid-template-columns: 1fr;
+@media (max-width: 1100px) {
+  .favorites-grid,
+  .loading-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 767px) {
-  .my-favorites-page {
-    gap: 22px;
-  }
-
-  .page-hero,
-  .loading-hero,
-  .loading-card {
-    border-radius: 24px;
-  }
-
   .page-hero {
-    padding: 24px 18px;
+    min-height: 320px;
+    margin: -88px -24px 0;
+  }
+
+  .hero-overlay {
+    padding: 104px 18px 42px;
   }
 
   .hero-copy h1 {
-    font-size: var(--font-size-10xl);
+    font-size: var(--font-size-11xl);
+  }
+
+  .hero-description {
+    font-size: var(--font-size-xl);
+  }
+
+  .content-shell {
+    padding: 34px 0 16px;
+  }
+
+  .content-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    margin-bottom: 28px;
+
+    h2 {
+      font-size: var(--font-size-8xl);
+    }
+  }
+
+  .sort-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .favorites-grid,
+  .loading-list {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .loading-card {
+    min-height: 500px;
   }
 }
 </style>
