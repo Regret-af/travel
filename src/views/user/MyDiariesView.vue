@@ -4,9 +4,19 @@
 
     <section v-if="pageState === 'loading'" class="loading-shell" aria-label="我的日记加载中">
       <div class="loading-hero" />
-      <div class="loading-toolbar" />
       <div class="loading-list">
-        <div v-for="placeholder in 3" :key="placeholder" class="loading-card" />
+        <article v-for="placeholder in pageSize" :key="placeholder" class="loading-card">
+          <div class="loading-cover" />
+          <div class="loading-content">
+            <span class="loading-line short" />
+            <span class="loading-line medium" />
+            <span class="loading-line long" />
+            <div class="loading-footer">
+              <span class="loading-avatar" />
+              <span class="loading-line author" />
+            </div>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -32,46 +42,28 @@
 
     <template v-else>
       <section class="page-hero">
-        <div class="hero-copy">
-          <p class="hero-eyebrow">我的日记</p>
-          <h1>把已经写下的旅途，整理成自己的私人目录。</h1>
-          <p class="hero-description">
-            这里会收纳你写下的旅行日记，让那些沿途的风景、心情与片段继续安静地留在你的目录里。
-          </p>
+        <div class="hero-overlay">
+          <div class="hero-copy">
+            <h1>我的私藏目录</h1>
+            <p class="hero-description">
+              这里收纳你写下的旅行日记，让那些沿途的风景、心情与片段继续安静地留在你的目录里。
+            </p>
 
-          <div class="hero-actions">
-            <button class="hero-action hero-action-primary" type="button" @click="goToPublish">
-              发布新日记
-            </button>
-            <button class="hero-action" type="button" @click="goToFavorites">
-              查看我的收藏
-            </button>
+            <div class="hero-actions">
+              <button class="hero-action hero-action-primary" type="button" @click="goToPublish">
+                <el-icon><Plus /></el-icon>
+                发布新日记
+              </button>
+              <button class="hero-link" type="button" @click="goToFavorites">
+                查看我的收藏
+              </button>
+            </div>
           </div>
-        </div>
-
-        <div class="hero-stats">
-          <article class="hero-stat">
-            <span class="hero-stat-label">当前收录</span>
-            <strong>{{ pageData.total.toLocaleString('zh-CN') }}</strong>
-            <p>把沿途写下的故事收进这里，方便随时回来翻看。</p>
-          </article>
-          <article class="hero-stat">
-            <span class="hero-stat-label">目录排序</span>
-            <strong>{{ currentSortLabel }}</strong>
-          </article>
-          <article class="hero-stat">
-            <span class="hero-stat-label">当前页码</span>
-            <strong>第 {{ pageData.pageNum || normalizedRoute.page }} 页</strong>
-          </article>
         </div>
       </section>
 
-      <section ref="resultsAnchorRef" class="sort-shell">
-        <div class="sort-copy">
-          <p class="section-eyebrow">目录排序</p>
-          <h2>选择你想翻开的这一册顺序</h2>
-        </div>
-
+      <section ref="resultsAnchorRef" class="catalog-bar">
+        <p class="catalog-summary">{{ diarySummary }}</p>
         <div class="sort-actions">
           <button
             v-for="option in sortOptions"
@@ -82,25 +74,32 @@
             @click="handleSortChange(option.value)"
           >
             <span class="sort-label">{{ option.label }}</span>
-            <span v-if="option.note" class="sort-note">{{ option.note }}</span>
           </button>
         </div>
+        <p v-if="isFetching" class="sort-status">目录正在更新中</p>
       </section>
 
       <section class="list-shell">
         <div v-if="listStatus === 'loading'" class="loading-list">
-          <div v-for="placeholder in 3" :key="placeholder" class="loading-card" />
+          <article v-for="placeholder in pageSize" :key="placeholder" class="loading-card">
+            <div class="loading-cover" />
+            <div class="loading-content">
+              <span class="loading-line short" />
+              <span class="loading-line medium" />
+              <span class="loading-line long" />
+              <div class="loading-footer">
+                <span class="loading-avatar" />
+                <span class="loading-line author" />
+              </div>
+            </div>
+          </article>
         </div>
 
-        <div v-else-if="listStatus === 'success'" class="card-list">
-          <DiaryShelfCard
+        <div v-else-if="listStatus === 'success'" class="diary-grid">
+          <DiaryEditorialCard
             v-for="item in pageData.list"
             :key="item.id"
             :item="item"
-            :to="`/diaries/${item.id}`"
-            :badge="formatStatusLabel(item.status)"
-            badge-tone="slate"
-            note="继续翻阅这篇已经收进你目录里的旅行记录"
           />
         </div>
 
@@ -144,12 +143,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { Plus } from '@element-plus/icons-vue';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import AuthRequiredView from '@/components/auth/AuthRequiredView.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
+import DiaryEditorialCard from '@/components/diaries/DiaryEditorialCard.vue';
 import DiaryMagazinePagination from '@/components/diaries/DiaryMagazinePagination.vue';
-import DiaryShelfCard from '@/components/diaries/DiaryShelfCard.vue';
-import { getMyTravelDiaries, type PageUserDiaryCard, type UserDiaryCard } from '@/api/diaries';
+import { getMyTravelDiaries, type PageUserDiaryCard } from '@/api/diaries';
 import { useAuthStore } from '@/stores/auth';
 import { getApiErrorMessage } from '@/types/api';
 
@@ -168,19 +168,13 @@ const pageState = ref<PageState>('loading');
 const listStatus = ref<ListStatus>('loading');
 const listError = ref('当前无法获取我的日记列表，请稍后重试。');
 const pageError = ref('当前无法验证登录信息，请稍后重新进入。');
+const isFetching = ref(false);
 const pageSize = 6;
 const defaultSort: SortValue = 'latest';
-const statusLabelMap: Record<number, string> = {
-  0: '已下线',
-  1: '公开中',
-  2: '草稿',
-  3: '审核中'
-};
 const sortOptions: Array<{ value: SortValue; label: string; note: string }> = [
   { value: 'latest', label: '最新发布', note: '' },
   { value: 'hot', label: '热度优先', note: '' }
 ];
-const fallbackSortLabel = sortOptions[0]?.label || '';
 const pageData = ref<PageUserDiaryCard>({
   list: [],
   pageNum: 1,
@@ -201,9 +195,14 @@ const normalizedRoute = computed(() => {
   } as const;
 });
 
-const currentSortLabel = computed(
-  () => sortOptions.find((option) => option.value === currentSort.value)?.label || fallbackSortLabel
-);
+const formattedTotal = computed(() => pageData.value.total.toLocaleString('zh-CN'));
+const diarySummary = computed(() => {
+  if (listStatus.value === 'loading') return '我的日记正在加载';
+  if (listStatus.value === 'error') return '我的日记目录暂时无法读取';
+  if (listStatus.value === 'empty') return '暂未发布可展示的旅行日记';
+
+  return `当前共收录 ${formattedTotal.value} 篇旅行日记`;
+});
 
 const openLoginDrawer = () => {
   authInitialMode.value = 'login';
@@ -266,6 +265,7 @@ const fetchList = async () => {
 
   const requestId = ++fetchSequence;
   listStatus.value = 'loading';
+  isFetching.value = true;
   listError.value = '当前无法获取我的日记列表，请稍后重试。';
 
   try {
@@ -310,6 +310,10 @@ const fetchList = async () => {
 
     listStatus.value = 'error';
     listError.value = getApiErrorMessage(error, '当前无法读取我的日记目录，请稍后重试。');
+  } finally {
+    if (requestId === fetchSequence) {
+      isFetching.value = false;
+    }
   }
 };
 
@@ -363,11 +367,6 @@ const handlePageChange = (page: number) => {
   scrollToResults();
 };
 
-const formatStatusLabel = (status?: UserDiaryCard['status']) => {
-  if (typeof status !== 'number') return '';
-  return statusLabelMap[status] || '状态待定';
-};
-
 watch(
   () => route.fullPath,
   () => {
@@ -403,242 +402,294 @@ watch(
 
 <style scoped lang="scss">
 .my-diaries-page {
-  max-width: 1240px;
+  width: min(100%, 1400px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  color: #0f172a;
+  gap: 40px;
+  color: var(--color-text-primary);
 }
 
 .page-hero,
-.sort-shell,
 .loading-hero,
-.loading-toolbar,
 .loading-card {
-  border-radius: 32px;
+  border-radius: var(--radius-panel);
 }
 
 .page-hero {
   position: relative;
+  min-height: 480px;
+  margin: 24px 8px 0;
   overflow: hidden;
-  padding: 42px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: 26px;
   background:
-    radial-gradient(circle at 14% 18%, rgba(34, 211, 238, 0.14), transparent 22%),
-    radial-gradient(circle at 88% 16%, rgba(212, 175, 55, 0.16), transparent 20%),
-    linear-gradient(140deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 255, 255, 0.96) 50%, rgba(245, 247, 250, 0.98) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+    url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1800&q=85') center / cover;
+  box-shadow: var(--shadow-elevated);
+
+  &:hover .hero-overlay::before {
+    transform: scale(1.04);
+  }
 }
 
-.hero-eyebrow,
-.section-eyebrow {
-  margin: 0 0 12px;
-  color: #c79b1d;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.08em;
+.hero-overlay {
+  position: relative;
+  min-height: inherit;
+  padding: 64px 48px;
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.64) 100%);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: transform 0.7s ease;
+  }
 }
 
-.hero-copy h1 {
-  margin: 0;
-  color: #111827;
-  font-size: var(--font-size-17xl);
-  line-height: 1.04;
-  font-weight: var(--font-weight-title);
-  letter-spacing: -0.04em;
+.hero-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+
+  h1 {
+    margin: 16px 0 0;
+    color: #ffffff;
+    font-size: var(--font-size-display-md);
+    line-height: 1.12;
+    font-weight: var(--font-weight-display);
+    letter-spacing: -0.03em;
+  }
 }
 
 .hero-description {
   margin: 18px 0 0;
-  max-width: 640px;
-  color: #475569;
-  font-size: var(--font-size-base);
-  line-height: 1.86;
+  max-width: 680px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-body-lg);
+  line-height: 1.9;
 }
 
 .hero-actions {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 28px;
+  gap: 24px;
+  margin-top: 32px;
 }
 
 .hero-action {
-  min-height: 48px;
-  padding: 0 20px;
-  border-radius: 999px;
-  border: 1px solid rgba(203, 213, 225, 0.92);
-  background: rgba(255, 255, 255, 0.88);
-  color: #334155;
+  min-height: 56px;
+  padding: 0 30px;
+  border-radius: var(--radius-chip);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease,
-    background 0.25s ease,
-    color 0.25s ease;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
   }
 }
 
 .hero-action-primary {
-  border-color: rgba(212, 175, 55, 0.24);
-  background: #111827;
-  color: #f8fafc;
+  background: #005bad;
+  color: #ffffff;
+  box-shadow: 0 18px 36px rgba(0, 91, 173, 0.22);
 
   &:hover {
-    border-color: rgba(212, 175, 55, 0.48);
-    background: #9a7313;
-    color: #111827;
+    background: #004483;
   }
 }
 
-.hero-stats {
-  display: grid;
-  gap: 14px;
-}
+.hero-link {
+  padding: 0 0 4px;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.42);
+  background: transparent;
+  color: #ffffff;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease;
 
-.hero-stat {
-  padding: 22px 20px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.04);
-
-  strong {
-    display: block;
-    margin-top: 10px;
-    color: #111827;
-    font-size: var(--font-size-7xl);
-    line-height: 1.06;
-    font-weight: var(--font-weight-title);
-  }
-
-  p {
-    margin: 10px 0 0;
-    color: #64748b;
-    font-size: var(--font-size-md);
-    line-height: 1.75;
+  &:hover {
+    color: rgba(255, 255, 255, 0.82);
+    border-color: rgba(255, 255, 255, 0.72);
   }
 }
 
-.hero-stat-label {
-  color: #64748b;
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.04em;
-}
-
-.sort-shell {
-  padding: 28px 30px;
+.catalog-bar {
+  margin: 16px 8px 0;
   display: flex;
-  align-items: end;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
-  border: 1px solid rgba(226, 232, 240, 0.86);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
+  gap: 20px;
 }
 
-.sort-copy h2 {
+.catalog-summary {
   margin: 0;
-  color: #111827;
-  font-size: var(--font-size-8xl);
-  line-height: 1.14;
-  font-weight: var(--font-weight-title);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
 }
 
 .sort-actions {
   display: inline-flex;
-  gap: 12px;
+  gap: 0;
+  flex-shrink: 0;
+  padding: 6px;
+  border-radius: var(--radius-chip);
+  background: #f2f3fb;
+  box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.06);
 }
 
 .sort-chip {
-  min-width: 168px;
-  padding: 14px 18px;
+  min-width: 118px;
+  min-height: 38px;
+  padding: 0 22px;
+  border: none;
+  border-radius: var(--radius-chip);
+  background: transparent;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 24px;
-  border: 1px solid rgba(203, 213, 225, 0.9);
-  background: rgba(255, 255, 255, 0.88);
   text-align: center;
   cursor: pointer;
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    background 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 
   &:hover,
   &.active {
-    transform: translateY(-2px);
-    border-color: rgba(212, 175, 55, 0.42);
-    background: rgba(212, 175, 55, 0.1);
-    box-shadow: 0 14px 28px rgba(212, 175, 55, 0.08);
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+
+    .sort-label {
+      color: var(--color-brand-primary);
+    }
   }
 }
 
-.sort-label,
-.sort-note {
-  display: block;
-}
-
 .sort-label {
-  color: #111827;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-bold);
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
 }
 
-.sort-note {
-  margin-top: 6px;
-  color: #64748b;
-  font-size: var(--font-size-xs);
-  line-height: 1.5;
+.sort-status {
+  flex-basis: 100%;
+  margin: -8px 0 0;
+  color: var(--color-accent-strong);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
 }
 
-.card-list,
+.list-shell {
+  margin: 0 8px;
+}
+
+.diary-grid,
 .loading-list {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-
-.loading-shell,
-.loading-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
 }
 
+.diary-grid {
+  :deep(.diary-card) {
+    height: 100%;
+  }
+}
+
+.loading-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
 .loading-hero,
-.loading-toolbar,
 .loading-card {
+  overflow: hidden;
+  background: var(--color-surface-soft);
+  border: 1px solid var(--color-border-soft);
+}
+
+.loading-hero {
+  min-height: 480px;
+  margin: 24px 8px 0;
   background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }
 
-.loading-hero {
-  min-height: 280px;
-}
-
-.loading-toolbar {
-  min-height: 116px;
-}
-
 .loading-card {
+  border-radius: var(--radius-card);
+}
+
+.loading-cover {
+  height: 288px;
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.loading-content {
   min-height: 300px;
+  padding: 30px;
+}
+
+.loading-line,
+.loading-avatar {
+  display: block;
+  border-radius: var(--radius-chip);
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.76), rgba(241, 245, 249, 0.94), rgba(226, 232, 240, 0.76));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.loading-line {
+  height: 12px;
+  margin-top: 18px;
+}
+
+.loading-line.short {
+  width: 78%;
+}
+
+.loading-line.medium {
+  width: 100%;
+}
+
+.loading-line.long {
+  width: 88%;
+}
+
+.loading-footer {
+  margin-top: 82px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(226, 232, 240, 0.86);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-avatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.loading-line.author {
+  width: 96px;
+  height: 10px;
+  margin-top: 0;
 }
 
 @keyframes shimmer {
@@ -651,43 +702,90 @@ watch(
   }
 }
 
-@media (max-width: 1024px) {
-  .page-hero {
-    grid-template-columns: 1fr;
+@media (max-width: 1100px) {
+  .diary-grid,
+  .loading-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .catalog-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sort-actions {
+    width: 100%;
+  }
+
+  .sort-chip {
+    flex: 1;
   }
 }
 
 @media (max-width: 767px) {
   .my-diaries-page {
-    gap: 22px;
+    gap: 28px;
   }
 
   .page-hero,
-  .sort-shell,
   .loading-hero,
-  .loading-toolbar,
   .loading-card {
     border-radius: 24px;
   }
 
   .page-hero,
-  .sort-shell {
-    padding: 24px 18px;
+  .loading-hero {
+    min-height: 360px;
+    margin: 0;
   }
 
-  .hero-copy h1,
-  .sort-copy h2 {
-    font-size: var(--font-size-10xl);
+  .hero-overlay {
+    padding: 36px 22px;
   }
 
-  .hero-actions,
-  .sort-actions {
+  .hero-copy h1 {
+    font-size: var(--font-size-title-lg);
+  }
+
+  .hero-description {
+    font-size: var(--font-size-base);
+  }
+
+  .hero-actions {
+    align-items: flex-start;
     flex-direction: column;
+    gap: 16px;
   }
 
-  .hero-action,
-  .sort-chip {
+  .hero-action {
     width: 100%;
+  }
+
+  .catalog-bar,
+  .list-shell {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .catalog-summary,
+  .sort-status {
+    font-size: var(--font-size-sm);
+  }
+
+  .diary-grid,
+  .loading-list {
+    grid-template-columns: 1fr;
+  }
+
+  .loading-cover {
+    height: 230px;
+  }
+
+  .loading-content {
+    min-height: 260px;
+    padding: 24px 22px;
   }
 }
 </style>
