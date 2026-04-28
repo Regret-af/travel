@@ -66,33 +66,18 @@
 
               <el-form-item label="正文内容" prop="content" class="content-item">
                 <div class="content-editor">
-                  <div class="editor-toolbar" aria-label="正文快捷工具">
-                    <button type="button" title="加粗" @click="wrapContent('**', '**')">
-                      <strong>B</strong>
-                    </button>
-                    <button type="button" title="斜体" @click="wrapContent('*', '*')">
-                      <em>I</em>
-                    </button>
-                    <button type="button" title="插入列表" @click="insertContent('\\n- ')">
-                      <span>列表</span>
-                    </button>
-                    <span class="toolbar-divider" />
-                    <button type="button" title="提示上传封面" @click="focusCoverTip">
-                      <el-icon><Picture /></el-icon>
-                    </button>
-                    <button type="button" title="插入地点" @click="insertContent('\\n地点：')">
-                      <el-icon><Location /></el-icon>
-                    </button>
-                  </div>
-
-                  <el-input
-                    ref="contentInputRef"
+                  <Toolbar
+                    class="rich-toolbar"
+                    :editor="editorRef"
+                    :default-config="toolbarConfig"
+                    mode="default"
+                  />
+                  <Editor
                     v-model="form.content"
-                    type="textarea"
-                    maxlength="10000"
-                    show-word-limit
-                    :autosize="{ minRows: 18, maxRows: 26 }"
-                    placeholder="开始编织你的旅程..."
+                    class="rich-editor"
+                    :default-config="editorConfig"
+                    mode="default"
+                    @on-created="handleEditorCreated"
                   />
                 </div>
               </el-form-item>
@@ -195,16 +180,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { ArrowDown, Back, Check, Location, Lock, Picture, View } from '@element-plus/icons-vue';
-import { ElMessage, type FormInstance, type FormRules, type InputInstance } from 'element-plus';
+import { ArrowDown, Back, Check, Lock, View } from '@element-plus/icons-vue';
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
+import type { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus';
+import '@wangeditor/editor/dist/css/style.css';
 import 'element-plus/theme-chalk/el-message.css';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import AuthRequiredView from '@/components/auth/AuthRequiredView.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import ImageUploadCard from '@/components/user/ImageUploadCard.vue';
 import { createTravelDiary, getDiaryCategoryOptions, type DiaryCategoryOption } from '@/api/diaries';
+import { uploadFile } from '@/api/files';
 import { useAuthStore } from '@/stores/auth';
 import { getApiErrorMessage } from '@/types/api';
 
@@ -217,8 +206,8 @@ const authStore = useAuthStore();
 const authDrawerOpen = ref(false);
 const authInitialMode = ref<'login' | 'register'>('login');
 const formRef = ref<FormInstance>();
-const contentInputRef = ref<InputInstance>();
 const coverPanelRef = ref<HTMLElement | null>(null);
+const editorRef = shallowRef<IDomEditor>();
 const pageState = ref<PageState>('loading');
 const categoriesStatus = ref<CategoryStatus>('idle');
 const categoryOptions = ref<DiaryCategoryOption[]>([]);
@@ -237,6 +226,34 @@ const visibilityOptions = [
   { value: 1, label: '公开', icon: View },
   { value: 0, label: '私有', icon: Lock }
 ];
+const toolbarConfig: Partial<IToolbarConfig> = {
+  excludeKeys: ['fullScreen']
+};
+const editorConfig: Partial<IEditorConfig> = {
+  placeholder: '开始编织你的旅程...',
+  scroll: false,
+  MENU_CONF: {
+    uploadImage: {
+      async customUpload(file: File, insertFn: (url: string, alt?: string, href?: string) => void) {
+        try {
+          const res = await uploadFile(file, 'diary_image');
+          insertFn(res.data.fileUrl, res.data.originalName || file.name, res.data.fileUrl);
+          ElMessage.success('图片已插入正文');
+        } catch (error) {
+          ElMessage.error(getApiErrorMessage(error, '图片上传失败，请稍后重试。'));
+        }
+      }
+    }
+  }
+};
+
+const getPlainContent = (html: string) =>
+  html
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
 
 const rules: FormRules<typeof form> = {
   title: [
@@ -255,7 +272,7 @@ const rules: FormRules<typeof form> = {
   content: [
     {
       validator: (_, value: string, callback) => {
-        if (!value?.trim()) {
+        if (!getPlainContent(value || '')) {
           callback(new Error('请输入正文内容'));
           return;
         }
@@ -283,17 +300,21 @@ const rules: FormRules<typeof form> = {
 const isReadyToPublish = computed(
   () =>
     Boolean(form.title.trim()) &&
-    Boolean(form.content.trim()) &&
+    Boolean(getPlainContent(form.content)) &&
     Boolean(form.coverUrl.trim()) &&
     form.contentType > 0
 );
 const publishCheckText = computed(() => {
   if (!form.title.trim()) return '还需要填写标题';
-  if (!form.content.trim()) return '还需要填写正文';
+  if (!getPlainContent(form.content)) return '还需要填写正文';
   if (!form.coverUrl.trim()) return '还需要上传封面';
   if (form.contentType <= 0) return '还需要选择内容分类';
   return '必填项已完成，可以发布';
 });
+
+const handleEditorCreated = (editor: IDomEditor) => {
+  editorRef.value = editor;
+};
 
 const openAuthDrawer = () => {
   authInitialMode.value = 'login';
@@ -375,17 +396,6 @@ const focusCoverTip = () => {
   coverPanelRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
-const insertContent = (snippet: string) => {
-  form.content = `${form.content}${snippet}`;
-  nextTick(() => contentInputRef.value?.focus());
-};
-
-const wrapContent = (prefix: string, suffix: string) => {
-  const value = form.content;
-  form.content = value ? `${prefix}${value}${suffix}` : `${prefix}文字${suffix}`;
-  nextTick(() => contentInputRef.value?.focus());
-};
-
 const handleSubmit = async () => {
   if (!formRef.value || submitting.value) return;
 
@@ -461,6 +471,10 @@ watch(
   },
   { immediate: true }
 );
+
+onBeforeUnmount(() => {
+  editorRef.value?.destroy();
+});
 </script>
 
 <style scoped lang="scss">
@@ -599,62 +613,50 @@ watch(
   border: 1px solid var(--color-border-soft);
 }
 
-.editor-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 18px 24px;
+.rich-toolbar {
   border-bottom: 1px solid rgba(241, 245, 249, 0.95);
+  background: #ffffff;
 }
 
-.editor-toolbar button {
-  min-width: 28px;
-  height: 28px;
-  padding: 0 4px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
+.rich-editor {
+  min-height: 520px;
+  background: #ffffff;
+}
+
+.content-editor:focus-within {
+  box-shadow: var(--shadow-ring-accent) !important;
+}
+
+.content-editor :deep(.w-e-text-container) {
+  min-height: 520px !important;
+  background: #ffffff;
+}
+
+.content-editor :deep(.w-e-scroll) {
+  min-height: 520px;
+}
+
+.content-editor :deep(.w-e-text-placeholder) {
   color: var(--color-text-subtle);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease;
-
-  &:hover {
-    color: #005bad;
-    background: rgba(0, 91, 173, 0.08);
-  }
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-relaxed);
+  top: 28px;
+  left: 30px;
 }
 
-.toolbar-divider {
-  width: 1px;
-  height: 24px;
-  margin: 0 4px;
-  background: rgba(226, 232, 240, 0.92);
-}
-
-.content-item :deep(.el-textarea__inner) {
-  width: 100%;
-  min-height: 500px !important;
+.content-editor :deep(.w-e-text-container [data-slate-editor]) {
+  min-height: 500px;
   padding: 28px 30px;
-  border-radius: 0;
-  border: none;
   color: var(--color-text-primary);
   font-size: var(--font-size-body-lg);
   line-height: var(--line-height-relaxed);
-  box-shadow: none !important;
 }
 
-.content-item :deep(.el-textarea) {
-  display: block;
-  width: 100%;
+.content-editor :deep(.w-e-bar) {
+  padding: 8px 12px;
 }
 
-.summary-item :deep(.el-textarea__inner:focus),
-.content-item :deep(.el-textarea__inner:focus) {
+.summary-item :deep(.el-textarea__inner:focus) {
   box-shadow: var(--shadow-ring-accent) !important;
 }
 
@@ -1001,14 +1003,20 @@ watch(
     font-size: var(--font-size-8xl);
   }
 
-  .content-item :deep(.el-textarea__inner) {
+  .rich-editor,
+  .content-editor :deep(.w-e-text-container),
+  .content-editor :deep(.w-e-scroll) {
     min-height: 420px !important;
+  }
+
+  .content-editor :deep(.w-e-text-container [data-slate-editor]) {
+    min-height: 400px;
     padding: 22px 18px;
   }
 
-  .editor-toolbar {
-    gap: 10px;
-    padding: 14px 16px;
+  .content-editor :deep(.w-e-text-placeholder) {
+    top: 22px;
+    left: 18px;
   }
 
   .compose-actions,
