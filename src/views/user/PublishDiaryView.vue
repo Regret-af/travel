@@ -1,6 +1,6 @@
 <template>
   <div class="publish-page">
-    <AuthDrawer v-model="authDrawerOpen" />
+    <AuthDrawer v-model="authDrawerOpen" :initial-mode="authInitialMode" />
 
     <section v-if="pageState === 'loading'" class="loading-shell" aria-label="发布页加载中">
       <div class="loading-hero" />
@@ -10,16 +10,12 @@
       </div>
     </section>
 
-    <DiaryCollectionState
+    <AuthRequiredView
       v-else-if="pageState === 'auth'"
-      variant="auth"
-      eyebrow="创作空间"
-      title="登录后，才能开始写下这段新的旅途"
-      description="登录后就能为这段旅途写下标题、封面与正文，让它以完整的样子被慢慢看见。"
-      action-label="立即登录"
-      secondary-label="返回个人中心"
-      secondary-to="/account"
-      @action="openAuthDrawer"
+      title="登录后发布旅行日记"
+      description="登录后可以撰写、保存并发布你的旅途故事。"
+      @login="openLoginDrawer"
+      @register="openRegisterDrawer"
     />
 
     <DiaryCollectionState
@@ -154,6 +150,7 @@ import { RouterLink, useRouter } from 'vue-router';
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus';
 import 'element-plus/theme-chalk/el-message.css';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
+import AuthRequiredView from '@/components/auth/AuthRequiredView.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import ImageUploadCard from '@/components/user/ImageUploadCard.vue';
 import { createTravelDiary } from '@/api/diaries';
@@ -166,6 +163,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const authDrawerOpen = ref(false);
+const authInitialMode = ref<'login' | 'register'>('login');
 const formRef = ref<FormInstance>();
 const pageState = ref<PageState>('loading');
 const pageError = ref('当前无法进入发布页面，请稍后重试。');
@@ -218,6 +216,17 @@ const heroBackgroundStyle = computed(() => ({
 }));
 
 const openAuthDrawer = () => {
+  authInitialMode.value = 'login';
+  authDrawerOpen.value = true;
+};
+
+const openLoginDrawer = () => {
+  authInitialMode.value = 'login';
+  authDrawerOpen.value = true;
+};
+
+const openRegisterDrawer = () => {
+  authInitialMode.value = 'register';
   authDrawerOpen.value = true;
 };
 

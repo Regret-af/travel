@@ -11,24 +11,11 @@
       </div>
     </section>
 
-    <section v-else-if="pageState === 'auth'" class="guest-hero">
-      <div class="guest-bg" />
-      <div class="guest-overlay" />
-      <div class="guest-panel">
-        <div class="guest-icon">
-          <el-icon><UserFilled /></el-icon>
-        </div>
-        <h1>开启你的私人旅行杂志</h1>
-        <p>
-          登录以记录每一次不期而遇，收藏那些拨动心弦的瞬间，与世界分享你的探索之旅。
-        </p>
-        <div class="guest-actions">
-          <button class="primary-action" type="button" @click="openLoginDrawer">立即登录</button>
-          <button class="secondary-action" type="button" @click="openRegisterDrawer">注册账户</button>
-        </div>
-        <span class="guest-note">登录即表示你同意平台服务协议和隐私政策</span>
-      </div>
-    </section>
+    <AuthRequiredView
+      v-else-if="pageState === 'auth'"
+      @login="openLoginDrawer"
+      @register="openRegisterDrawer"
+    />
 
     <section v-else-if="pageState === 'error'" class="state-panel error-panel">
       <p class="state-eyebrow">连接中断</p>
@@ -220,10 +207,10 @@ import {
   InfoFilled,
   Lock,
   StarFilled,
-  SwitchButton,
-  UserFilled
+  SwitchButton
 } from '@element-plus/icons-vue';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
+import AuthRequiredView from '@/components/auth/AuthRequiredView.vue';
 import {
   getNotificationUnreadCount,
   getNotifications,

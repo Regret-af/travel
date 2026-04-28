@@ -1,6 +1,6 @@
 <template>
   <div class="profile-edit-page">
-    <AuthDrawer v-model="authDrawerOpen" />
+    <AuthDrawer v-model="authDrawerOpen" :initial-mode="authInitialMode" />
 
     <section v-if="pageState === 'loading'" class="loading-shell" aria-label="资料编辑加载中">
       <div class="loading-hero" />
@@ -10,16 +10,12 @@
       </div>
     </section>
 
-    <DiaryCollectionState
+    <AuthRequiredView
       v-else-if="pageState === 'auth'"
-      variant="auth"
-      eyebrow="账户资料"
-      title="登录后，才能编辑属于你的公开资料"
-      description="登录后即可更新昵称和头像，让你的公开形象保持在你想呈现的状态。"
-      action-label="立即登录"
-      secondary-label="返回个人中心"
-      secondary-to="/account"
-      @action="openAuthDrawer"
+      title="登录后编辑个人资料"
+      description="更新头像、昵称和个人简介，让你的旅行主页更完整。"
+      @login="openLoginDrawer"
+      @register="openRegisterDrawer"
     />
 
     <DiaryCollectionState
@@ -132,6 +128,7 @@ import 'element-plus/theme-chalk/el-message.css';
 import { useRouter } from 'vue-router';
 import { Check } from '@element-plus/icons-vue';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
+import AuthRequiredView from '@/components/auth/AuthRequiredView.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import ImageUploadCard from '@/components/user/ImageUploadCard.vue';
 import { updateMyProfile } from '@/api/user';
@@ -144,6 +141,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const authDrawerOpen = ref(false);
+const authInitialMode = ref<'login' | 'register'>('login');
 const pageState = ref<PageState>('loading');
 const pageError = ref('当前无法进入资料编辑页，请稍后重试。');
 const submitError = ref('');
@@ -193,6 +191,17 @@ const rules: FormRules<typeof form> = {
 };
 
 const openAuthDrawer = () => {
+  authInitialMode.value = 'login';
+  authDrawerOpen.value = true;
+};
+
+const openLoginDrawer = () => {
+  authInitialMode.value = 'login';
+  authDrawerOpen.value = true;
+};
+
+const openRegisterDrawer = () => {
+  authInitialMode.value = 'register';
   authDrawerOpen.value = true;
 };
 

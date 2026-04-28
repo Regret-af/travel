@@ -14,6 +14,7 @@ declare module 'vue' {
     AttractionCard: typeof import('./components/attraction/AttractionCard.vue')['default']
     AttractionListCard: typeof import('./components/attraction/AttractionListCard.vue')['default']
     AuthDrawer: typeof import('./components/auth/AuthDrawer.vue')['default']
+    AuthRequiredView: typeof import('./components/auth/AuthRequiredView.vue')['default']
     CuratedDestinations: typeof import('./components/home/CuratedDestinations.vue')['default']
     DiaryCollectionState: typeof import('./components/diaries/DiaryCollectionState.vue')['default']
     DiaryCommentSection: typeof import('./components/diaries/DiaryCommentSection.vue')['default']

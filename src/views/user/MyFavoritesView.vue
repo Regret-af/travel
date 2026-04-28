@@ -1,6 +1,6 @@
 <template>
   <div class="my-favorites-page">
-    <AuthDrawer v-model="authDrawerOpen" />
+    <AuthDrawer v-model="authDrawerOpen" :initial-mode="authInitialMode" />
 
     <section v-if="pageState === 'loading'" class="loading-shell" aria-label="我的收藏加载中">
       <div class="loading-hero" />
@@ -9,16 +9,12 @@
       </div>
     </section>
 
-    <DiaryCollectionState
+    <AuthRequiredView
       v-else-if="pageState === 'auth'"
-      variant="auth"
-      eyebrow="旅行者空间"
-      title="登录后，才会看到你保存下来的日记清单"
+      title="登录后查看你的收藏夹"
       description="这里集中展示你收藏过的旅行日记，方便你随时回来继续翻阅。"
-      action-label="立即登录"
-      secondary-label="返回个人中心"
-      secondary-to="/account"
-      @action="openAuthDrawer"
+      @login="openLoginDrawer"
+      @register="openRegisterDrawer"
     />
 
     <DiaryCollectionState
@@ -119,6 +115,7 @@ import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ArrowDown } from '@element-plus/icons-vue';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
+import AuthRequiredView from '@/components/auth/AuthRequiredView.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import DiaryEditorialCard from '@/components/diaries/DiaryEditorialCard.vue';
 import DiaryMagazinePagination from '@/components/diaries/DiaryMagazinePagination.vue';
@@ -134,6 +131,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 const authDrawerOpen = ref(false);
+const authInitialMode = ref<'login' | 'register'>('login');
 const pageState = ref<PageState>('loading');
 const listStatus = ref<ListStatus>('loading');
 const pageError = ref('当前无法验证登录信息，请稍后重新进入。');
@@ -162,7 +160,13 @@ const favoriteSummary = computed(() => {
 
   return `当前共收藏 ${formattedTotal.value} 篇旅行日记`;
 });
-const openAuthDrawer = () => {
+const openLoginDrawer = () => {
+  authInitialMode.value = 'login';
+  authDrawerOpen.value = true;
+};
+
+const openRegisterDrawer = () => {
+  authInitialMode.value = 'register';
   authDrawerOpen.value = true;
 };
 

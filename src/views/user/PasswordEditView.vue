@@ -1,22 +1,18 @@
 <template>
   <div class="password-edit-page">
-    <AuthDrawer v-model="authDrawerOpen" />
+    <AuthDrawer v-model="authDrawerOpen" :initial-mode="authInitialMode" />
 
     <section v-if="pageState === 'loading'" class="loading-shell" aria-label="修改密码加载中">
       <div class="loading-hero" />
       <div class="loading-card" />
     </section>
 
-    <DiaryCollectionState
+    <AuthRequiredView
       v-else-if="pageState === 'auth'"
-      variant="auth"
-      eyebrow="账户安全"
-      title="登录后，才能修改当前账户密码"
-      description="登录后即可更新当前账户密码，让这份旅途记录继续被你稳稳地保管。"
-      action-label="立即登录"
-      secondary-label="返回个人中心"
-      secondary-to="/account"
-      @action="openAuthDrawer"
+      title="登录后管理账户安全"
+      description="登录后可以修改当前账户密码，保护你的个人资料和旅行内容。"
+      @login="openLoginDrawer"
+      @register="openRegisterDrawer"
     />
 
     <DiaryCollectionState
@@ -139,6 +135,7 @@ import 'element-plus/theme-chalk/el-message.css';
 import { useRouter } from 'vue-router';
 import { CircleCheckFilled } from '@element-plus/icons-vue';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
+import AuthRequiredView from '@/components/auth/AuthRequiredView.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import { updateMyPassword } from '@/api/user';
 import { useAuthStore } from '@/stores/auth';
@@ -150,6 +147,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const authDrawerOpen = ref(false);
+const authInitialMode = ref<'login' | 'register'>('login');
 const pageState = ref<PageState>('loading');
 const pageError = ref('当前无法进入修改密码页，请稍后重试。');
 const formRef = ref<FormInstance>();
@@ -232,6 +230,17 @@ const passwordStrength = computed(() => {
 });
 
 const openAuthDrawer = () => {
+  authInitialMode.value = 'login';
+  authDrawerOpen.value = true;
+};
+
+const openLoginDrawer = () => {
+  authInitialMode.value = 'login';
+  authDrawerOpen.value = true;
+};
+
+const openRegisterDrawer = () => {
+  authInitialMode.value = 'register';
   authDrawerOpen.value = true;
 };
 
