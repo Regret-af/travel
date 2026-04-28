@@ -12,8 +12,8 @@
 
     <AuthRequiredView
       v-else-if="pageState === 'auth'"
-      title="登录后发布旅行日记"
-      description="登录后可以撰写、保存并发布你的旅途故事。"
+      :title="isEditMode ? '登录后编辑旅行日记' : '登录后发布旅行日记'"
+      :description="isEditMode ? '登录后可以修改并保存你的旅行日记。' : '登录后可以撰写、保存并发布你的旅途故事。'"
       @login="openLoginDrawer"
       @register="openRegisterDrawer"
     />
@@ -22,7 +22,7 @@
       v-else-if="pageState === 'error'"
       variant="error"
       eyebrow="连接受阻"
-      title="创作页暂时没有顺利展开"
+      :title="isEditMode ? '编辑页暂时没有顺利展开' : '创作页暂时没有顺利展开'"
       :description="pageError"
       action-label="重新加载"
       secondary-label="返回个人中心"
@@ -34,9 +34,9 @@
       <section class="publish-hero">
         <div class="hero-copy">
           <p class="hero-eyebrow">旅行日记</p>
-          <h1>记录你的旅行足迹</h1>
+          <h1>{{ isEditMode ? '编辑你的旅行日记' : '记录你的旅行足迹' }}</h1>
           <p class="hero-description">
-            将路上的风景与真切心绪，翻成一册适合慢慢阅读的故事目录。
+            {{ isEditMode ? '调整标题、封面、正文与发布设置，让这篇故事保持准确而完整。' : '将路上的风景与真切心绪，翻成一册适合慢慢阅读的故事目录。' }}
           </p>
         </div>
       </section>
@@ -86,7 +86,7 @@
 
           <div class="compose-actions">
             <button class="submit-button" type="button" :disabled="submitting" @click="handleSubmit">
-              {{ submitting ? '发布中...' : '立即发布' }}
+              {{ submitButtonText }}
             </button>
             <button class="secondary-button" type="button" :disabled="submitting" @click="goToMyDiaries">
               <el-icon><Back /></el-icon>
@@ -127,8 +127,8 @@
                     v-model.number="form.contentType"
                     :disabled="categoriesStatus === 'loading'"
                   >
-                    <option :value="0" disabled>
-                      {{ categoriesStatus === 'loading' ? '分类加载中...' : '请选择日记分类' }}
+                    <option :value="0" :disabled="!isEditMode">
+                      {{ categoryPlaceholderText }}
                     </option>
                     <option
                       v-for="option in categoryOptions"
@@ -148,6 +148,9 @@
 
               <div class="setting-field">
                 <span class="setting-label">可见权限</span>
+                <p v-if="isEditMode && !visibilityInitialized" class="setting-note">
+                  当前详情未返回可见范围；不切换时将保持原设置。
+                </p>
                 <div class="visibility-grid">
                   <label
                     v-for="option in visibilityOptions"
@@ -155,7 +158,12 @@
                     class="visibility-option"
                     :class="{ active: form.visibility === option.value }"
                   >
-                    <input v-model.number="form.visibility" type="radio" :value="option.value" />
+                    <input
+                      v-model.number="form.visibility"
+                      type="radio"
+                      :value="option.value"
+                      @change="visibilityInitialized = true"
+                    />
                     <el-icon>
                       <component :is="option.icon" />
                     </el-icon>
@@ -181,7 +189,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { ArrowDown, Back, Check, Lock, View } from '@element-plus/icons-vue';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import type { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
@@ -192,7 +200,13 @@ import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import AuthRequiredView from '@/components/auth/AuthRequiredView.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import ImageUploadCard from '@/components/user/ImageUploadCard.vue';
-import { createTravelDiary, getDiaryCategoryOptions, type DiaryCategoryOption } from '@/api/diaries';
+import {
+  createTravelDiary,
+  getDiaryCategoryOptions,
+  getTravelDiaryDetail,
+  updateTravelDiary,
+  type DiaryCategoryOption
+} from '@/api/diaries';
 import { uploadFile } from '@/api/files';
 import { useAuthStore } from '@/stores/auth';
 import { getApiErrorMessage } from '@/types/api';
@@ -201,6 +215,7 @@ type PageState = 'loading' | 'auth' | 'ready' | 'error';
 type CategoryStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 const authDrawerOpen = ref(false);
@@ -214,12 +229,14 @@ const categoryOptions = ref<DiaryCategoryOption[]>([]);
 const pageError = ref('当前无法进入发布页面，请稍后重试。');
 const submitting = ref(false);
 const submitError = ref('');
+const visibilityInitialized = ref(false);
+const contentTypeInitialized = ref(false);
 const form = reactive({
   title: '',
   summary: '',
   coverUrl: '',
   contentType: 0,
-  visibility: 1,
+  visibility: 1 as 0 | 1 | null,
   content: ''
 });
 const visibilityOptions = [
@@ -255,6 +272,20 @@ const getPlainContent = (html: string) =>
     .replace(/&nbsp;/g, ' ')
     .trim();
 
+const isEditMode = computed(() => route.name === 'edit-diary');
+const diaryId = computed(() => {
+  const raw = route.params.id;
+  return typeof raw === 'string' ? raw.trim() : '';
+});
+const categoryPlaceholderText = computed(() => {
+  if (categoriesStatus.value === 'loading') return '分类加载中...';
+  return isEditMode.value ? '保持原分类' : '请选择日记分类';
+});
+const submitButtonText = computed(() => {
+  if (submitting.value) return isEditMode.value ? '保存中...' : '发布中...';
+  return isEditMode.value ? '保存修改' : '立即发布';
+});
+
 const rules: FormRules<typeof form> = {
   title: [
     {
@@ -285,6 +316,11 @@ const rules: FormRules<typeof form> = {
   contentType: [
     {
       validator: (_, value: number, callback) => {
+        if (isEditMode.value && (!Number.isFinite(value) || value <= 0)) {
+          callback();
+          return;
+        }
+
         if (!Number.isFinite(value) || value <= 0) {
           callback(new Error('请选择日记分类'));
           return;
@@ -302,14 +338,14 @@ const isReadyToPublish = computed(
     Boolean(form.title.trim()) &&
     Boolean(getPlainContent(form.content)) &&
     Boolean(form.coverUrl.trim()) &&
-    form.contentType > 0
+    (isEditMode.value || form.contentType > 0)
 );
 const publishCheckText = computed(() => {
   if (!form.title.trim()) return '还需要填写标题';
   if (!getPlainContent(form.content)) return '还需要填写正文';
   if (!form.coverUrl.trim()) return '还需要上传封面';
-  if (form.contentType <= 0) return '还需要选择内容分类';
-  return '必填项已完成，可以发布';
+  if (!isEditMode.value && form.contentType <= 0) return '还需要选择内容分类';
+  return isEditMode.value ? '必填项已完成，可以保存' : '必填项已完成，可以发布';
 });
 
 const handleEditorCreated = (editor: IDomEditor) => {
@@ -335,6 +371,66 @@ const goToMyDiaries = () => {
   router.push('/account/diaries');
 };
 
+const resetForm = () => {
+  form.title = '';
+  form.summary = '';
+  form.coverUrl = '';
+  form.contentType = 0;
+  form.visibility = isEditMode.value ? null : 1;
+  form.content = '';
+  visibilityInitialized.value = !isEditMode.value;
+  contentTypeInitialized.value = !isEditMode.value;
+  submitError.value = '';
+};
+
+const resolveContentTypeId = (value: unknown) => {
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    const numericValue = Number(value);
+
+    if (Number.isFinite(numericValue) && numericValue > 0) {
+      return numericValue;
+    }
+
+    const matchedOption = categoryOptions.value.find((option) => option.label === value.trim());
+    return matchedOption?.value || 0;
+  }
+
+  return 0;
+};
+
+const loadEditDetail = async () => {
+  if (!diaryId.value) {
+    throw new Error('当前日记标识无效，无法进入编辑页面。');
+  }
+
+  const res = await getTravelDiaryDetail(diaryId.value);
+  const detail = res.data;
+  const rawDetail = detail as typeof detail & {
+    contentType?: unknown;
+    visibility?: unknown;
+  };
+  const resolvedContentType = resolveContentTypeId(rawDetail.contentType);
+
+  form.title = detail.title || '';
+  form.summary = detail.summary || '';
+  form.coverUrl = detail.coverUrl || '';
+  form.content = detail.content || '';
+  form.contentType = resolvedContentType;
+  contentTypeInitialized.value = resolvedContentType > 0;
+
+  if (rawDetail.visibility === 0 || rawDetail.visibility === 1) {
+    form.visibility = rawDetail.visibility;
+    visibilityInitialized.value = true;
+  } else {
+    form.visibility = null;
+    visibilityInitialized.value = false;
+  }
+};
+
 const loadCategoryOptions = async () => {
   categoriesStatus.value = 'loading';
 
@@ -344,7 +440,7 @@ const loadCategoryOptions = async () => {
 
     const firstOption = categoryOptions.value[0];
 
-    if (!form.contentType && categoryOptions.value.length === 1 && firstOption) {
+    if (!isEditMode.value && !form.contentType && categoryOptions.value.length === 1 && firstOption) {
       form.contentType = firstOption.value;
     }
 
@@ -363,7 +459,8 @@ const initializePage = async () => {
   }
 
   pageState.value = 'loading';
-  pageError.value = '当前无法进入发布页面，请稍后重试。';
+  pageError.value = isEditMode.value ? '当前无法进入编辑页面，请稍后重试。' : '当前无法进入发布页面，请稍后重试。';
+  resetForm();
 
   try {
     const user = await authStore.fetchMe();
@@ -373,8 +470,13 @@ const initializePage = async () => {
       return;
     }
 
+    await loadCategoryOptions();
+
+    if (isEditMode.value) {
+      await loadEditDetail();
+    }
+
     pageState.value = 'ready';
-    loadCategoryOptions();
   } catch (error) {
     console.error('Failed to initialize publish page', error);
 
@@ -384,7 +486,7 @@ const initializePage = async () => {
     }
 
     pageState.value = 'error';
-    pageError.value = getApiErrorMessage(error, '当前无法进入创作页，请稍后重试。');
+    pageError.value = getApiErrorMessage(error, isEditMode.value ? '当前无法进入编辑页，请稍后重试。' : '当前无法进入创作页，请稍后重试。');
   }
 };
 
@@ -411,7 +513,7 @@ const handleSubmit = async () => {
     return;
   }
 
-  if (form.contentType <= 0) {
+  if (!isEditMode.value && form.contentType <= 0) {
     ElMessage.warning('请选择日记分类后再发布。');
     return;
   }
@@ -431,19 +533,35 @@ const handleSubmit = async () => {
   submitting.value = true;
 
   try {
-    const res = await createTravelDiary({
+    const payload = {
       title: form.title.trim(),
       summary: form.summary.trim() || undefined,
       coverUrl: form.coverUrl.trim() || undefined,
-      contentType: form.contentType,
-      visibility: form.visibility,
       content: form.content.trim()
+    };
+
+    if (isEditMode.value) {
+      await updateTravelDiary(diaryId.value, {
+        ...payload,
+        ...(form.contentType > 0 ? { contentType: form.contentType } : {}),
+        ...(visibilityInitialized.value && form.visibility !== null ? { visibility: form.visibility } : {})
+      });
+
+      ElMessage.success('旅行日记已保存');
+      router.push('/account/diaries');
+      return;
+    }
+
+    const res = await createTravelDiary({
+      ...payload,
+      contentType: form.contentType,
+      visibility: form.visibility ?? 1
     });
 
     ElMessage.success('旅行日记已发布');
     router.push(`/diaries/${res.data.id}`);
   } catch (error) {
-    console.error('Failed to publish diary', error);
+    console.error(isEditMode.value ? 'Failed to update diary' : 'Failed to publish diary', error);
 
     if (!authStore.token) {
       pageState.value = 'auth';
@@ -451,7 +569,7 @@ const handleSubmit = async () => {
       return;
     }
 
-    submitError.value = getApiErrorMessage(error, '发布失败，请稍后重试。');
+    submitError.value = getApiErrorMessage(error, isEditMode.value ? '保存失败，请稍后重试。' : '发布失败，请稍后重试。');
   } finally {
     submitting.value = false;
   }
@@ -470,6 +588,15 @@ watch(
     }
   },
   { immediate: true }
+);
+
+watch(
+  () => route.fullPath,
+  () => {
+    if (authStore.token) {
+      initializePage();
+    }
+  }
 );
 
 onBeforeUnmount(() => {
@@ -835,6 +962,13 @@ onBeforeUnmount(() => {
     font-weight: var(--font-weight-semibold);
     cursor: pointer;
   }
+}
+
+.setting-note {
+  margin: -4px 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
 }
 
 .visibility-grid {

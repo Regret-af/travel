@@ -49,6 +49,11 @@ const router = createRouter({
       component: () => import('@/views/user/PublishDiaryView.vue')
     },
     {
+      path: '/account/diaries/:id/edit',
+      name: 'edit-diary',
+      component: () => import('@/views/user/PublishDiaryView.vue')
+    },
+    {
       path: '/account/favorites',
       name: 'my-favorites',
       component: () => import('@/views/user/MyFavoritesView.vue')

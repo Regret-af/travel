@@ -96,11 +96,28 @@
         </div>
 
         <div v-else-if="listStatus === 'success'" class="diary-grid">
-          <DiaryEditorialCard
+          <div
             v-for="item in pageData.list"
             :key="item.id"
-            :item="item"
-          />
+            class="managed-diary-card"
+          >
+            <DiaryEditorialCard :item="item" />
+            <div class="diary-manage-actions" aria-label="日记管理操作">
+              <button type="button" class="manage-button" @click.stop="goToEdit(item.id)">
+                <el-icon><EditPen /></el-icon>
+                编辑
+              </button>
+              <button
+                type="button"
+                class="manage-button manage-button-danger"
+                :disabled="deletePendingIds.includes(item.id)"
+                @click.stop="handleDeleteDiary(item)"
+              >
+                <el-icon><Delete /></el-icon>
+                {{ deletePendingIds.includes(item.id) ? '删除中' : '删除' }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <DiaryCollectionState
@@ -143,13 +160,16 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Plus } from '@element-plus/icons-vue';
+import { Delete, EditPen, Plus } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import 'element-plus/theme-chalk/el-message.css';
+import 'element-plus/theme-chalk/el-message-box.css';
 import AuthDrawer from '@/components/auth/AuthDrawer.vue';
 import AuthRequiredView from '@/components/auth/AuthRequiredView.vue';
 import DiaryCollectionState from '@/components/diaries/DiaryCollectionState.vue';
 import DiaryEditorialCard from '@/components/diaries/DiaryEditorialCard.vue';
 import DiaryMagazinePagination from '@/components/diaries/DiaryMagazinePagination.vue';
-import { getMyTravelDiaries, type PageUserDiaryCard } from '@/api/diaries';
+import { deleteTravelDiary, getMyTravelDiaries, type PageUserDiaryCard, type UserDiaryCard } from '@/api/diaries';
 import { useAuthStore } from '@/stores/auth';
 import { getApiErrorMessage } from '@/types/api';
 
@@ -169,6 +189,7 @@ const listStatus = ref<ListStatus>('loading');
 const listError = ref('当前无法获取我的日记列表，请稍后重试。');
 const pageError = ref('当前无法验证登录信息，请稍后重新进入。');
 const isFetching = ref(false);
+const deletePendingIds = ref<string[]>([]);
 const pageSize = 6;
 const defaultSort: SortValue = 'latest';
 const sortOptions: Array<{ value: SortValue; label: string; note: string }> = [
@@ -216,6 +237,10 @@ const openRegisterDrawer = () => {
 
 const goToPublish = () => {
   router.push('/account/diaries/new');
+};
+
+const goToEdit = (id: string) => {
+  router.push(`/account/diaries/${id}/edit`);
 };
 
 const goToFavorites = () => {
@@ -365,6 +390,45 @@ const handlePageChange = (page: number) => {
 
   updateRoute({ page });
   scrollToResults();
+};
+
+const handleDeleteDiary = async (item: UserDiaryCard) => {
+  if (deletePendingIds.value.includes(item.id)) return;
+
+  try {
+    await ElMessageBox.confirm(
+      `删除后无法恢复，确定要删除《${item.title}》吗？`,
+      '删除旅行日记',
+      {
+        confirmButtonText: '确认删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+        confirmButtonClass: 'el-button--danger'
+      }
+    );
+  } catch {
+    return;
+  }
+
+  deletePendingIds.value = [...deletePendingIds.value, item.id];
+
+  try {
+    await deleteTravelDiary(item.id);
+    ElMessage.success('旅行日记已删除');
+    await fetchList();
+  } catch (error) {
+    console.error('Failed to delete diary', error);
+
+    if (!authStore.token) {
+      pageState.value = 'auth';
+      openLoginDrawer();
+      return;
+    }
+
+    ElMessage.error(getApiErrorMessage(error, '删除失败，请稍后重试。'));
+  } finally {
+    deletePendingIds.value = deletePendingIds.value.filter((id) => id !== item.id);
+  }
 };
 
 watch(
@@ -602,9 +666,61 @@ watch(
   gap: 24px;
 }
 
-.diary-grid {
+.managed-diary-card {
+  position: relative;
+  min-width: 0;
+
   :deep(.diary-card) {
     height: 100%;
+  }
+}
+
+.diary-manage-actions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: var(--radius-chip);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(14px);
+}
+
+.manage-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-chip);
+  background: transparent;
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 91, 173, 0.1);
+    color: #005bad;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+  }
+}
+
+.manage-button-danger {
+  &:hover:not(:disabled) {
+    background: rgba(186, 26, 26, 0.08);
+    color: #ba1a1a;
   }
 }
 

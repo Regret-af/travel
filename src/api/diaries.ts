@@ -15,7 +15,8 @@ interface DiaryApiItem {
   summary?: string;
   coverUrl?: string;
   author?: DiaryAuthorApi | null;
-  contentType?: string;
+  contentType?: string | number;
+  visibility?: number;
   viewCount?: number;
   likeCount?: number;
   favoriteCount?: number;
@@ -71,7 +72,8 @@ export interface DiaryCard {
   summary?: string;
   coverUrl?: string;
   author?: DiaryAuthor;
-  contentType?: string;
+  contentType?: string | number;
+  visibility?: number;
   viewCount?: number;
   likeCount?: number;
   favoriteCount?: number;
@@ -164,6 +166,15 @@ export interface CreateTravelDiaryPayload {
   content: string;
 }
 
+export interface UpdateTravelDiaryPayload {
+  title: string;
+  summary?: string;
+  coverUrl?: string;
+  contentType?: number;
+  visibility?: number;
+  content: string;
+}
+
 export interface CreateDiaryCommentPayload {
   content: string;
 }
@@ -199,6 +210,7 @@ const mapDiary = (item: DiaryApiItem): DiaryCard => ({
       }
     : undefined,
   contentType: item.contentType,
+  visibility: item.visibility,
   viewCount: item.viewCount,
   likeCount: item.likeCount,
   favoriteCount: item.favoriteCount,
@@ -395,6 +407,14 @@ export async function createTravelDiary(payload: CreateTravelDiaryPayload) {
   const res = await request.post<ApiResponse<DiaryDetailApiItem>>('/travel-diaries', payload);
 
   return createDetailResponse(res);
+}
+
+export async function updateTravelDiary(diaryId: string | number, payload: UpdateTravelDiaryPayload) {
+  return request.put<ApiResponse<null>>(`/travel-diaries/${diaryId}`, payload);
+}
+
+export async function deleteTravelDiary(diaryId: string | number) {
+  return request.delete<ApiResponse<null>>(`/travel-diaries/${diaryId}`);
 }
 
 export async function getTravelDiaryDetail(diaryId: string, options: RequestBehaviorOptions = {}) {

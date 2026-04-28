@@ -321,7 +321,7 @@ const formattedPublishedAt = computed(() => formatDateTime(detail.value.publishe
 const authorDisplayName = computed(() => detail.value.author?.nickname?.trim() || '旅行者');
 const authorInitial = computed(() => authorDisplayName.value.slice(0, 1).toUpperCase());
 const authorBio = computed(() => detail.value.author?.bio?.trim() || '');
-const contentTypeLabel = computed(() => detail.value.contentType?.trim() || '');
+const contentTypeLabel = computed(() => String(detail.value.contentType || '').trim());
 const showAuthorMoreSection = computed(
   () => authorMoreStatus.value === 'loading' || authorMoreList.value.length > 0
 );
