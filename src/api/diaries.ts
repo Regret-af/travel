@@ -53,6 +53,11 @@ interface DiaryCommentApiItem {
   createdAt?: string;
 }
 
+interface DiaryCategoryOptionApi {
+  value: number;
+  label: string;
+}
+
 export interface DiaryAuthor {
   id: string;
   nickname?: string;
@@ -154,11 +159,18 @@ export interface CreateTravelDiaryPayload {
   title: string;
   summary?: string;
   coverUrl?: string;
+  contentType: number;
+  visibility?: number;
   content: string;
 }
 
 export interface CreateDiaryCommentPayload {
   content: string;
+}
+
+export interface DiaryCategoryOption {
+  value: number;
+  label: string;
 }
 
 export interface DiaryLikeResponse {
@@ -339,6 +351,20 @@ export async function getDiaryFeed(options: RequestBehaviorOptions = {}) {
   });
 
   return createPageResponse(res);
+}
+
+export async function getDiaryCategoryOptions(options: RequestBehaviorOptions = {}) {
+  const res = await request.get<ApiResponse<DiaryCategoryOptionApi[]>>('/diary-categories/options', {
+    skipErrorToast: options.skipErrorToast
+  });
+
+  return {
+    ...res,
+    data: (res.data || []).map((item) => ({
+      value: Number(item.value),
+      label: item.label
+    }))
+  };
 }
 
 export async function getTravelDiaryList(params: DiaryListParams = {}) {
