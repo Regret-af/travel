@@ -238,7 +238,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import { ArrowDown, CollectionTag, EditPen, Lock, Menu, Notebook, Search, StarFilled } from '@element-plus/icons-vue';
+import { ArrowDown, Bell, CollectionTag, EditPen, Lock, Menu, Notebook, Search, StarFilled } from '@element-plus/icons-vue';
 import debounce from 'lodash-es/debounce';
 import { useAuthStore } from '@/stores/auth';
 import {
@@ -273,6 +273,7 @@ const searchWrapperRef = ref<HTMLElement | null>(null);
 let searchFetchSequence = 0;
 const quickAccessItems = [
   { label: '个人中心', icon: StarFilled, to: '/account' },
+  { label: '通知中心', icon: Bell, to: '/notifications' },
   { label: '发布日记', icon: EditPen, to: '/account/diaries/new' },
   { label: '我的日记', icon: Notebook, to: '/account/diaries' },
   { label: '我的收藏', icon: CollectionTag, to: '/account/favorites' },

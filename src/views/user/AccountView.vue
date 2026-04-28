@@ -54,7 +54,7 @@
 
           <div class="hero-actions">
             <button class="primary-action" type="button" @click="openSettingsEntry">编辑资料</button>
-            <button class="icon-action" type="button" aria-label="查看通知中心" @click="scrollToNotifications">
+            <button class="icon-action" type="button" aria-label="查看通知中心" @click="goToNotifications">
               <el-icon><Bell /></el-icon>
               <span v-if="unreadCount > 0" class="action-badge">{{ unreadCountLabel }}</span>
             </button>
@@ -127,7 +127,7 @@
           </section>
 
           <aside class="side-stack">
-            <section ref="notificationsRef" class="glass-card notification-card">
+            <section class="glass-card notification-card">
               <div class="section-header compact-header">
                 <h2>通知中心</h2>
                 <span class="notice-count">{{ unreadSummary }}</span>
@@ -169,13 +169,13 @@
                 <p>评论、点赞、收藏和系统消息会集中出现在这里。</p>
               </div>
 
-              <button class="wide-action" type="button" @click="scrollToNotifications">查看全部通知</button>
+              <button class="wide-action" type="button" @click="goToNotifications">查看全部通知</button>
             </section>
 
             <section class="settings-card">
               <div class="section-header compact-header">
                 <h2>账号与设置</h2>
-                <button class="text-link" type="button" @click="scrollToNotifications">通知设置</button>
+                <button class="text-link" type="button" @click="goToNotifications">通知设置</button>
               </div>
 
               <button class="setting-row" type="button" @click="goToPasswordEdit">
@@ -197,7 +197,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   ArrowRight,
@@ -235,7 +235,6 @@ const authStore = useAuthStore();
 
 const authDrawerOpen = ref(false);
 const authInitialMode = ref<'login' | 'register'>('login');
-const notificationsRef = ref<HTMLElement | null>(null);
 const pageState = ref<PageState>('loading');
 const pageError = ref('当前网络或服务暂时不可用，请稍后再试。');
 const notificationsState = ref<AsyncState>('idle');
@@ -358,13 +357,8 @@ function goToPasswordEdit() {
   router.push('/account/password');
 }
 
-function scrollToNotifications() {
-  nextTick(() => {
-    notificationsRef.value?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  });
+function goToNotifications() {
+  router.push('/notifications');
 }
 
 async function loadNotifications() {
